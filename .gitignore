@@ -10,13 +10,14 @@ build/
 .grandlew.bat
 .settings.gradle
 .build.gradle
+.idea
 
+idea/
 
 # Ignore Gradle folder
 .gradle/
 
 .idea/*
-.idea
 
 
 ### IntelliJ IDEA ###
