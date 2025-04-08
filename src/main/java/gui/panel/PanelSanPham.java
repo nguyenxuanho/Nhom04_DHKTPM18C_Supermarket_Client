@@ -9,6 +9,7 @@ import model.DanhMucSanPham;
 import model.SanPham;
 import model.ThuocTinhSanPham;
 import net.datafaker.Faker;
+import org.checkerframework.checker.units.qual.C;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -24,14 +25,16 @@ import java.rmi.RemoteException;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class PanelSanPham extends JPanel implements MouseListener, ActionListener {
     private JLabel jLabelMaSP, jLabelTenSP, jLabelLoaiSP, jLabelGiaSP,
-            jLabelHanSuDung, jLableThueVAT, jLabelSoLuong, jLabelNgayNhap, jLabelTrangThai, jLabelMoTa, jLabelThuocTinh;
-    private JComboBox JcomboboxLoaiSP, JcomboboxTrangThai;
-    private JTextField txtMaSP, txtTenSP, txtGiaSP, txtThueVAT, txtSoLuong, txtThuocTinh, txtMoTa;
+            jLabelHanSuDung, jLableThueVAT, jLabelSoLuong, jLabelNgayNhap, jLabelTrangThai,
+            jLabelMoTa, jLabelThuocTinh, labelFind, labelStatus, labelDanhMuc, labelNgayNhap;
+    private JComboBox JcomboboxLoaiSP, JcomboboxTrangThai, jComboBoxStatus, jComboBoxDanhMuc, jComboBoxMonth, jComboBoxYear;
+    private JTextField txtMaSP, txtTenSP, txtGiaSP, txtThueVAT, txtSoLuong, txtThuocTinh, txtMoTa, txtFind;
 
     private JTable jTableContent;
 
@@ -41,7 +44,7 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
 
     private JDateChooser dateNgayNhap, dateHanSuDung;
 
-    private JButton btnThem, btnXoa, btnSua, btnReset;
+    private JButton btnThem, btnXoa, btnSua, btnReset, btnResetTable, btnFind;
 
     private Context context = new InitialContext();
     private SanPhamDAOInterface sanPhamDAO = (SanPhamDAOInterface)context.lookup("rmi://LAPTOP-MB2815MQ:9090/sanPhamDAO");
@@ -60,6 +63,7 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
 
         add(titleLabel, BorderLayout.NORTH);
 
+
         // Tên cột cho bảng
         String[] columnNames = {"Mã SP", "Tên sản phẩm", "Loại sản phẩm", "Giá bán", "Số lượng", "Thuế VAT", "Ngày nhập", "Thuộc tính", "Mô tả", "Hạn sử dụng", "Trạng thái"};
 
@@ -73,8 +77,8 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
             try {
                 List<ThuocTinhSanPham> thuocTinhSanPhamList =  thuocTinhSanPhamDAO.getListByProductId(sanPham.getMaSanPham());
                String thuocTinh =  thuocTinhSanPhamList.stream().map(thuocTinhSanPham ->
-                       thuocTinhSanPham.getTenThuocTinh() + ": " + thuocTinhSanPham.getGiaTriThuocTinh()
-               ).collect(Collectors.joining(", "));
+                       thuocTinhSanPham.getTenThuocTinh() + ":" + thuocTinhSanPham.getGiaTriThuocTinh()
+               ).collect(Collectors.joining(","));
 
 
                 dataModel.addRow ( new Object[]{
@@ -105,6 +109,14 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
 
         Box BoxHozi = Box.createVerticalBox();
 
+
+        Box boxButton = Box.createHorizontalBox();
+        boxButton.add(btnResetTable = new JButton("Làm mới"));
+        boxButton.add(Box.createHorizontalGlue()); // đẩy nút sang trái
+
+
+        BoxHozi.add(boxButton);
+        BoxHozi.add(Box.createVerticalStrut(20));
         BoxHozi.add(scrollPane);
         add(BoxHozi, BorderLayout.CENTER);
 
@@ -112,8 +124,78 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
         boxGapHeight.add(Box.createVerticalStrut(20));
         BoxHozi.add(boxGapHeight);
 
-        boxGapHeight.add(Box.createVerticalStrut(100));
-        BoxHozi.add(boxGapHeight);
+        JPanel filterPanel = new JPanel();
+
+        filterPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createTitledBorder("Bộ lọc và tìm kiếm"),
+                BorderFactory.createEmptyBorder(10, 10, 10, 10)
+        ));
+
+        Box boxHorizonFilter = Box.createHorizontalBox();
+
+        Box boxSearch = Box.createHorizontalBox();
+        labelFind = new JLabel("Nhập mã để tìm: ");
+        txtFind = new JTextField(10);
+        btnFind = new JButton("Tìm");
+
+        labelDanhMuc = new JLabel("Danh mục: ");
+        jComboBoxDanhMuc = new JComboBox<>();
+
+        jComboBoxDanhMuc.addItem("Tất cả");
+
+        danhMucSanPhamDAO.getList().forEach(danhMucSanPham -> {
+            jComboBoxDanhMuc.addItem(danhMucSanPham.getMaDanhMucSanPham() + "_" + danhMucSanPham.getTenDanhMucSanPham());
+        });
+
+        labelStatus = new JLabel("Trạng thái: ");
+        jComboBoxStatus = new JComboBox<>();
+        jComboBoxStatus.addItem("Còn bán");
+        jComboBoxStatus.addItem("Ngưng bán");
+        jComboBoxStatus.addItem("Tất cả");
+
+        labelNgayNhap = new JLabel("Ngày nhập:");
+        jComboBoxMonth = new JComboBox<>();
+        jComboBoxMonth.addItem("Tất cả");
+        for (int i = 1; i <= 12; i++) {
+            jComboBoxMonth.addItem(i+"");
+        }
+        jComboBoxYear = new JComboBox<>();
+        jComboBoxYear.addItem("Tất cả");
+        for (int i = 2000; i <= LocalDate.now().getYear(); i++) {
+            jComboBoxYear.addItem(i+"");
+        }
+
+
+        boxSearch.add(labelFind);
+        boxSearch.add(Box.createHorizontalStrut(10));
+        boxSearch.add(txtFind);
+        boxSearch.add(Box.createHorizontalStrut(10));
+        boxSearch.add(btnFind);
+        boxSearch.add(Box.createHorizontalStrut(300));
+        boxSearch.add(labelDanhMuc);
+        boxSearch.add(Box.createHorizontalStrut(10));
+        boxSearch.add(jComboBoxDanhMuc);
+        boxSearch.add(Box.createHorizontalStrut(10));
+        boxSearch.add(labelStatus);
+        boxSearch.add(Box.createHorizontalStrut(10));
+        boxSearch.add(jComboBoxStatus);
+        boxSearch.add(Box.createHorizontalStrut(10));
+        boxSearch.add(labelNgayNhap);
+        boxSearch.add(Box.createHorizontalStrut(10));
+        boxSearch.add(jComboBoxMonth);
+        boxSearch.add(Box.createHorizontalStrut(10));
+        boxSearch.add(jComboBoxYear);
+
+
+        boxHorizonFilter.add(boxSearch);
+
+
+
+
+        filterPanel.add(boxHorizonFilter);
+        BoxHozi.add(filterPanel);
+
+
 
         // Panel nhập liệu và nút chức năng
         JPanel bottomPanel = new JPanel(new BorderLayout());
@@ -260,14 +342,7 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
 //        End table
         inputPanel.add(boxVerticalFormGroup);
 
-
-
-
-
         bottomPanel.add(inputPanel, BorderLayout.CENTER);
-
-
-
 
         // Panel chứa các nút
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
@@ -275,6 +350,20 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
         btnXoa = new JButton("Xóa");
         btnSua = new JButton("Sửa");
         btnReset = new JButton("Reset");
+
+        btnThem.setCursor(new Cursor(12));
+        btnXoa.setCursor(new Cursor(12));
+        btnSua.setCursor(new Cursor(12));
+        btnReset.setCursor(new Cursor(12));
+        btnFind.setCursor(new Cursor(12));
+        btnResetTable.setCursor(new Cursor(12));
+        jComboBoxMonth.setCursor(new Cursor(12));
+        jComboBoxYear.setCursor(new Cursor(12));
+        jComboBoxDanhMuc.setCursor(new Cursor(12));
+        jComboBoxStatus.setCursor(new Cursor(12));
+        JcomboboxLoaiSP.setCursor(new Cursor(12));
+        JcomboboxTrangThai.setCursor(new Cursor(12));
+
 
         buttonPanel.add(btnThem);
         buttonPanel.add(btnXoa);
@@ -292,17 +381,49 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
         btnReset.addActionListener(this);
         btnXoa.addActionListener(this);
         btnThem.addActionListener(this);
+        btnSua.addActionListener(this);
+        btnFind.addActionListener(this);
+        btnResetTable.addActionListener(this);
 //        End action
+
+
+//        Custom GUI
+        setButtonPretty(btnFind);
+        setButtonPretty(btnReset);
+        setButtonPretty(btnXoa);
+        setButtonPretty(btnThem);
+        setButtonPretty(btnSua);
+        setButtonPretty(btnResetTable);
+
+
+        setComboBoxPretty(JcomboboxLoaiSP);
+        setComboBoxPretty(JcomboboxTrangThai);
+        setComboBoxPretty(jComboBoxMonth);
+        setComboBoxPretty(jComboBoxStatus);
+        setComboBoxPretty(jComboBoxYear);
+        setComboBoxPretty(jComboBoxDanhMuc);
+
+
+
+//        End custom GUI
 
     }
 
     // Hàm tạo panel chứa label và textfield để dùng cho GridLayout
-    private JPanel createLabeledField(String labelText, JTextField textField) {
-        JPanel panel = new JPanel(new BorderLayout(5, 5));
-        JLabel label = new JLabel(labelText);
-        panel.add(label, BorderLayout.WEST);
-        panel.add(textField, BorderLayout.CENTER);
-        return panel;
+    private void setButtonPretty(JButton button) {
+        button.setFocusPainted(false); // bỏ viền focus khi click
+        button.setBackground(new Color(52, 152, 219)); // màu xanh dương
+        button.setForeground(Color.WHITE); // chữ trắng
+        button.setFont(new Font("Segoe UI", Font.BOLD, 14)); // font đẹp
+        button.setBorder(BorderFactory.createEmptyBorder(5, 16, 5, 16)); // padding
+    }
+
+    private void setComboBoxPretty(JComboBox comboBox){
+        comboBox.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        comboBox.setBackground(new Color(236, 240, 241)); // nền xám nhẹ
+        comboBox.setForeground(new Color(44, 62, 80));    // chữ đậm
+        comboBox.setBorder(BorderFactory.createLineBorder(new Color(189, 195, 199), 1));
+        comboBox.setMaximumRowCount(5); // số dòng hiển thị khi mở list
     }
 
     @Override
@@ -324,7 +445,8 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
                 JcomboboxTrangThai.setSelectedIndex(0);
                 txtTenSP.requestFocus();
 
-            } else if (source.equals(btnXoa)) {
+            }
+            else if (source.equals(btnXoa)) {
                 String maSP = jTableContent.getValueAt(jTableContent.getSelectedRow(), 0).toString();
                 int xoa = JOptionPane.showConfirmDialog(null, "Bạn có chắc muốn xóa dòng này ?");
                 if(xoa == 0) {
@@ -335,10 +457,8 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
                         throw new RuntimeException(ex);
                     }
                 }
-            } else if (source.equals(btnThem)) {
-
-//                txtHanSuDung.setText("");
-//                txtNgayNhap.setText("");
+            }
+            else if (source.equals(btnThem)) {
 
                 String maSP = "SP" + faker.number().digits(5);
                 String tenSP = txtTenSP.getText();
@@ -367,9 +487,26 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
                 SanPham sanPham = new SanPham(maSP, tenSP,
                         localDateHanSuDung, giaSP, thueVAT, trangThai, soLuong, localDateNgayNhap, moTa);
 
+
                 try {
                     sanPham.setDanhMucSanPham(danhMucSanPhamDAO.findOne(maDanhMuc));
+
+                    Arrays.stream(listThuocTinh).forEach(item -> {
+                        String itemKey = item.split(":")[0];
+                        String itemValue = item.split(":")[1];
+                        String thuocTinhID = "TT" + faker.number().digits(5);
+                        ThuocTinhSanPham thuocTinhSanPham = new ThuocTinhSanPham(thuocTinhID, itemKey, itemValue);
+                        thuocTinhSanPham.setSanPham(sanPham);
+
+                        try {
+                            thuocTinhSanPhamDAO.save(thuocTinhSanPham);
+                        } catch (RemoteException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                    });
+
                     sanPhamDAO.save(sanPham);
+
                     dataModel.addRow(new Object[] {
                             sanPham.getMaSanPham(),
                             sanPham.getTenSanPham(),
@@ -378,7 +515,7 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
                             sanPham.getSoLuongTon(),
                             String.format("%.2f", sanPham.getThueVAT()),
                             sanPham.getNgayNhap().toString(),
-                            "",
+                            txtThuocTinh.getText(),
                             sanPham.getMoTa(),
                             sanPham.getHanSuDung().toString(),
                             sanPham.getTrangThai()
@@ -398,7 +535,95 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
 //                    }
 //                }
 
-            } else if (source.equals(btnSua)) {
+            }
+            else if (source.equals(btnSua)) {
+                String maSP = jTableContent.getValueAt(jTableContent.getSelectedRow(), 0).toString();
+
+                try {
+                    SanPham sanPham = sanPhamDAO.findOne(maSP);
+                    if(sanPham != null){
+                        String tenSP = txtTenSP.getText();
+                        double giaSP = Double.parseDouble(txtGiaSP.getText());
+                        double thueVAT = Double.parseDouble(txtThueVAT.getText());
+                        int soLuong = Integer.parseInt(txtSoLuong.getText());
+                        String moTa = txtMoTa.getText();
+
+                        String[] listThuocTinh = txtThuocTinh.getText().split(",");
+
+                        String trangThai = JcomboboxTrangThai.getSelectedItem().toString();
+                        String maDanhMuc = JcomboboxLoaiSP.getSelectedItem().toString().split("_")[0];
+
+
+                        java.util.Date dateNgaynhap = dateNgayNhap.getDate(); // Lấy ngày từ JDateChooser
+                        LocalDate localDateNgayNhap = dateNgaynhap.toInstant()
+                                .atZone(ZoneId.systemDefault())
+                                .toLocalDate();
+
+                        java.util.Date dateHSD =  dateHanSuDung.getDate(); // Lấy ngày từ JDateChooser
+                        LocalDate localDateHanSuDung = dateHSD.toInstant()
+                                .atZone(ZoneId.systemDefault())
+                                .toLocalDate();
+
+                        sanPham.setTenSanPham(tenSP);
+                        sanPham.setGiaBan(giaSP);
+                        sanPham.setThueVAT(thueVAT);
+                        sanPham.setSoLuongTon(soLuong);
+                        sanPham.setMoTa(moTa);
+                        sanPham.setTrangThai(trangThai);
+                        sanPham.setDanhMucSanPham(danhMucSanPhamDAO.findOne(maDanhMuc));
+                        sanPham.setNgayNhap(localDateNgayNhap);
+                        sanPham.setHanSuDung(localDateHanSuDung);
+
+                        sanPhamDAO.update(sanPham);
+
+                        List<ThuocTinhSanPham> thuocTinhSanPhamList = thuocTinhSanPhamDAO.getListByProductId(maSP);
+
+                        thuocTinhSanPhamList.forEach(ttSP -> {
+                            try {
+                                thuocTinhSanPhamDAO.delete(ttSP.getMaThuocTinhSanPham());
+                            } catch (RemoteException ex) {
+                                throw new RuntimeException(ex);
+                            }
+                        });
+
+
+                        Arrays.stream(listThuocTinh).forEach(item -> {
+                            String itemKey = item.split(":")[0];
+                            String itemValue = item.split(":")[1];
+                            String thuocTinhID = "TT" + faker.number().digits(5);
+
+                            ThuocTinhSanPham thuocTinhSanPham = new ThuocTinhSanPham(thuocTinhID, itemKey, itemValue);
+                            thuocTinhSanPham.setSanPham(sanPham);
+
+                            try {
+                                thuocTinhSanPhamDAO.save(thuocTinhSanPham);
+                            } catch (RemoteException ex) {
+                                throw new RuntimeException(ex);
+                            }
+                        });
+
+                        for(int i = 0; i < jTableContent.getRowCount(); i++) {
+                            if(jTableContent.getValueAt(i, 0).toString().equals(maSP)) {
+                                jTableContent.setValueAt(tenSP, i, 1);
+                                jTableContent.setValueAt(JcomboboxLoaiSP.getSelectedItem()
+                                        .toString().split("_")[1], i, 2);
+                                jTableContent.setValueAt(giaSP, i, 3);
+                                jTableContent.setValueAt(soLuong, i, 4);
+                                jTableContent.setValueAt(String.format("%.2f", thueVAT), i, 5);
+                                jTableContent.setValueAt(localDateNgayNhap.toString(), i, 6);
+                                jTableContent.setValueAt(txtThuocTinh.getText(), i, 7);
+                                jTableContent.setValueAt(moTa, i, 8);
+                                jTableContent.setValueAt(localDateHanSuDung.toString(), i, 9);
+                                jTableContent.setValueAt(trangThai, i, 10);
+                            }
+                        }
+
+                    } else JOptionPane.showMessageDialog(null, "Không tìm thấy mã sản phẩm để sửa");
+
+                } catch (RemoteException ex) {
+                    throw new RuntimeException(ex);
+                }
+
 //                String maLop = txtMaLop.getText();
 //                String tenLop = txtTenLop.getText();
 //                String maGV = cboGVCN.getSelectedItem().toString();
@@ -408,17 +633,68 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
 //                } else JOptionPane.showMessageDialog(null, "Trùng mã");
 
             }
-//            else if (source.equals(btnTimLop)) {
-////                String maLop = txtMaLop.getText();
-////                LopHoc lp = dslp.timLopHoc(maLop);
-////                if(lp != null) {
-////                    for(int i = 0; i < table.getRowCount(); i++) {
-////                        if(table.getValueAt(i, 0).toString().equals(lp.getMaLop())) {
-////                            table.setRowSelectionInterval(i, i);
-////                        }
-////                    }
-////                }
-//            }
+            else if (source.equals(btnFind)) {
+                String maSP = txtFind.getText();
+                try {
+                    SanPham sanPham = sanPhamDAO.findOne(maSP);
+                    if(sanPham != null) {
+                        dataModel.setRowCount(0);
+                        String thuocTinh =  thuocTinhSanPhamDAO.getListByProductId(sanPham.getMaSanPham())
+                                .stream().map(thuocTinhSanPham ->
+                                thuocTinhSanPham.getTenThuocTinh() + ":" + thuocTinhSanPham.getGiaTriThuocTinh()
+                        ).collect(Collectors.joining(","));
+                        dataModel.addRow(new Object[] {
+                                sanPham.getMaSanPham(),
+                                sanPham.getTenSanPham(),
+                                sanPham.getDanhMucSanPham().getTenDanhMucSanPham(),
+                                sanPham.getGiaBan(),
+                                sanPham.getSoLuongTon(),
+                                String.format("%.2f", sanPham.getThueVAT()),
+                                sanPham.getNgayNhap().toString(),
+                                thuocTinh,
+                                sanPham.getMoTa(),
+                                sanPham.getHanSuDung().toString(),
+                                sanPham.getTrangThai()
+                        });
+                    }
+                } catch (RemoteException ex) {
+                    throw new RuntimeException(ex);
+                }
+
+            }
+            else if (source.equals(btnResetTable)){
+                try {
+                    dataModel.setRowCount(0);
+                    sanPhamDAO.getList().forEach(sanPham -> {
+                        List<ThuocTinhSanPham> thuocTinhSanPhamList = null;
+                        try {
+                            thuocTinhSanPhamList = thuocTinhSanPhamDAO.getListByProductId(sanPham.getMaSanPham());
+                            String thuocTinh =  thuocTinhSanPhamList.stream().map(thuocTinhSanPham ->
+                                    thuocTinhSanPham.getTenThuocTinh() + ":" + thuocTinhSanPham.getGiaTriThuocTinh()
+                            ).collect(Collectors.joining(","));
+
+
+                            dataModel.addRow ( new Object[]{
+                                    sanPham.getMaSanPham(),
+                                    sanPham.getTenSanPham(),
+                                    sanPham.getDanhMucSanPham().getTenDanhMucSanPham(),
+                                    sanPham.getGiaBan(),
+                                    sanPham.getSoLuongTon(),
+                                    String.format("%.2f", sanPham.getThueVAT()),
+                                    sanPham.getNgayNhap().toString(),
+                                    thuocTinh,
+                                    sanPham.getMoTa(),
+                                    sanPham.getHanSuDung().toString(),
+                                    sanPham.getTrangThai()
+                            });
+                        } catch (RemoteException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                    });
+                } catch (RemoteException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
         }
     }
 
@@ -436,14 +712,14 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
 //                    txtHanSuDung.setText(sanPham.getHanSuDung().toString());
                     Date dateHSD = java.sql.Date.valueOf(sanPham.getHanSuDung());
                     dateHanSuDung.setDate(dateHSD);
-                    txtThueVAT.setText(sanPham.getThueVAT() + "");
+                    txtThueVAT.setText(String.format("%.2f", sanPham.getThueVAT()));
                     txtSoLuong.setText(sanPham.getSoLuongTon() + "");
 //                    txtNgayNhap.setText(sanPham.getNgayNhap().toString());
                     Date dateNgaynhap = java.sql.Date.valueOf(sanPham.getNgayNhap());
                     dateNgayNhap.setDate(dateNgaynhap);
                     String thuocTinh =  thuocTinhSanPhamDAO.getListByProductId(sanPham.getMaSanPham()).stream().map(thuocTinhSanPham ->
                             thuocTinhSanPham.getTenThuocTinh() + ":" + thuocTinhSanPham.getGiaTriThuocTinh()
-                    ).collect(Collectors.joining(", "));
+                    ).collect(Collectors.joining(","));
 
 
                     txtThuocTinh.setText(thuocTinh);
