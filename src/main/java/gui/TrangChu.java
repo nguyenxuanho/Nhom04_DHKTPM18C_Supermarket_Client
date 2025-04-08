@@ -4,19 +4,21 @@ import gui.panel.PanelHoaDon;
 import gui.panel.PanelKhachHang;
 import gui.panel.PanelSanPham;
 
+import javax.naming.NamingException;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.rmi.RemoteException;
 
 public class TrangChu extends JFrame {
     private CardLayout cardLayout;
     private JPanel contentPanel;
 
-    public TrangChu() {
+    public TrangChu() throws NamingException, RemoteException {
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
-        setUndecorated(true);
+//        setUndecorated(true);
 
         JLabel titleLabel = new JLabel("Hệ Thống Quản Lý Siêu Thị", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 26));
@@ -104,6 +106,14 @@ public class TrangChu extends JFrame {
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new TrangChu().setVisible(true));
+        SwingUtilities.invokeLater(() -> {
+            try {
+                new TrangChu().setVisible(true);
+            } catch (NamingException e) {
+                throw new RuntimeException(e);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 }
