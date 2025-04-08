@@ -149,9 +149,10 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
 
         labelStatus = new JLabel("Trạng thái: ");
         jComboBoxStatus = new JComboBox<>();
+        jComboBoxStatus.addItem("Tất cả");
         jComboBoxStatus.addItem("Còn bán");
         jComboBoxStatus.addItem("Ngưng bán");
-        jComboBoxStatus.addItem("Tất cả");
+
 
         labelNgayNhap = new JLabel("Ngày nhập:");
         jComboBoxMonth = new JComboBox<>();
@@ -384,6 +385,12 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
         btnSua.addActionListener(this);
         btnFind.addActionListener(this);
         btnResetTable.addActionListener(this);
+
+
+        jComboBoxMonth.addActionListener(this);
+        jComboBoxYear.addActionListener(this);
+        jComboBoxStatus.addActionListener(this);
+        jComboBoxDanhMuc.addActionListener(this);
 //        End action
 
 
@@ -675,6 +682,41 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
 
 
                             dataModel.addRow ( new Object[]{
+                                    sanPham.getMaSanPham(),
+                                    sanPham.getTenSanPham(),
+                                    sanPham.getDanhMucSanPham().getTenDanhMucSanPham(),
+                                    sanPham.getGiaBan(),
+                                    sanPham.getSoLuongTon(),
+                                    String.format("%.2f", sanPham.getThueVAT()),
+                                    sanPham.getNgayNhap().toString(),
+                                    thuocTinh,
+                                    sanPham.getMoTa(),
+                                    sanPham.getHanSuDung().toString(),
+                                    sanPham.getTrangThai()
+                            });
+                        } catch (RemoteException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                    });
+                } catch (RemoteException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+            else if (source.equals(jComboBoxDanhMuc) || source.equals(jComboBoxMonth) || source.equals(jComboBoxStatus) || source.equals(jComboBoxYear)){
+                String danhMuc = jComboBoxDanhMuc.getSelectedItem().toString();
+                String month = jComboBoxMonth.getSelectedItem().toString();
+                String status = jComboBoxStatus.getSelectedItem().toString();
+                String year = jComboBoxYear.getSelectedItem().toString();
+                try {
+                    dataModel.setRowCount(0);
+                    sanPhamDAO.getListByFitter(danhMuc, month, year, status).forEach(sanPham -> {
+                        try {
+                            String thuocTinh = thuocTinhSanPhamDAO.getListByProductId(sanPham.getMaSanPham())
+                                    .stream().map(thuocTinhSanPham ->
+                                            thuocTinhSanPham.getTenThuocTinh() + ":" + thuocTinhSanPham.getGiaTriThuocTinh()
+                                    ).collect(Collectors.joining(","));
+
+                            dataModel.addRow(new Object[] {
                                     sanPham.getMaSanPham(),
                                     sanPham.getTenSanPham(),
                                     sanPham.getDanhMucSanPham().getTenDanhMucSanPham(),
