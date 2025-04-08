@@ -49,6 +49,10 @@ dependencies {
 
     implementation(files("libs/DHKTPM18A-1.0-SNAPSHOT.jar"))
 
+    // https://mvnrepository.com/artifact/com.toedter/jcalendar
+    implementation 'com.toedter:jcalendar:1.4'
+
+
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
 }
