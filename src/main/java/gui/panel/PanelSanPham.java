@@ -4,12 +4,9 @@ import InterF.DanhMucSanPhamDAOInterface;
 import InterF.SanPhamDAOInterface;
 import InterF.ThuocTinhSanPhamDAOInterface;
 import com.toedter.calendar.JDateChooser;
-import dao.DanhMucSanPhamDAO;
-import model.DanhMucSanPham;
 import model.SanPham;
 import model.ThuocTinhSanPham;
 import net.datafaker.Faker;
-import org.checkerframework.checker.units.qual.C;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -30,26 +27,26 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class PanelSanPham extends JPanel implements MouseListener, ActionListener {
-    private JLabel jLabelMaSP, jLabelTenSP, jLabelLoaiSP, jLabelGiaSP,
+    private final JLabel jLabelMaSP, jLabelTenSP, jLabelLoaiSP, jLabelGiaSP,
             jLabelHanSuDung, jLableThueVAT, jLabelSoLuong, jLabelNgayNhap, jLabelTrangThai,
             jLabelMoTa, jLabelThuocTinh, labelFind, labelStatus, labelDanhMuc, labelNgayNhap;
-    private JComboBox JcomboboxLoaiSP, JcomboboxTrangThai, jComboBoxStatus, jComboBoxDanhMuc, jComboBoxMonth, jComboBoxYear;
-    private JTextField txtMaSP, txtTenSP, txtGiaSP, txtThueVAT, txtSoLuong, txtThuocTinh, txtMoTa, txtFind;
+    private final JComboBox<String> JcomboboxLoaiSP, JcomboboxTrangThai, jComboBoxStatus, jComboBoxDanhMuc, jComboBoxMonth, jComboBoxYear;
+    private final JTextField txtMaSP, txtTenSP, txtGiaSP, txtThueVAT, txtSoLuong, txtThuocTinh, txtMoTa, txtFind;
 
-    private JTable jTableContent;
+    private final JTable jTableContent;
 
     private final Faker faker = new Faker();
 
-    private DefaultTableModel dataModel;
+    private final DefaultTableModel dataModel;
 
-    private JDateChooser dateNgayNhap, dateHanSuDung;
+    private final JDateChooser dateNgayNhap, dateHanSuDung;
 
-    private JButton btnThem, btnXoa, btnSua, btnReset, btnResetTable, btnFind;
+    private final JButton btnThem, btnXoa, btnSua, btnReset, btnResetTable, btnFind;
 
-    private Context context = new InitialContext();
-    private SanPhamDAOInterface sanPhamDAO = (SanPhamDAOInterface)context.lookup("rmi://LAPTOP-MB2815MQ:9090/sanPhamDAO");
-    private ThuocTinhSanPhamDAOInterface thuocTinhSanPhamDAO = (ThuocTinhSanPhamDAOInterface)context.lookup("rmi://LAPTOP-MB2815MQ:9090/thuocTinhSanPhamDAO");
-    private DanhMucSanPhamDAOInterface danhMucSanPhamDAO = (DanhMucSanPhamDAOInterface) context.lookup("rmi://LAPTOP-MB2815MQ:9090/danhMucSanPhamDAO");
+    private final Context context = new InitialContext();
+    private final SanPhamDAOInterface sanPhamDAO = (SanPhamDAOInterface)context.lookup("rmi://LAPTOP-MB2815MQ:9090/sanPhamDAO");
+    private final ThuocTinhSanPhamDAOInterface thuocTinhSanPhamDAO = (ThuocTinhSanPhamDAOInterface)context.lookup("rmi://LAPTOP-MB2815MQ:9090/thuocTinhSanPhamDAO");
+    private final DanhMucSanPhamDAOInterface danhMucSanPhamDAO = (DanhMucSanPhamDAOInterface) context.lookup("rmi://LAPTOP-MB2815MQ:9090/danhMucSanPhamDAO");
 
     public PanelSanPham () throws NamingException, RemoteException {
         setLayout(new BorderLayout());
@@ -352,18 +349,18 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
         btnSua = new JButton("Sửa");
         btnReset = new JButton("Reset");
 
-        btnThem.setCursor(new Cursor(12));
-        btnXoa.setCursor(new Cursor(12));
-        btnSua.setCursor(new Cursor(12));
-        btnReset.setCursor(new Cursor(12));
-        btnFind.setCursor(new Cursor(12));
-        btnResetTable.setCursor(new Cursor(12));
-        jComboBoxMonth.setCursor(new Cursor(12));
-        jComboBoxYear.setCursor(new Cursor(12));
-        jComboBoxDanhMuc.setCursor(new Cursor(12));
-        jComboBoxStatus.setCursor(new Cursor(12));
-        JcomboboxLoaiSP.setCursor(new Cursor(12));
-        JcomboboxTrangThai.setCursor(new Cursor(12));
+        btnThem.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnXoa.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnSua.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnReset.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnFind.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnResetTable.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        jComboBoxMonth.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        jComboBoxYear.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        jComboBoxDanhMuc.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        jComboBoxStatus.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        JcomboboxLoaiSP.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        JcomboboxTrangThai.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
 
         buttonPanel.add(btnThem);
@@ -527,6 +524,7 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
                             sanPham.getHanSuDung().toString(),
                             sanPham.getTrangThai()
                     });
+                    JOptionPane.showMessageDialog(null, "Thêm sản phẩm thành công");
                 } catch (RemoteException ex) {
                     throw new RuntimeException(ex);
                 }
@@ -625,7 +623,10 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
                             }
                         }
 
-                    } else JOptionPane.showMessageDialog(null, "Không tìm thấy mã sản phẩm để sửa");
+                        JOptionPane.showMessageDialog(null, "Sửa sản phẩm thành công");
+
+                    }
+                    else JOptionPane.showMessageDialog(null, "Không tìm thấy mã sản phẩm để sửa");
 
                 } catch (RemoteException ex) {
                     throw new RuntimeException(ex);
@@ -664,6 +665,7 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
                                 sanPham.getTrangThai()
                         });
                     }
+                    else JOptionPane.showMessageDialog(null, "Không tìm thấy mã sản phẩm");
                 } catch (RemoteException ex) {
                     throw new RuntimeException(ex);
                 }

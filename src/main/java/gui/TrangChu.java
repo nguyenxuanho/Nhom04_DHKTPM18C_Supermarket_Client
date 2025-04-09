@@ -1,5 +1,6 @@
 package gui;
 
+import gui.panel.PanelDanhMucSanPham;
 import gui.panel.PanelHoaDon;
 import gui.panel.PanelKhachHang;
 import gui.panel.PanelSanPham;
@@ -44,8 +45,11 @@ public class TrangChu extends JFrame {
         JButton btnSanPham = createMenuButton("Sản phẩm");
         JButton btnKhachHang = createMenuButton("Khách hàng");
         JButton btnHoaDon = createMenuButton("Hóa đơn");
+        JButton btnDanhMucSanPham = createMenuButton("Danh mục sản phẩm");
 
         menuPanel.add(btnSanPham);
+        menuPanel.add(Box.createVerticalStrut(10));
+        menuPanel.add(btnDanhMucSanPham);
         menuPanel.add(Box.createVerticalStrut(10));
         menuPanel.add(btnKhachHang);
         menuPanel.add(Box.createVerticalStrut(10));
@@ -74,12 +78,14 @@ public class TrangChu extends JFrame {
         contentPanel.add(new PanelSanPham(), "sanpham");
         contentPanel.add(new PanelKhachHang(), "khachhang");
         contentPanel.add(new PanelHoaDon(), "hoadon");
+        contentPanel.add(new PanelDanhMucSanPham(), "danhmucsanpham");
 
         add(contentPanel, BorderLayout.CENTER);
 
         btnSanPham.addActionListener((ActionEvent e) -> cardLayout.show(contentPanel, "sanpham"));
         btnKhachHang.addActionListener((ActionEvent e) -> cardLayout.show(contentPanel, "khachhang"));
         btnHoaDon.addActionListener((ActionEvent e) -> cardLayout.show(contentPanel, "hoadon"));
+        btnDanhMucSanPham.addActionListener((ActionEvent e) -> cardLayout.show(contentPanel, "danhmucsanpham"));
     }
 
     private JButton createMenuButton(String text) {
