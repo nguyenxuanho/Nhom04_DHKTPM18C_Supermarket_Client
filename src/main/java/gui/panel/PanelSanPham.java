@@ -4,6 +4,7 @@ import InterF.DanhMucSanPhamDAOInterface;
 import InterF.SanPhamDAOInterface;
 import InterF.ThuocTinhSanPhamDAOInterface;
 import com.toedter.calendar.JDateChooser;
+import io.github.cdimascio.dotenv.Dotenv;
 import model.SanPham;
 import model.ThuocTinhSanPham;
 import net.datafaker.Faker;
@@ -33,6 +34,10 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
     private final JComboBox<String> JcomboboxLoaiSP, JcomboboxTrangThai, jComboBoxStatus, jComboBoxDanhMuc, jComboBoxMonth, jComboBoxYear;
     private final JTextField txtMaSP, txtTenSP, txtGiaSP, txtThueVAT, txtSoLuong, txtThuocTinh, txtMoTa, txtFind;
 
+    Dotenv dotenv = Dotenv.load();
+
+    String drivername = dotenv.get("DRIVER_NAME");
+
     private final JTable jTableContent;
 
     private final Faker faker = new Faker();
@@ -44,9 +49,9 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
     private final JButton btnThem, btnXoa, btnSua, btnReset, btnResetTable, btnFind;
 
     private final Context context = new InitialContext();
-    private final SanPhamDAOInterface sanPhamDAO = (SanPhamDAOInterface)context.lookup("rmi://LAPTOP-MB2815MQ:9090/sanPhamDAO");
-    private final ThuocTinhSanPhamDAOInterface thuocTinhSanPhamDAO = (ThuocTinhSanPhamDAOInterface)context.lookup("rmi://LAPTOP-MB2815MQ:9090/thuocTinhSanPhamDAO");
-    private final DanhMucSanPhamDAOInterface danhMucSanPhamDAO = (DanhMucSanPhamDAOInterface) context.lookup("rmi://LAPTOP-MB2815MQ:9090/danhMucSanPhamDAO");
+    private final SanPhamDAOInterface sanPhamDAO = (SanPhamDAOInterface)context.lookup("rmi://" + drivername + ":9090/sanPhamDAO");
+    private final ThuocTinhSanPhamDAOInterface thuocTinhSanPhamDAO = (ThuocTinhSanPhamDAOInterface)context.lookup("rmi://" + drivername + ":9090/thuocTinhSanPhamDAO");
+    private final DanhMucSanPhamDAOInterface danhMucSanPhamDAO = (DanhMucSanPhamDAOInterface) context.lookup("rmi://" + drivername + ":9090/danhMucSanPhamDAO");
 
     public PanelSanPham () throws NamingException, RemoteException {
         setLayout(new BorderLayout());
@@ -228,7 +233,7 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
         row1.add(jLabelHanSuDung = new JLabel("Hạn SD:"));
         jLabelHanSuDung.setPreferredSize(new Dimension(90, 25));
         row1.add(Box.createHorizontalStrut(10));
-        row1.add(dateHanSuDung = new JDateChooser());
+            row1.add(dateHanSuDung = new JDateChooser());
 
         dateHanSuDung.setDateFormatString("dd/MM/yyyy");
 

@@ -10,11 +10,11 @@ repositories {
 }
 
 ext {
-    junitVersion = '5.11.0'
+    junitVersion = '5.10.0'
 }
 
-sourceCompatibility = '23'
-targetCompatibility = '23'
+sourceCompatibility = '11'
+targetCompatibility = '11'
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
@@ -51,6 +51,12 @@ dependencies {
 
     // https://mvnrepository.com/artifact/com.toedter/jcalendar
     implementation 'com.toedter:jcalendar:1.4'
+
+    // https://mvnrepository.com/artifact/io.github.cdimascio/java-dotenv
+    implementation("io.github.cdimascio:java-dotenv:5.2.2")
+
+    // https://mvnrepository.com/artifact/com.formdev/flatlaf
+    implementation("com.formdev:flatlaf:3.5.4")
 
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")

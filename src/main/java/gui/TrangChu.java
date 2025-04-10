@@ -1,9 +1,7 @@
 package gui;
 
-import gui.panel.PanelDanhMucSanPham;
-import gui.panel.PanelHoaDon;
-import gui.panel.PanelKhachHang;
-import gui.panel.PanelSanPham;
+import com.formdev.flatlaf.*;
+import gui.panel.*;
 
 import javax.naming.NamingException;
 import javax.swing.*;
@@ -16,6 +14,14 @@ public class TrangChu extends JFrame {
     private JPanel contentPanel;
 
     public TrangChu() throws NamingException, RemoteException {
+
+        try {
+            // Set FlatLaf Light theme
+            UIManager.setLookAndFeel(new FlatLightLaf());
+        } catch (UnsupportedLookAndFeelException e) {
+            e.printStackTrace();
+        }
+
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
@@ -46,6 +52,8 @@ public class TrangChu extends JFrame {
         JButton btnKhachHang = createMenuButton("Khách hàng");
         JButton btnHoaDon = createMenuButton("Hóa đơn");
         JButton btnDanhMucSanPham = createMenuButton("Danh mục sản phẩm");
+        JButton btnNhanVien = createMenuButton("Nhân viên");
+        JButton btnTaiKhoan = createMenuButton("Tài khoản");
 
         menuPanel.add(btnSanPham);
         menuPanel.add(Box.createVerticalStrut(10));
@@ -54,6 +62,10 @@ public class TrangChu extends JFrame {
         menuPanel.add(btnKhachHang);
         menuPanel.add(Box.createVerticalStrut(10));
         menuPanel.add(btnHoaDon);
+        menuPanel.add(Box.createVerticalStrut(10));
+        menuPanel.add(btnNhanVien);
+        menuPanel.add(Box.createVerticalStrut(10));
+        menuPanel.add(btnTaiKhoan);
 
         menuPanel.add(Box.createVerticalGlue());
 
@@ -79,6 +91,8 @@ public class TrangChu extends JFrame {
         contentPanel.add(new PanelKhachHang(), "khachhang");
         contentPanel.add(new PanelHoaDon(), "hoadon");
         contentPanel.add(new PanelDanhMucSanPham(), "danhmucsanpham");
+        contentPanel.add(new PanelNhanVien(), "nhanvien");
+        contentPanel.add(new PanelTaiKhoan(), "taikhoan");
 
         add(contentPanel, BorderLayout.CENTER);
 
@@ -86,6 +100,8 @@ public class TrangChu extends JFrame {
         btnKhachHang.addActionListener((ActionEvent e) -> cardLayout.show(contentPanel, "khachhang"));
         btnHoaDon.addActionListener((ActionEvent e) -> cardLayout.show(contentPanel, "hoadon"));
         btnDanhMucSanPham.addActionListener((ActionEvent e) -> cardLayout.show(contentPanel, "danhmucsanpham"));
+        btnNhanVien.addActionListener((ActionEvent e) -> cardLayout.show(contentPanel, "nhanvien"));
+        btnTaiKhoan.addActionListener((ActionEvent e) -> cardLayout.show(contentPanel, "taikhoan"));
     }
 
     private JButton createMenuButton(String text) {

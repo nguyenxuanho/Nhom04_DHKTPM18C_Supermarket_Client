@@ -20,7 +20,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class PanelKhachHang extends JPanel {
+public class PanelNhanVien extends JPanel {
     private JTextField txtMaNV, txtTenNV, txtNgaySinh, txtSDT, txtDiaChi, txtSoDinhDanh, txtTimMaNV, txtTimTenNV;
     private JComboBox<String> cboGioiTinh, cboChucVu;
     private JButton btnThem, btnXoa, btnSua, btnReset, btnTim;
@@ -32,7 +32,7 @@ public class PanelKhachHang extends JPanel {
     private JDateChooser dateNgaySinh;
     private JComboBox<String> cboChucVuLoc;
 
-    public PanelKhachHang() {
+    public PanelNhanVien() {
         setLayout(new BorderLayout(10, 10));
 
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));

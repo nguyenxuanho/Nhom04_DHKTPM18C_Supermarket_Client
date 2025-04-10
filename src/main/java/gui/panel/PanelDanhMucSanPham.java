@@ -1,6 +1,7 @@
 package gui.panel;
 
 import InterF.DanhMucSanPhamDAOInterface;
+import io.github.cdimascio.dotenv.Dotenv;
 import model.DanhMucSanPham;
 import net.datafaker.Faker;
 import javax.naming.Context;
@@ -19,6 +20,10 @@ public class PanelDanhMucSanPham extends JPanel implements MouseListener, Action
     private final JLabel jLabelMaDanhMucSP, jLabelTenDanhMucSP, labelFind;
     private final JTextField txtMaDanhMucSP, txtTenDanhMucSP, txtFind;
 
+    Dotenv dotenv = Dotenv.load();
+
+    String drivername = dotenv.get("DRIVER_NAME");
+
     private final JTable jTableContent;
 
     private final Faker faker = new Faker();
@@ -30,7 +35,7 @@ public class PanelDanhMucSanPham extends JPanel implements MouseListener, Action
 
     private final Context context = new InitialContext();
 
-    private final DanhMucSanPhamDAOInterface danhMucSanPhamDAO = (DanhMucSanPhamDAOInterface) context.lookup("rmi://LAPTOP-MB2815MQ:9090/danhMucSanPhamDAO");
+    private final DanhMucSanPhamDAOInterface danhMucSanPhamDAO = (DanhMucSanPhamDAOInterface) context.lookup("rmi://" + drivername + ":9090/danhMucSanPhamDAO");
 
     public PanelDanhMucSanPham () throws NamingException, RemoteException {
         setLayout(new BorderLayout());
