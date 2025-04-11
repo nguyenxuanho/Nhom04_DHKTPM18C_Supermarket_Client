@@ -5,8 +5,12 @@ import gui.panel.*;
 
 import javax.naming.NamingException;
 import javax.swing.*;
+import javax.swing.event.AncestorEvent;
+import javax.swing.event.AncestorListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.rmi.RemoteException;
 
 public class TrangChu extends JFrame {
@@ -70,17 +74,60 @@ public class TrangChu extends JFrame {
         menuPanel.add(Box.createVerticalGlue());
 
         JPanel userPanel = new JPanel();
+        userPanel.setLayout(null);
+        JPanel jPanel = new JPanel();
+        jPanel.putClientProperty(FlatClientProperties.STYLE, "arc: 10");
+        jPanel.setBackground(new Color(0, 255, 255));
+        jPanel.setBounds(10, 118, 240, 47);
+
         userPanel.setOpaque(false);
-        userPanel.setLayout(new BoxLayout(userPanel, BoxLayout.X_AXIS));
         userPanel.setBorder(BorderFactory.createEmptyBorder(20, 15, 20, 15));
+        userPanel.setLayout(null);
+
+
+        userPanel.add(jPanel);
+        jPanel.setLayout(null);
 
         JLabel name = new JLabel("Mach Ngoc Xuan");
+        name.setFont(new Font("Tahoma", Font.PLAIN, 15));
+        name.setBounds(44, 10, 152, 24);
         name.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
+        jPanel.add(name);
 
-        userPanel.add(name);
+        JLabel lblNewLabel_1 = new JLabel("");
+        lblNewLabel_1.setFont(new Font("Tahoma", Font.PLAIN, 15));
+        lblNewLabel_1.setBounds(194, 0, 46, 47);
+        jPanel.add(lblNewLabel_1);
+        lblNewLabel_1.setAlignmentX(Component.RIGHT_ALIGNMENT);
+        lblNewLabel_1.setHorizontalAlignment(SwingConstants.CENTER);
+        lblNewLabel_1.setIcon(new ImageIcon(getClass().getResource("/image/logout.png")));
 
+        JLabel lblNewLabel = new JLabel("");
+        lblNewLabel.setFont(new Font("Tahoma", Font.PLAIN, 15));
+        lblNewLabel.setBounds(0, 0, 46, 47);
+        jPanel.add(lblNewLabel);
+        lblNewLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        lblNewLabel.setIcon(new ImageIcon(getClass().getResource("/image/avatar.png")));
         menuPanel.add(userPanel);
-        add(menuPanel, BorderLayout.WEST);
+        getContentPane().add(menuPanel, BorderLayout.WEST);
+
+        jPanel.addAncestorListener(new AncestorListener() {
+            @Override
+            public void ancestorAdded(AncestorEvent event) {
+                jPanel.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        JOptionPane.showMessageDialog(null, "Bạn đã đăng xuất!");
+                    }
+                });
+            }
+
+            @Override
+            public void ancestorRemoved(AncestorEvent event) {}
+
+            @Override
+            public void ancestorMoved(AncestorEvent event) {}
+        });
 
 
 //        Chỗ thay đổi cái content của Dữ liệu.....
