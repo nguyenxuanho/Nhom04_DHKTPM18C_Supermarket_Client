@@ -1,5 +1,8 @@
 package gui.panel;
 
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
@@ -9,16 +12,27 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
+import InterF.KhachHangDAOInterface;
+import InterF.NhanVienDAOInterface;
 import com.toedter.calendar.JDateChooser;
+import dao.NhanVienDAO;
+import io.github.cdimascio.dotenv.Dotenv;
+import model.ChucVuNhanVien;
+import model.GioiTinh;
+import model.NhanVien;
+import net.datafaker.Faker;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.rmi.RemoteException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 public class PanelNhanVien extends JPanel {
     private JTextField txtMaNV, txtTenNV, txtNgaySinh, txtSDT, txtDiaChi, txtSoDinhDanh, txtTimMaNV, txtTimTenNV;
@@ -32,7 +46,14 @@ public class PanelNhanVien extends JPanel {
     private JDateChooser dateNgaySinh;
     private JComboBox<String> cboChucVuLoc;
 
-    public PanelNhanVien() {
+    private final Faker faker = new Faker();
+    Dotenv dotenv = Dotenv.load();
+    String drivername = dotenv.get("DRIVER_NAME");
+
+    private final Context context = new InitialContext();
+    private final NhanVienDAOInterface nhanVienDAO = (NhanVienDAOInterface) context.lookup("rmi://" + drivername + ":9090/nhanVienDAO");
+
+    public PanelNhanVien() throws NamingException, RemoteException{
         setLayout(new BorderLayout(10, 10));
 
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -285,6 +306,11 @@ public class PanelNhanVien extends JPanel {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
 
+        JPanel jPanelLamMoi = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
+        JButton lammoi = new JButton("Làm mới");
+        lammoi.setPreferredSize(new Dimension(100, 30));
+        jPanelLamMoi.add(lammoi);
+
         String[] columns = {"Mã NV", "Tên NV", "Ngày sinh", "SĐT", "Địa chỉ", "Số định danh", "Giới tính", "Chức vụ"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
@@ -322,8 +348,13 @@ public class PanelNhanVien extends JPanel {
             }
         });
 
+        panel.add(jPanelLamMoi, BorderLayout.NORTH);
+
         JScrollPane scrollPane = new JScrollPane(table);
         panel.add(scrollPane, BorderLayout.CENTER);
+
+        lammoi.addActionListener(e -> resetTable());
+
 
         return panel;
     }
@@ -335,22 +366,61 @@ public class PanelNhanVien extends JPanel {
         btnReset.addActionListener(e -> resetForm());
     }
 
+    private void resetTable(){
+        try{
+            tableModel.setRowCount(0);
+            addSampleData();
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private void addEmployee() {
-        // Kiểm tra dữ liệu đầu vào
-        if (validateInput()) {
-            String[] rowData = {
-                    generateEmployeeId(),
-                    txtTenNV.getText(),
-                    txtNgaySinh.getText(),
-                    txtSDT.getText(),
-                    txtDiaChi.getText(),
-                    txtSoDinhDanh.getText(),
-                    cboGioiTinh.getSelectedItem().toString(),
-                    cboChucVu.getSelectedItem().toString()
-            };
-            tableModel.addRow(rowData);
-            resetForm();
-            JOptionPane.showMessageDialog(this, "Thêm nhân viên thành công!");
+
+        try {
+            if(validateInput()) {
+                String maNV = "NV" + faker.number().digits(5);
+                String tenNV = txtTenNV.getText();
+                Date ngaySinhDate = dateNgaySinh.getDate();
+                LocalDate localDateNgaySinh = ngaySinhDate.toInstant()
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDate();
+                String sdt = txtSDT.getText();
+                String diaChi = txtDiaChi.getText();
+                String soDinhDanh = txtSoDinhDanh.getText();
+                String textGioiTinh = cboGioiTinh.getSelectedItem().toString();
+                String enumGioiTinh = textGioiTinh.equals("Nam") ? "NAM" : "NU";
+                GioiTinh enumGT = GioiTinh.valueOf(enumGioiTinh);
+                String textChucVu = cboChucVu.getSelectedItem().toString();
+                String enumChucVu = textChucVu.equals("Người quản lý") ? "NGUOIQUANLY" : "NHANVIEN";
+                ChucVuNhanVien chucVuNhanVien = ChucVuNhanVien.valueOf(enumChucVu);
+
+                NhanVien nhanVien = new NhanVien(maNV, tenNV, localDateNgaySinh, sdt, diaChi, soDinhDanh, enumGT, chucVuNhanVien);
+
+                if(nhanVienDAO.insertNhanVien(nhanVien)) {
+                    tableModel.addRow(new Object[]{
+                            nhanVien.getMaNhanVien(),
+                            nhanVien.getTenNhanVien(),
+                            nhanVien.getNgaySinh(),
+                            nhanVien.getSoDienThoai(),
+                            nhanVien.getDiaChi(),
+                            nhanVien.getSoDinhDanh(),
+                            nhanVien.getGioiTinh(),
+                            nhanVien.getChucVuNhanVien()
+                    });
+                    resetForm();
+                    JOptionPane.showMessageDialog(this, "Đã thêm nhân viên thành công");
+                } else {
+                    JOptionPane.showMessageDialog(this, "Không thể thêm nhân viên mới");
+                }
+            }
+        } catch (RemoteException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Lỗi kết nối máy chủ: " + e.getMessage(),
+                    "Lỗi kết nối",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -460,16 +530,30 @@ public class PanelNhanVien extends JPanel {
         }
     }
 
+    private boolean isOver18(Date birthDate) {
+        if (birthDate == null) {
+            return false;
+        }
+
+        Calendar today = Calendar.getInstance();
+        Calendar birthDay = Calendar.getInstance();
+        birthDay.setTime(birthDate);
+
+        // Tính tuổi
+        int age = today.get(Calendar.YEAR) - birthDay.get(Calendar.YEAR);
+
+        // Nếu chưa đến sinh nhật năm nay thì trừ đi 1 tuổi
+        if (today.get(Calendar.DAY_OF_YEAR) < birthDay.get(Calendar.DAY_OF_YEAR)) {
+            age--;
+        }
+
+        return age >= 18;
+    }
+
     private boolean validateInput() {
         if (txtTenNV.getText().trim().isEmpty()) {
             JOptionPane.showMessageDialog(this, "Vui lòng nhập tên nhân viên!", "Lỗi", JOptionPane.ERROR_MESSAGE);
             txtTenNV.requestFocus();
-            return false;
-        }
-
-        if (txtNgaySinh.getText().trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Vui lòng nhập ngày sinh!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-            txtNgaySinh.requestFocus();
             return false;
         }
 
@@ -479,47 +563,66 @@ public class PanelNhanVien extends JPanel {
             return false;
         }
 
+        Date ngaySinh = dateNgaySinh.getDate();
+        if (ngaySinh == null) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn ngày sinh!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            dateNgaySinh.requestFocus();
+            return false;
+        }
+
+        // Kiểm tra tuổi >= 18
+        if (!isOver18(ngaySinh)) {
+            JOptionPane.showMessageDialog(this, "Nhân viên phải từ 18 tuổi trở lên!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            dateNgaySinh.requestFocus();
+            return false;
+        }
+
+        if (!txtSDT.getText().matches("^(03|05|07|08|09)\\d{8}$")) {
+            JOptionPane.showMessageDialog(this,
+                    "Số điện thoại phải có 10 chữ số và bắt đầu bằng 03, 05, 07, 08 hoặc 09",
+                    "Lỗi", JOptionPane.ERROR_MESSAGE);
+            txtSDT.requestFocus();
+            txtSDT.selectAll();
+            return false;
+        }
+
+        String soDinhDanh = txtSoDinhDanh.getText().trim();
+        if (soDinhDanh.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Vui lòng nhập số định danh!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            txtSoDinhDanh.requestFocus();
+            return false;
+        }
+
+        // Kiểm tra số định danh phải là 12 chữ số
+        if (!soDinhDanh.matches("\\d{12}")) {
+            JOptionPane.showMessageDialog(this,
+                    "Số định danh phải gồm 12 chữ số!",
+                    "Lỗi", JOptionPane.ERROR_MESSAGE);
+            txtSoDinhDanh.requestFocus();
+            txtSoDinhDanh.selectAll();
+            return false;
+        }
+
         return true;
     }
 
-    private String generateEmployeeId() {
-        return "NV" + (tableModel.getRowCount() + 1);
-    }
+    private void addSampleData() throws RemoteException{
 
-    private void addSampleData() {
-        String[][] sampleData = {
-                {"NV1", "Nguyễn Văn A", "15/05/1990", "0987654321", "Hà Nội", "123456789012", "Nam", "Nhân viên"},
-                {"NV2", "Trần Thị B", "20/10/1985", "0912345678", "Hồ Chí Minh", "987654321098", "Nữ", "Quản lý"},
-                {"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-                {"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-                {"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-                {"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-                {"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-                {"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-                {"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-                {"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-                {"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-                {"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-                {"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-                {"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-                {"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-                {"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-                {"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-                {"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-                {"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-                {"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-                {"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-                {"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-                {"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-                {"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-                {"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-                {"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-                {"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-                {"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"}
-        };
+        List<NhanVien> dsNhanVien = nhanVienDAO.getAllNhanVien();
 
-        for (String[] row : sampleData) {
-            tableModel.addRow(row);
+
+//        String[] columns = {"Mã NV", "Tên NV", "Ngày sinh", "SĐT", "Địa chỉ", "Số định danh", "Giới tính", "Chức vụ"};
+        for (NhanVien nhanVien : dsNhanVien) {
+            tableModel.addRow(new Object[] {
+                    nhanVien.getMaNhanVien(),
+                    nhanVien.getTenNhanVien(),
+                    nhanVien.getNgaySinh(),
+                    nhanVien.getSoDienThoai(),
+                    nhanVien.getDiaChi(),
+                    nhanVien.getSoDinhDanh(),
+                    nhanVien.getNgaySinh(),
+                    nhanVien.getChucVuNhanVien()
+            });
         }
     }
 }
