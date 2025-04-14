@@ -1,5 +1,8 @@
 package gui.panel;
 
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
@@ -9,17 +12,24 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
+import InterF.NhanVienDAOInterface;
+import InterF.TaiKhoanDAOInterface;
 import com.formdev.flatlaf.FlatLightLaf;
 import com.toedter.calendar.JDateChooser;
+import io.github.cdimascio.dotenv.Dotenv;
+import model.*;
+import net.datafaker.Faker;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.rmi.RemoteException;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class PanelTaiKhoan extends JPanel {
 	private JTextField txtMaNV, txtTenNV, txtNgaySinh, txtSDT, txtDiaChi, txtSoDinhDanh, txtTimMaNV, txtTimTenNV;
@@ -41,7 +51,17 @@ public class PanelTaiKhoan extends JPanel {
 	private JTextField txtTimMaTK;
 	private JTextField txtTimTenDangNhap;
 
-	public PanelTaiKhoan() {
+
+	private final Faker faker = new Faker();
+	Dotenv dotenv = Dotenv.load();
+	String drivername = dotenv.get("DRIVER_NAME");
+
+	private final Context context = new InitialContext();
+	private final TaiKhoanDAOInterface taiKhoanDAO = (TaiKhoanDAOInterface) context.lookup("rmi://" + drivername + ":9090/taiKhoanDAO");
+	private final NhanVienDAOInterface nhanVienDAO = (NhanVienDAOInterface) context.lookup("rmi://" + drivername + ":9090/nhanVienDAO");
+	private JComboBox<String> cbbMaNV;
+
+	public PanelTaiKhoan() throws NamingException, RemoteException {
 		FlatLightLaf.setup();
 		UIManager.put("PasswordField.showRevealButton", true);
 		setLayout(new BorderLayout(10, 10));
@@ -63,6 +83,8 @@ public class PanelTaiKhoan extends JPanel {
 		// Panel bảng dữ liệu
 		JPanel tablePanel = createTablePanel();
 		container.add(tablePanel, BorderLayout.CENTER);
+
+//		loadMaNVcbbox();
 
 		// Thêm dữ liệu mẫu
 		addSampleData();
@@ -98,6 +120,9 @@ public class PanelTaiKhoan extends JPanel {
 		jLableDangNhap = new JLabel("Tên đăng nhập:") ;
 		jLableDangNhap.setPreferredSize(new Dimension(90, 25));
 		txtTenDangNhap = new JTextField(20);
+		JLabel jLabelPwd = new JLabel("Mật khẩu:");
+		jLabelPwd.setPreferredSize(new Dimension(90, 25));
+		txtPassword = new JPasswordField();
 
 		box1.add(Box.createHorizontalStrut(50));
 		box1.add(jLableMaTK);
@@ -105,21 +130,24 @@ public class PanelTaiKhoan extends JPanel {
 		box1.add(Box.createHorizontalStrut(30));
 		box1.add(jLableDangNhap);
 		box1.add(txtTenDangNhap);
+		box1.add(Box.createHorizontalStrut(30));
+		box1.add(jLabelPwd);
+		box1.add(txtPassword);
 		box1.add(Box.createHorizontalStrut(50));
 
 
 		Box box2 = Box.createHorizontalBox();
-		JLabel jLabelPwd = new JLabel("Mật khẩu:");
-		jLabelPwd.setPreferredSize(new Dimension(90, 25));
-		txtPassword = new JPasswordField();
+		JLabel jLabelmaNV = new JLabel("Mã nhân viên:");
+		jLabelmaNV.setPreferredSize(new Dimension(90, 25));
+		cbbMaNV = new JComboBox<String>();
 		JLabel jLabelTrangThai = new JLabel("Trạng thái:");
 		jLabelTrangThai.setPreferredSize(new Dimension(90, 25));
 		cboTrangThai = new JComboBox<>(new String[]{"Đang hoạt động", "Không còn hoạt đông"});
 		cboTrangThai.setPreferredSize(new Dimension(445, 25));
 
 		box2.add(Box.createHorizontalStrut(50));
-		box2.add(jLabelPwd);
-		box2.add(txtPassword);
+		box2.add(jLabelmaNV);
+		box2.add(cbbMaNV);
 		box2.add(Box.createHorizontalStrut(30));
 		box2.add(jLabelTrangThai);
 		box2.add(cboTrangThai);
@@ -263,6 +291,11 @@ public class PanelTaiKhoan extends JPanel {
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
 
+		JPanel jPanelLamMoi = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
+		JButton lammoi = new JButton("Làm mới");
+		lammoi.setPreferredSize(new Dimension(100, 30));
+		jPanelLamMoi.add(lammoi);
+
 		String[] columns = {"Mã tài khoản", "Tên đăng nhập", "Password", "Trạng thái"};
 		tableModel = new DefaultTableModel(columns, 0) {
 			@Override
@@ -300,62 +333,194 @@ public class PanelTaiKhoan extends JPanel {
 			}
 		});
 
+		panel.add(jPanelLamMoi, BorderLayout.NORTH);
 		JScrollPane scrollPane = new JScrollPane(table);
 		panel.add(scrollPane, BorderLayout.CENTER);
+
+		lammoi.addActionListener(e -> resetTable());
 
 		return panel;
 	}
 
+	private void resetTable(){
+		try{
+			tableModel.setRowCount(0);
+			addSampleData();
+		} catch (RemoteException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	private void addButtonListeners() {
-		btnThem.addActionListener(e -> addEmployee());
+		btnThem.addActionListener(e -> addTaiKhoan());
 		btnXoa.addActionListener(e -> deleteTaiKhoan());
 		btnSua.addActionListener(e -> updateTaiKhoan());
 		btnReset.addActionListener(e -> resetForm());
 	}
 
-	private void addEmployee() {
-		// Kiểm tra dữ liệu đầu vào
-		if (validateInput()) {
-			String[] rowData = {
-					generateEmployeeId(),
-					txtTenNV.getText(),
-					txtNgaySinh.getText(),
-					txtSDT.getText(),
-					txtDiaChi.getText(),
-					txtSoDinhDanh.getText(),
-					cboGioiTinh.getSelectedItem().toString(),
-					cboChucVu.getSelectedItem().toString()
-			};
-			tableModel.addRow(rowData);
-			resetForm();
-			JOptionPane.showMessageDialog(this, "Thêm nhân viên thành công!");
+	private void loadMaNVcbbox() throws RemoteException {
+		System.out.println("hlnll");
+		List<NhanVien> dsNhanVien = nhanVienDAO.getAllNhanVien();
+		System.out.println(dsNhanVien);
+//		List<NhanVien> nhanVienDaCoTaiKhoan = taiKhoanDAO.getNhanVien();
+//		Set<String> maNVCoTaiKhoan = nhanVienDaCoTaiKhoan.stream()
+//				.map(NhanVien::getMaNhanVien)
+//				.collect(Collectors.toSet());
+//
+//
+//		List<NhanVien> nhanVienChuaCoTaiKhoan = allNhanViens.stream()
+//				.filter(nv -> !maNVCoTaiKhoan.contains(nv.getMaNhanVien()))
+//				.collect(Collectors.toList());
+//
+//		System.out.println(nhanVienDaCoTaiKhoan);
+//
+//		for (NhanVien nhanVien :  nhanVienChuaCoTaiKhoan) {
+//			cbbMaNV.addItem(nhanVien.getMaNhanVien());
+//		}
+	}
+
+	private void addTaiKhoan() {
+		try {
+			if(validateInput()) {
+				String maNV = "TK" + faker.number().digits(5);
+				String tenDangNhap = txtTenDangNhap.getText();
+				String password = txtPassword.getText();
+				String trangthai = cboTrangThai.getSelectedItem().toString();
+
+				TaiKhoan taiKhoan = new TaiKhoan(maNV, tenDangNhap, password, trangthai);
+
+				if(taiKhoanDAO.insertTaiKhoan(taiKhoan)) {
+					tableModel.addRow(new Object[]{
+							taiKhoan.getMaTaiKhoan(),
+							taiKhoan.getTenDangNhap(),
+							taiKhoan.getMatKhau(),
+							taiKhoan.getTrangThai()
+					});
+					resetForm();
+					JOptionPane.showMessageDialog(this, "Đã thêm tài khoản thành công");
+				} else {
+					JOptionPane.showMessageDialog(this, "Không thể thêm tài khoản mới");
+				}
+			}
+		} catch (RemoteException e) {
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(
+					this,
+					"Lỗi kết nối máy chủ: " + e.getMessage(),
+					"Lỗi kết nối",
+					JOptionPane.ERROR_MESSAGE);
 		}
 	}
 
 	private void deleteTaiKhoan() {
-		int selectedRow = table.getSelectedRow();
-		if (selectedRow >= 0) {
-			tableModel.removeRow(selectedRow);
-			resetForm();
-			JOptionPane.showMessageDialog(this, "Xóa tài khoản thành công!");
-		} else {
-			JOptionPane.showMessageDialog(this, "Vui lòng chọn tài khoản cần xóa!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+		try {
+			int selectedRow = table.getSelectedRow();
+			if (selectedRow >= 0) {
+				String maTK = table.getValueAt(selectedRow, 0).toString();
+
+				int confirm = JOptionPane.showConfirmDialog(
+						this,
+						"Bạn có chắc chắn muốn xóa tài khoản này?",
+						"Xác nhận xóa",
+						JOptionPane.YES_NO_OPTION);
+
+				if (confirm == JOptionPane.YES_OPTION) {
+					if (taiKhoanDAO.deleteTaiKhoan(maTK)) {
+						tableModel.removeRow(selectedRow);
+						resetForm();
+						JOptionPane.showMessageDialog(
+								this,
+								"Xóa tài khoản thành công!",
+								"Thành công",
+								JOptionPane.INFORMATION_MESSAGE);
+					} else {
+						JOptionPane.showMessageDialog(
+								this,
+								"Không thể xóa tài khoản. Vui lòng thử lại!",
+								"Lỗi",
+								JOptionPane.ERROR_MESSAGE);
+					}
+				}
+			} else {
+				JOptionPane.showMessageDialog(
+						this,
+						"Vui lòng chọn tài khoản cần xóa!",
+						"Lỗi",
+						JOptionPane.ERROR_MESSAGE);
+			}
+		} catch (RemoteException e) {
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(
+					this,
+					"Lỗi kết nối máy chủ: " + e.getMessage(),
+					"Lỗi kết nối",
+					JOptionPane.ERROR_MESSAGE);
 		}
 	}
 
 	private void updateTaiKhoan() {
-		int selectedRow = table.getSelectedRow();
-		if (selectedRow >= 0) {
-			if (validateInput()) {
-				tableModel.setValueAt(txtTenDangNhap.getText(), selectedRow, 1);
-				tableModel.setValueAt(txtPassword.getPassword(), selectedRow, 2);
-				tableModel.setValueAt(cboTrangThai.getSelectedItem().toString(), selectedRow, 3);
-				resetForm();
-				JOptionPane.showMessageDialog(this, "Cập nhật thông tin thành công!");
-			}
-		} else {
-			JOptionPane.showMessageDialog(this, "Vui lòng chọn nhân viên cần sửa!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-		}
+//		try {
+//			int row = table.getSelectedRow();
+//			if (row >= 0) {
+//				if(validateInput()) {
+//					String maTK = table.getValueAt(row, 0).toString();
+//					String tenDangNhap = txtTenDangNhap.getText().toString();
+//					String sdt = txtSDT.getText();
+//					String gioiTinh = cboGioiTinh.getSelectedItem().toString();
+//					String enumGioiTinh = gioiTinh.equals("Nam") ? "NAM" : "NU";
+//					String diemTichLuy = txtDiemTichluy.getText().trim();
+//					int diem = Integer.parseInt(diemTichLuy);
+//
+//					GioiTinh enumGT = GioiTinh.valueOf(enumGioiTinh);
+//					KhachHang khachHang = new KhachHang(maKH, tenKH, sdt, enumGT, diem);
+//
+//					int confirm = JOptionPane.showConfirmDialog(
+//							this,
+//							"Bạn có chắc muốn cập nhật khách hàng " + tenKH,
+//							"Xác nhận cập nhật",
+//							JOptionPane.YES_NO_OPTION
+//					);
+//
+//					if(confirm == JOptionPane.YES_OPTION) {
+//						if(khachHangDAO.suaKhachHang(maKH, khachHang)) {
+//							tableModel.setValueAt(maKH, row, 0);
+//							tableModel.setValueAt(tenKH, row, 1);
+//							tableModel.setValueAt(sdt, row, 2);
+//							tableModel.setValueAt(gioiTinh, row, 3);
+//							tableModel.setValueAt(diemTichLuy, row, 4);
+//							resetForm();
+//							JOptionPane.showMessageDialog(
+//									this,
+//									"Cập nhật khách hàng "+tenKH+"thành công",
+//									"Thành công",
+//									JOptionPane.INFORMATION_MESSAGE
+//							);
+//						} else {
+//							JOptionPane.showMessageDialog(
+//									this,
+//									"Không thể cập nhật khách hàng" + tenKH,
+//									"Lỗi",
+//									JOptionPane.ERROR_MESSAGE
+//							);
+//						}
+//					}
+//				}
+//			} else {
+//				JOptionPane.showMessageDialog(
+//						this,
+//						"Vui lòng chọn khách cần cập nhật",
+//						"Thông báo",
+//						JOptionPane.ERROR_MESSAGE
+//				);
+//			}
+//		} catch (RemoteException e) {
+//			e.printStackTrace();
+//			JOptionPane.showMessageDialog(
+//					this,
+//					"Lỗi kết nối máy chủ: " + e.getMessage(),
+//					"Lỗi kết nối",
+//					JOptionPane.ERROR_MESSAGE);
+//		}
 	}
 
 	private void resetForm() {
@@ -424,40 +589,18 @@ public class PanelTaiKhoan extends JPanel {
 		return "TK" + (tableModel.getRowCount() + 1);
 	}
 
-	private void addSampleData() {
-		String[][] sampleData = {
-				{"NV1", "Nguyễn Văn A", "15/05/1990", "0987654321", "Hà Nội", "123456789012", "Nam", "Nhân viên"},
-				{"NV2", "Trần Thị B", "20/10/1985", "0912345678", "Hồ Chí Minh", "987654321098", "Nữ", "Quản lý"},
-				{"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-				{"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-				{"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-				{"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-				{"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-				{"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-				{"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-				{"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-				{"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-				{"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-				{"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-				{"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-				{"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-				{"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-				{"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-				{"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-				{"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-				{"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-				{"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-				{"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-				{"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-				{"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-				{"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-				{"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-				{"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"},
-				{"NV3", "Lê Văn C", "03/03/1995", "0967890123", "Đà Nẵng", "456789012345", "Nam", "Nhân viên"}
-		};
+	private void addSampleData() throws RemoteException{
 
-		for (String[] row : sampleData) {
-			tableModel.addRow(row);
+		List<TaiKhoan> taiKhoans = taiKhoanDAO.getAllTaiKhoan();
+
+//		String[] columns = {"Mã tài khoản", "Tên đăng nhập", "Password", "Trạng thái"};
+		for(TaiKhoan taiKhoan : taiKhoans) {
+			tableModel.addRow(new Object[]{
+					taiKhoan.getMaTaiKhoan(),
+					taiKhoan.getTenDangNhap(),
+					taiKhoan.getMatKhau(),
+					taiKhoan.getTrangThai(),
+			});
 		}
 	}
 }
