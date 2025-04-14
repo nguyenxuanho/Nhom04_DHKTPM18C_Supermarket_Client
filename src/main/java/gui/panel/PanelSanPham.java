@@ -4,6 +4,7 @@ import InterF.DanhMucSanPhamDAOInterface;
 import InterF.SanPhamDAOInterface;
 import InterF.ThuocTinhSanPhamDAOInterface;
 import com.toedter.calendar.JDateChooser;
+import gui.components.ComponentUtils;
 import io.github.cdimascio.dotenv.Dotenv;
 import model.SanPham;
 import model.ThuocTinhSanPham;
@@ -13,7 +14,9 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -75,6 +78,8 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
 
         jTableContent = new JTable(dataModel);
 
+        ComponentUtils.setTable(jTableContent);
+
         sanPhamDAO.getList().forEach(sanPham -> {
             try {
                 List<ThuocTinhSanPham> thuocTinhSanPhamList =  thuocTinhSanPhamDAO.getListByProductId(sanPham.getMaSanPham());
@@ -104,7 +109,7 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
         // Tùy chỉnh độ cao hàng và font chữ nếu cần
         jTableContent.setRowHeight(30);
         jTableContent.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        jTableContent.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 16));
+        jTableContent.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 14));
 
         // Thêm bảng vào JScrollPane để có thể cuộn
         JScrollPane scrollPane = new JScrollPane(jTableContent);
@@ -113,7 +118,7 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
 
 
         Box boxButton = Box.createHorizontalBox();
-        boxButton.add(btnResetTable = new JButton("Làm mới"));
+        boxButton.add(btnResetTable = new JButton("Refresh"));
         boxButton.add(Box.createHorizontalGlue()); // đẩy nút sang trái
 
 
@@ -128,9 +133,10 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
 
         JPanel filterPanel = new JPanel();
 
+
         filterPanel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createTitledBorder("Bộ lọc và tìm kiếm"),
-                BorderFactory.createEmptyBorder(10, 10, 10, 10)
+                BorderFactory.createEmptyBorder(20, 20, 10, 20),
+                ComponentUtils.getTitleBorder("Bộ lọc và tìm kiếm")
         ));
 
         Box boxHorizonFilter = Box.createHorizontalBox();
@@ -174,7 +180,7 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
         boxSearch.add(txtFind);
         boxSearch.add(Box.createHorizontalStrut(10));
         boxSearch.add(btnFind);
-        boxSearch.add(Box.createHorizontalStrut(300));
+        boxSearch.add(Box.createHorizontalStrut(200));
         boxSearch.add(labelDanhMuc);
         boxSearch.add(Box.createHorizontalStrut(10));
         boxSearch.add(jComboBoxDanhMuc);
@@ -203,9 +209,10 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
         // Panel nhập liệu và nút chức năng
         JPanel bottomPanel = new JPanel(new BorderLayout());
         JPanel inputPanel = new JPanel();
+
         inputPanel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createTitledBorder("Thông tin nhập"),
-                BorderFactory.createEmptyBorder(20, 20, 20, 20)
+                BorderFactory.createEmptyBorder(20, 20, 10, 20),
+                ComponentUtils.getTitleBorder("Thông tin nhập")
         ));
 
         Font labelFont = new Font("Arial", Font.BOLD, 14); // Chữ lớn và đậm
@@ -233,11 +240,11 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
         row1.add(jLabelHanSuDung = new JLabel("Hạn SD:"));
         jLabelHanSuDung.setPreferredSize(new Dimension(90, 25));
         row1.add(Box.createHorizontalStrut(10));
-            row1.add(dateHanSuDung = new JDateChooser());
+        row1.add(dateHanSuDung = new JDateChooser());
 
         dateHanSuDung.setDateFormatString("dd/MM/yyyy");
 
-        dateHanSuDung.setPreferredSize(new Dimension(225, 20));
+        dateHanSuDung.setPreferredSize(new Dimension(235, 20));
 
 
 
@@ -270,7 +277,7 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
         row3.add(Box.createHorizontalStrut(10));
         row3.add(dateNgayNhap = new JDateChooser());
         dateNgayNhap.setDateFormatString("dd/MM/yyyy");
-        dateNgayNhap.setPreferredSize(new Dimension(225, 20));
+        dateNgayNhap.setPreferredSize(new Dimension(235, 20));
 
         row3.add(Box.createHorizontalStrut(30));
         row3.add(jLabelMoTa = new JLabel("Mô tả: "));
@@ -354,20 +361,6 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
         btnSua = new JButton("Sửa");
         btnReset = new JButton("Reset");
 
-        btnThem.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btnXoa.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btnSua.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btnReset.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btnFind.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btnResetTable.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        jComboBoxMonth.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        jComboBoxYear.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        jComboBoxDanhMuc.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        jComboBoxStatus.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        JcomboboxLoaiSP.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        JcomboboxTrangThai.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-
         buttonPanel.add(btnThem);
         buttonPanel.add(btnXoa);
         buttonPanel.add(btnSua);
@@ -397,43 +390,26 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
 
 
 //        Custom GUI
-        setButtonPretty(btnFind);
-        setButtonPretty(btnReset);
-        setButtonPretty(btnXoa);
-        setButtonPretty(btnThem);
-        setButtonPretty(btnSua);
-        setButtonPretty(btnResetTable);
+        ComponentUtils.setButton(btnThem, new Color(33, 150, 243));
+        ComponentUtils.setButton(btnXoa, new Color(244, 67, 54));
+        ComponentUtils.setButton(btnSua, new Color(255, 193, 7));
+        ComponentUtils.setButton(btnReset, new Color(76, 175, 80));
 
+        ComponentUtils.setButtonMain(btnFind);
+        ComponentUtils.setButtonMain(btnResetTable);
 
-        setComboBoxPretty(JcomboboxLoaiSP);
-        setComboBoxPretty(JcomboboxTrangThai);
-        setComboBoxPretty(jComboBoxMonth);
-        setComboBoxPretty(jComboBoxStatus);
-        setComboBoxPretty(jComboBoxYear);
-        setComboBoxPretty(jComboBoxDanhMuc);
-
-
-
+        ComponentUtils.setJcombobox(jComboBoxMonth);
+        ComponentUtils.setJcombobox(jComboBoxDanhMuc);
+        ComponentUtils.setJcombobox(jComboBoxYear);
+        ComponentUtils.setJcombobox(jComboBoxStatus);
+        ComponentUtils.setJcombobox(JcomboboxTrangThai);
+        ComponentUtils.setJcombobox(JcomboboxLoaiSP);
 //        End custom GUI
 
     }
 
-    // Hàm tạo panel chứa label và textfield để dùng cho GridLayout
-    private void setButtonPretty(JButton button) {
-        button.setFocusPainted(false); // bỏ viền focus khi click
-        button.setBackground(new Color(52, 152, 219)); // màu xanh dương
-        button.setForeground(Color.WHITE); // chữ trắng
-        button.setFont(new Font("Segoe UI", Font.BOLD, 14)); // font đẹp
-        button.setBorder(BorderFactory.createEmptyBorder(5, 16, 5, 16)); // padding
-    }
 
-    private void setComboBoxPretty(JComboBox comboBox){
-        comboBox.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        comboBox.setBackground(new Color(236, 240, 241)); // nền xám nhẹ
-        comboBox.setForeground(new Color(44, 62, 80));    // chữ đậm
-        comboBox.setBorder(BorderFactory.createLineBorder(new Color(189, 195, 199), 1));
-        comboBox.setMaximumRowCount(5); // số dòng hiển thị khi mở list
-    }
+
 
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -534,17 +510,6 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
                     throw new RuntimeException(ex);
                 }
 
-
-
-//                dslp.updateLop(lp);
-//                for(int i = 0; i < table.getRowCount(); i++) {
-//                    if(table.getValueAt(i, 0).toString().equals(maLop)) {
-//                        table.setValueAt(tenLop, i, 1);
-//                        table.setValueAt(maGV, i, 2);
-//                        table.setValueAt(siSo, i, 3);
-//                    }
-//                }
-
             }
             else if (source.equals(btnSua)) {
                 String maSP = jTableContent.getValueAt(jTableContent.getSelectedRow(), 0).toString();
@@ -636,15 +601,6 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
                 } catch (RemoteException ex) {
                     throw new RuntimeException(ex);
                 }
-
-//                String maLop = txtMaLop.getText();
-//                String tenLop = txtTenLop.getText();
-//                String maGV = cboGVCN.getSelectedItem().toString();
-//                int siSo = Integer.parseInt(txtSiSo.getText());
-//                if(dslp.themLopHoc(new LopHoc(maLop, tenLop, new GiaoVien(maGV), siSo))) {
-//                    dataModel.addRow(new Object[] {maLop, tenLop, maGV, siSo});
-//                } else JOptionPane.showMessageDialog(null, "Trùng mã");
-
             }
             else if (source.equals(btnFind)) {
                 String maSP = txtFind.getText();
@@ -758,12 +714,10 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
                     txtMaSP.setText(sanPham.getMaSanPham());
                     txtTenSP.setText(sanPham.getTenSanPham());
                     txtGiaSP.setText(sanPham.getGiaBan() + "");
-//                    txtHanSuDung.setText(sanPham.getHanSuDung().toString());
                     Date dateHSD = java.sql.Date.valueOf(sanPham.getHanSuDung());
                     dateHanSuDung.setDate(dateHSD);
                     txtThueVAT.setText(String.format("%.2f", sanPham.getThueVAT()));
                     txtSoLuong.setText(sanPham.getSoLuongTon() + "");
-//                    txtNgayNhap.setText(sanPham.getNgayNhap().toString());
                     Date dateNgaynhap = java.sql.Date.valueOf(sanPham.getNgayNhap());
                     dateNgayNhap.setDate(dateNgaynhap);
                     String thuocTinh =  thuocTinhSanPhamDAO.getListByProductId(sanPham.getMaSanPham()).stream().map(thuocTinhSanPham ->

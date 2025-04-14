@@ -12,10 +12,9 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
-import InterF.KhachHangDAOInterface;
 import InterF.NhanVienDAOInterface;
 import com.toedter.calendar.JDateChooser;
-import dao.NhanVienDAO;
+import gui.components.ComponentUtils;
 import io.github.cdimascio.dotenv.Dotenv;
 import model.ChucVuNhanVien;
 import model.GioiTinh;
@@ -321,24 +320,7 @@ public class PanelNhanVien extends JPanel {
         table = new JTable(tableModel);
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
-        table.setDefaultRenderer(Object.class, centerRenderer);
-        table.setFocusable(false);
-        table.setDefaultEditor(Object.class, null);
-        table.setAutoCreateRowSorter(true);
-        table.getTableHeader().setFont(new Font("Arial", Font.PLAIN, 20));
-        table.getTableHeader().setBackground(new Color(33, 150, 243));
-        table.setRowHeight(40);
-        table.setShowHorizontalLines(true);
-        table.setShowVerticalLines(false);
-        table.setSelectionBackground(new Color(33, 150, 243));
-        table.setSelectionForeground(Color.WHITE);
-        table.setGridColor(Color.LIGHT_GRAY);
-
-        JTableHeader tableHeader = table.getTableHeader();
-        tableHeader.setForeground(Color.WHITE);
-        tableHeader.setPreferredSize(new Dimension(tableHeader.getWidth(), 40));
+        ComponentUtils.setTable(table);
 
 
         table.addMouseListener(new MouseAdapter() {

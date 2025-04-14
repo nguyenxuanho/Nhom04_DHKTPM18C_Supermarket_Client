@@ -1,6 +1,7 @@
 package gui.panel;
 
 import InterF.DanhMucSanPhamDAOInterface;
+import gui.components.ComponentUtils;
 import io.github.cdimascio.dotenv.Dotenv;
 import model.DanhMucSanPham;
 import net.datafaker.Faker;
@@ -58,6 +59,7 @@ public class PanelDanhMucSanPham extends JPanel implements MouseListener, Action
 
 
         jTableContent = new JTable(dataModel);
+        ComponentUtils.setTable(jTableContent);
 
         danhMucSanPhamDAO.getList().forEach(danhMucSanPham -> {
                 dataModel.addRow ( new Object[]{
@@ -94,8 +96,8 @@ public class PanelDanhMucSanPham extends JPanel implements MouseListener, Action
         JPanel filterPanel = new JPanel();
 
         filterPanel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createTitledBorder("Bộ lọc và tìm kiếm"),
-                BorderFactory.createEmptyBorder(10, 10, 10, 10)
+                BorderFactory.createEmptyBorder(20, 20, 10, 20),
+                ComponentUtils.getTitleBorder("Bộ lọc và tìm kiếm")
         ));
 
         Box boxHorizonFilter = Box.createHorizontalBox();
@@ -126,9 +128,10 @@ public class PanelDanhMucSanPham extends JPanel implements MouseListener, Action
         // Panel nhập liệu và nút chức năng
         JPanel bottomPanel = new JPanel(new BorderLayout());
         JPanel inputPanel = new JPanel();
+
         inputPanel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createTitledBorder("Thông tin nhập"),
-                BorderFactory.createEmptyBorder(20, 20, 20, 20)
+                BorderFactory.createEmptyBorder(20, 20, 10, 20),
+                ComponentUtils.getTitleBorder("Thông tin nhập")
         ));
 
         Font labelFont = new Font("Arial", Font.BOLD, 14); // Chữ lớn và đậm
@@ -212,12 +215,13 @@ public class PanelDanhMucSanPham extends JPanel implements MouseListener, Action
 
 
 //        Custom GUI
-        setButtonPretty(btnFind);
-        setButtonPretty(btnReset);
-        setButtonPretty(btnXoa);
-        setButtonPretty(btnThem);
-        setButtonPretty(btnSua);
-        setButtonPretty(btnResetTable);
+        ComponentUtils.setButton(btnThem, new Color(33, 150, 243));
+        ComponentUtils.setButton(btnXoa, new Color(244, 67, 54));
+        ComponentUtils.setButton(btnSua, new Color(255, 193, 7));
+        ComponentUtils.setButton(btnReset, new Color(76, 175, 80));
+
+        ComponentUtils.setButtonMain(btnFind);
+        ComponentUtils.setButtonMain(btnResetTable);
 
 
 
@@ -226,14 +230,6 @@ public class PanelDanhMucSanPham extends JPanel implements MouseListener, Action
 
     }
 
-    // Hàm set cho đẹp :))
-    private void setButtonPretty(JButton button) {
-        button.setFocusPainted(false); // bỏ viền focus khi click
-        button.setBackground(new Color(52, 152, 219)); // màu xanh dương
-        button.setForeground(Color.WHITE); // chữ trắng
-        button.setFont(new Font("Segoe UI", Font.BOLD, 14)); // font đẹp
-        button.setBorder(BorderFactory.createEmptyBorder(5, 16, 5, 16)); // padding
-    }
 
 
     @Override

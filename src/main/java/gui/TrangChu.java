@@ -1,6 +1,7 @@
 package gui;
 
 import com.formdev.flatlaf.*;
+import dto.TaiKhoanDTO;
 import gui.panel.*;
 
 import javax.naming.NamingException;
@@ -31,7 +32,7 @@ public class TrangChu extends JFrame {
         setLayout(new BorderLayout());
 //        setUndecorated(true);
 
-        JLabel titleLabel = new JLabel("Hệ Thống Quản Lý Siêu Thị", SwingConstants.CENTER);
+        JLabel titleLabel = new JLabel("HỆ THỐNG QUẢN LÝ SIÊU THỊ", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 26));
         titleLabel.setOpaque(true);
         titleLabel.setBackground(new Color(33, 150, 243));
@@ -88,7 +89,9 @@ public class TrangChu extends JFrame {
         userPanel.add(jPanel);
         jPanel.setLayout(null);
 
-        JLabel name = new JLabel("Mach Ngoc Xuan");
+//        JLabel name = new JLabel(TaiKhoanDTO.getTaiKhoan().getNhanVien().getTenNhanVien());
+        JLabel name = new JLabel("Xuân Hồ");
+
         name.setFont(new Font("Tahoma", Font.PLAIN, 15));
         name.setBounds(44, 10, 152, 24);
         name.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
@@ -117,7 +120,18 @@ public class TrangChu extends JFrame {
                 jPanel.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseClicked(MouseEvent e) {
-                        JOptionPane.showMessageDialog(null, "Bạn đã đăng xuất!");
+                        int confirm = JOptionPane.showConfirmDialog(null, "Bạn có chắc chắn muốn đăng xuất?", "Đăng xuất", JOptionPane.YES_NO_OPTION);
+                        if (confirm == JOptionPane.YES_OPTION) {
+                            // Ẩn form hiện tại
+                            SwingUtilities.getWindowAncestor(jPanel).dispose();
+
+                            // Mở form đăng nhập
+                            try {
+                                new LoginForm().setVisible(true);
+                            } catch (NamingException ex) {
+                                throw new RuntimeException(ex);
+                            }
+                        }
                     }
                 });
             }

@@ -1,6 +1,7 @@
 package gui.panel;
 
 import InterF.KhachHangDAOInterface;
+import gui.components.ComponentUtils;
 import io.github.cdimascio.dotenv.Dotenv;
 import model.GioiTinh;
 import model.KhachHang;
@@ -74,20 +75,10 @@ public class PanelKhachHang extends JPanel {
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout());
 
-        Border border = BorderFactory.createLineBorder(new Color(33, 150, 243), 2);
-        TitledBorder titledBorder = BorderFactory.createTitledBorder(border,
-                "Thông tin khách hàng",
-                TitledBorder.LEFT,
-                TitledBorder.TOP,
-                new Font("Arial", Font.BOLD, 16),
-                Color.WHITE);
-
-        titledBorder.setTitleColor(new Color(33, 150, 243));
-        titledBorder.setBorder(BorderFactory.createLineBorder(new Color(33, 150, 243), 2));
 
         panel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createEmptyBorder(20, 20, 10, 20),
-                titledBorder
+                ComponentUtils.getTitleBorder("Thông tin khách hàng")
         ));
 
         Box boxFormInput = Box.createVerticalBox();
@@ -147,23 +138,14 @@ public class PanelKhachHang extends JPanel {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
 
         btnThem = new JButton("Thêm");
-        btnThem.setPreferredSize(new Dimension(100, 40));
         btnXoa = new JButton("Xóa");
-        btnXoa.setPreferredSize(new Dimension(100, 40));
         btnSua = new JButton("Sửa");
-        btnSua.setPreferredSize(new Dimension(100, 40));
         btnReset = new JButton("Reset");
-        btnReset.setPreferredSize(new Dimension(100, 40));
 
-
-        btnThem.setBackground(new Color(33, 150, 243));
-        btnThem.setForeground(Color.WHITE);
-        btnXoa.setBackground(new Color(244, 67, 54));
-        btnXoa.setForeground(Color.WHITE);
-        btnSua.setBackground(new Color(255, 193, 7));
-        btnSua.setForeground(Color.WHITE);
-        btnReset.setBackground(new Color(76, 175, 80));
-        btnReset.setForeground(Color.WHITE);
+        ComponentUtils.setButton(btnThem, new Color(33, 150, 243));
+        ComponentUtils.setButton(btnXoa, new Color(244, 67, 54));
+        ComponentUtils.setButton(btnSua, new Color(255, 193, 7));
+        ComponentUtils.setButton(btnReset, new Color(76, 175, 80));
 
         buttonPanel.add(btnThem);
         buttonPanel.add(btnXoa);
@@ -182,17 +164,11 @@ public class PanelKhachHang extends JPanel {
         panel.setLayout(new BorderLayout(10, 10));
         panel.setBackground(new Color(240, 240, 240));
 
-        Border border = BorderFactory.createLineBorder(new Color(33, 150, 243), 2);
-        TitledBorder titledBorder = BorderFactory.createTitledBorder(border,
-                "Tra cứu thông tin khách hàng",
-                TitledBorder.LEFT,
-                TitledBorder.TOP,
-                new Font("Arial", Font.BOLD, 16),
-                new Color(33, 150, 243));
+
 
         panel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createEmptyBorder(15, 15, 15, 15),
-                titledBorder
+                ComponentUtils.getTitleBorder("Tra cứu thông tin khách hàng")
         ));
 
         JPanel searchByIDPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
@@ -344,24 +320,7 @@ public class PanelKhachHang extends JPanel {
         table = new JTable(tableModel);
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
-        table.setDefaultRenderer(Object.class, centerRenderer);
-        table.setFocusable(false);
-        table.setDefaultEditor(Object.class, null);
-        table.setAutoCreateRowSorter(true);
-        table.getTableHeader().setFont(new Font("Arial", Font.PLAIN, 20));
-        table.getTableHeader().setBackground(new Color(33, 150, 243));
-        table.setRowHeight(40);
-        table.setShowHorizontalLines(true);
-        table.setShowVerticalLines(false);
-        table.setSelectionBackground(new Color(33, 150, 243));
-        table.setSelectionForeground(Color.WHITE);
-        table.setGridColor(Color.LIGHT_GRAY);
-
-        JTableHeader tableHeader = table.getTableHeader();
-        tableHeader.setForeground(Color.WHITE);
-        tableHeader.setPreferredSize(new Dimension(tableHeader.getWidth(), 40));
+        ComponentUtils.setTable(table);
 
 
         table.addMouseListener(new MouseAdapter() {
