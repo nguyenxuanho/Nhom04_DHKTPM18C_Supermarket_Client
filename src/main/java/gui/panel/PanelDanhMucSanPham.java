@@ -1,10 +1,11 @@
 package gui.panel;
 
-import InterF.DanhMucSanPhamDAOInterface;
 import gui.components.ComponentUtils;
 import io.github.cdimascio.dotenv.Dotenv;
 import model.DanhMucSanPham;
 import net.datafaker.Faker;
+import service.DanhMucSanPhamService;
+
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -36,7 +37,7 @@ public class PanelDanhMucSanPham extends JPanel implements MouseListener, Action
 
     private final Context context = new InitialContext();
 
-    private final DanhMucSanPhamDAOInterface danhMucSanPhamDAO = (DanhMucSanPhamDAOInterface) context.lookup("rmi://" + drivername + ":9090/danhMucSanPhamDAO");
+    private final DanhMucSanPhamService danhMucSanPhamService = (DanhMucSanPhamService) context.lookup("rmi://" + drivername + ":9020/danhMucSanPhamService");
 
     public PanelDanhMucSanPham () throws NamingException, RemoteException {
         setLayout(new BorderLayout());
@@ -61,7 +62,7 @@ public class PanelDanhMucSanPham extends JPanel implements MouseListener, Action
         jTableContent = new JTable(dataModel);
         ComponentUtils.setTable(jTableContent);
 
-        danhMucSanPhamDAO.getList().forEach(danhMucSanPham -> {
+        danhMucSanPhamService.getList().forEach(danhMucSanPham -> {
                 dataModel.addRow ( new Object[]{
                         danhMucSanPham.getMaDanhMucSanPham(),
                         danhMucSanPham.getTenDanhMucSanPham(),
@@ -245,7 +246,7 @@ public class PanelDanhMucSanPham extends JPanel implements MouseListener, Action
                 int xoa = JOptionPane.showConfirmDialog(null, "Bạn có chắc muốn xóa dòng này ?");
                 if(xoa == 0) {
                     try {
-                        danhMucSanPhamDAO.delete(maDanhMucSP);
+                        danhMucSanPhamService.delete(maDanhMucSP);
                         dataModel.removeRow(jTableContent.getSelectedRow());
                     } catch (RemoteException ex) {
                         throw new RuntimeException(ex);
@@ -259,7 +260,7 @@ public class PanelDanhMucSanPham extends JPanel implements MouseListener, Action
                 DanhMucSanPham danhMucSanPham = new DanhMucSanPham(maDanhMucSP, tenDanhMucSP);
 
                 try {
-                    danhMucSanPhamDAO.save(danhMucSanPham);
+                    danhMucSanPhamService.save(danhMucSanPham);
                     dataModel.addRow(new Object[] {
                             danhMucSanPham.getMaDanhMucSanPham(),
                             danhMucSanPham.getTenDanhMucSanPham(),
@@ -275,13 +276,13 @@ public class PanelDanhMucSanPham extends JPanel implements MouseListener, Action
                 String maDanhMucSP = jTableContent.getValueAt(jTableContent.getSelectedRow(), 0).toString();
 
                 try {
-                    DanhMucSanPham danhMucSanPham = danhMucSanPhamDAO.findOne(maDanhMucSP);
+                    DanhMucSanPham danhMucSanPham = danhMucSanPhamService.findOne(maDanhMucSP);
                     if(danhMucSanPham != null){
                         String tenDanhMucSP = txtTenDanhMucSP.getText();
 
                         danhMucSanPham.setTenDanhMucSanPham(tenDanhMucSP);
 
-                        danhMucSanPhamDAO.update(danhMucSanPham);
+                        danhMucSanPhamService.update(danhMucSanPham);
 
                         for(int i = 0; i < jTableContent.getRowCount(); i++) {
                             if(jTableContent.getValueAt(i, 0).toString().equals(maDanhMucSP)) {
@@ -299,7 +300,7 @@ public class PanelDanhMucSanPham extends JPanel implements MouseListener, Action
             else if (source.equals(btnFind)) {
                 String maDanhMucSP = txtFind.getText();
                 try {
-                    DanhMucSanPham danhMucSanPham = danhMucSanPhamDAO.findOne(maDanhMucSP);
+                    DanhMucSanPham danhMucSanPham = danhMucSanPhamService.findOne(maDanhMucSP);
                     if(danhMucSanPham != null) {
                         dataModel.setRowCount(0);
 
@@ -316,7 +317,7 @@ public class PanelDanhMucSanPham extends JPanel implements MouseListener, Action
             else if (source.equals(btnResetTable)){
                 try {
                     dataModel.setRowCount(0);
-                    danhMucSanPhamDAO.getList().forEach(danhMucSanPham -> {
+                    danhMucSanPhamService.getList().forEach(danhMucSanPham -> {
                         dataModel.addRow ( new Object[]{
                                 danhMucSanPham.getMaDanhMucSanPham(),
                                 danhMucSanPham.getTenDanhMucSanPham(),
@@ -338,7 +339,7 @@ public class PanelDanhMucSanPham extends JPanel implements MouseListener, Action
             if(source.equals(jTableContent)) {
                 String maDanhMucSP = jTableContent.getValueAt(jTableContent.getSelectedRow(), 0).toString();
                 try {
-                    DanhMucSanPham danhMucSanPham = danhMucSanPhamDAO.findOne(maDanhMucSP);
+                    DanhMucSanPham danhMucSanPham = danhMucSanPhamService.findOne(maDanhMucSP);
                     txtMaDanhMucSP.setText(danhMucSanPham.getMaDanhMucSanPham());
                     txtTenDanhMucSP.setText(danhMucSanPham.getTenDanhMucSanPham());
                 } catch (RemoteException ex) {

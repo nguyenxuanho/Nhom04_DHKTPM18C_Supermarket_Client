@@ -10,14 +10,14 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 
-import InterF.NhanVienDAOInterface;
-import InterF.TaiKhoanDAOInterface;
 import com.formdev.flatlaf.FlatLightLaf;
 import com.toedter.calendar.JDateChooser;
 import io.github.cdimascio.dotenv.Dotenv;
 import model.*;
 import net.datafaker.Faker;
 import gui.components.ComponentUtils;
+import service.NhanVienService;
+import service.TaiKhoanService;
 
 import java.awt.*;
 
@@ -52,8 +52,8 @@ public class PanelTaiKhoan extends JPanel {
 	String drivername = dotenv.get("DRIVER_NAME");
 
 	private final Context context = new InitialContext();
-	private final TaiKhoanDAOInterface taiKhoanDAO = (TaiKhoanDAOInterface) context.lookup("rmi://" + drivername + ":9090/taiKhoanDAO");
-	private final NhanVienDAOInterface nhanVienDAO = (NhanVienDAOInterface) context.lookup("rmi://" + drivername + ":9090/nhanVienDAO");
+	private final TaiKhoanService taiKhoanService = (TaiKhoanService) context.lookup("rmi://" + drivername + ":9020/taiKhoanService");
+	private final NhanVienService nhanVienService = (NhanVienService) context.lookup("rmi://" + drivername + ":9020/nhanVienService");
 	private JComboBox<String> cbbMaNV;
 
 	public PanelTaiKhoan() throws NamingException, RemoteException {
@@ -322,7 +322,7 @@ public class PanelTaiKhoan extends JPanel {
 
 	private void loadMaNVcbbox() throws RemoteException {
 		System.out.println("hlnll");
-		List<NhanVien> dsNhanVien = nhanVienDAO.getAllNhanVien();
+		List<NhanVien> dsNhanVien = nhanVienService.getAllNhanVien();
 		System.out.println(dsNhanVien);
 //		List<NhanVien> nhanVienDaCoTaiKhoan = taiKhoanDAO.getNhanVien();
 //		Set<String> maNVCoTaiKhoan = nhanVienDaCoTaiKhoan.stream()
@@ -351,7 +351,7 @@ public class PanelTaiKhoan extends JPanel {
 
 				TaiKhoan taiKhoan = new TaiKhoan(maNV, tenDangNhap, password, trangthai);
 
-				if(taiKhoanDAO.insertTaiKhoan(taiKhoan)) {
+				if(taiKhoanService.insertTaiKhoan(taiKhoan)) {
 					tableModel.addRow(new Object[]{
 							taiKhoan.getMaTaiKhoan(),
 							taiKhoan.getTenDangNhap(),
@@ -387,7 +387,7 @@ public class PanelTaiKhoan extends JPanel {
 						JOptionPane.YES_NO_OPTION);
 
 				if (confirm == JOptionPane.YES_OPTION) {
-					if (taiKhoanDAO.deleteTaiKhoan(maTK)) {
+					if (taiKhoanService.deleteTaiKhoan(maTK)) {
 						tableModel.removeRow(selectedRow);
 						resetForm();
 						JOptionPane.showMessageDialog(
@@ -553,7 +553,7 @@ public class PanelTaiKhoan extends JPanel {
 
 	private void addSampleData() throws RemoteException{
 
-		List<TaiKhoan> taiKhoans = taiKhoanDAO.getAllTaiKhoan();
+		List<TaiKhoan> taiKhoans = taiKhoanService.getAllTaiKhoan();
 
 //		String[] columns = {"Mã tài khoản", "Tên đăng nhập", "Password", "Trạng thái"};
 		for(TaiKhoan taiKhoan : taiKhoans) {

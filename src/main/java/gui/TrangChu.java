@@ -3,6 +3,7 @@ package gui;
 import com.formdev.flatlaf.*;
 import dto.TaiKhoanDTO;
 import gui.panel.*;
+import org.checkerframework.checker.units.qual.C;
 
 import javax.naming.NamingException;
 import javax.swing.*;
@@ -53,6 +54,7 @@ public class TrangChu extends JFrame {
         menuPanel.add(appTitle);
 
 
+        JButton btnDashboard = createMenuButton("Trang chủ");
         JButton btnSanPham = createMenuButton("Sản phẩm");
         JButton btnKhachHang = createMenuButton("Khách hàng");
         JButton btnHoaDon = createMenuButton("Hóa đơn");
@@ -60,6 +62,9 @@ public class TrangChu extends JFrame {
         JButton btnNhanVien = createMenuButton("Nhân viên");
         JButton btnTaiKhoan = createMenuButton("Tài khoản");
 
+
+        menuPanel.add(btnDashboard);
+        menuPanel.add(Box.createVerticalStrut(10));
         menuPanel.add(btnSanPham);
         menuPanel.add(Box.createVerticalStrut(10));
         menuPanel.add(btnDanhMucSanPham);
@@ -79,10 +84,12 @@ public class TrangChu extends JFrame {
         JPanel jPanel = new JPanel();
         jPanel.putClientProperty(FlatClientProperties.STYLE, "arc: 10");
         jPanel.setBackground(new Color(0, 255, 255));
-        jPanel.setBounds(10, 118, 240, 47);
+        jPanel.setBounds(10, 10, 240, 47);
+
+        userPanel.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         userPanel.setOpaque(false);
-        userPanel.setBorder(BorderFactory.createEmptyBorder(20, 15, 20, 15));
+        userPanel.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
         userPanel.setLayout(null);
 
 
@@ -148,6 +155,7 @@ public class TrangChu extends JFrame {
         cardLayout = new CardLayout();
         contentPanel = new JPanel(cardLayout);
 
+        contentPanel.add(new PanelDashboard(), "dashboard");
         contentPanel.add(new PanelSanPham(), "sanpham");
         contentPanel.add(new PanelKhachHang(), "khachhang");
         contentPanel.add(new PanelHoaDon(), "hoadon");
@@ -157,6 +165,7 @@ public class TrangChu extends JFrame {
 
         add(contentPanel, BorderLayout.CENTER);
 
+        btnDashboard.addActionListener((ActionEvent e) -> cardLayout.show(contentPanel, "dashboard"));
         btnSanPham.addActionListener((ActionEvent e) -> cardLayout.show(contentPanel, "sanpham"));
         btnKhachHang.addActionListener((ActionEvent e) -> cardLayout.show(contentPanel, "khachhang"));
         btnHoaDon.addActionListener((ActionEvent e) -> cardLayout.show(contentPanel, "hoadon"));
@@ -175,6 +184,7 @@ public class TrangChu extends JFrame {
         button.setBackground(new Color(0, 123, 255));
         button.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
         button.setHorizontalAlignment(SwingConstants.LEFT);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {

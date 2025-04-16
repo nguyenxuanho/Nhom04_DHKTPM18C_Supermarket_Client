@@ -1,22 +1,20 @@
 package gui.panel;
 
-import InterF.DanhMucSanPhamDAOInterface;
-import InterF.SanPhamDAOInterface;
-import InterF.ThuocTinhSanPhamDAOInterface;
 import com.toedter.calendar.JDateChooser;
 import gui.components.ComponentUtils;
 import io.github.cdimascio.dotenv.Dotenv;
 import model.SanPham;
 import model.ThuocTinhSanPham;
 import net.datafaker.Faker;
+import service.DanhMucSanPhamService;
+import service.SanPhamService;
+import service.ThuocTinhSanPhamService;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.swing.*;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.JTableHeader;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -52,9 +50,9 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
     private final JButton btnThem, btnXoa, btnSua, btnReset, btnResetTable, btnFind;
 
     private final Context context = new InitialContext();
-    private final SanPhamDAOInterface sanPhamDAO = (SanPhamDAOInterface)context.lookup("rmi://" + drivername + ":9090/sanPhamDAO");
-    private final ThuocTinhSanPhamDAOInterface thuocTinhSanPhamDAO = (ThuocTinhSanPhamDAOInterface)context.lookup("rmi://" + drivername + ":9090/thuocTinhSanPhamDAO");
-    private final DanhMucSanPhamDAOInterface danhMucSanPhamDAO = (DanhMucSanPhamDAOInterface) context.lookup("rmi://" + drivername + ":9090/danhMucSanPhamDAO");
+    private final SanPhamService sanPhamService = (SanPhamService)context.lookup("rmi://" + drivername + ":9020/sanPhamService");
+    private final ThuocTinhSanPhamService thuocTinhSanPhamService = (ThuocTinhSanPhamService)context.lookup("rmi://" + drivername + ":9020/thuocTinhSanPhamService");
+    private final DanhMucSanPhamService danhMucSanPhamService = (DanhMucSanPhamService) context.lookup("rmi://" + drivername + ":9020/danhMucSanPhamService");
 
     public PanelSanPham () throws NamingException, RemoteException {
         setLayout(new BorderLayout());
@@ -80,9 +78,9 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
 
         ComponentUtils.setTable(jTableContent);
 
-        sanPhamDAO.getList().forEach(sanPham -> {
+        sanPhamService.getList().forEach(sanPham -> {
             try {
-                List<ThuocTinhSanPham> thuocTinhSanPhamList =  thuocTinhSanPhamDAO.getListByProductId(sanPham.getMaSanPham());
+                List<ThuocTinhSanPham> thuocTinhSanPhamList =  thuocTinhSanPhamService.getListByProductId(sanPham.getMaSanPham());
                String thuocTinh =  thuocTinhSanPhamList.stream().map(thuocTinhSanPham ->
                        thuocTinhSanPham.getTenThuocTinh() + ":" + thuocTinhSanPham.getGiaTriThuocTinh()
                ).collect(Collectors.joining(","));
@@ -151,7 +149,7 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
 
         jComboBoxDanhMuc.addItem("Tất cả");
 
-        danhMucSanPhamDAO.getList().forEach(danhMucSanPham -> {
+        danhMucSanPhamService.getList().forEach(danhMucSanPham -> {
             jComboBoxDanhMuc.addItem(danhMucSanPham.getMaDanhMucSanPham() + "_" + danhMucSanPham.getTenDanhMucSanPham());
         });
 
@@ -309,7 +307,7 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
         row4.add(JcomboboxLoaiSP = new JComboBox<String>());
 //        JcomboboxLoaiSP.setEditable(false);
 
-        danhMucSanPhamDAO.getList().forEach(danhMucSanPham -> {
+        danhMucSanPhamService.getList().forEach(danhMucSanPham -> {
             JcomboboxLoaiSP.addItem(danhMucSanPham.getMaDanhMucSanPham() + "_" + danhMucSanPham.getTenDanhMucSanPham());
         });
 
@@ -436,7 +434,7 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
                 int xoa = JOptionPane.showConfirmDialog(null, "Bạn có chắc muốn xóa dòng này ?");
                 if(xoa == 0) {
                     try {
-                        sanPhamDAO.delete(maSP);
+                        sanPhamService.delete(maSP);
                         dataModel.removeRow(jTableContent.getSelectedRow());
                     } catch (RemoteException ex) {
                         throw new RuntimeException(ex);
@@ -474,7 +472,7 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
 
 
                 try {
-                    sanPham.setDanhMucSanPham(danhMucSanPhamDAO.findOne(maDanhMuc));
+                    sanPham.setDanhMucSanPham(danhMucSanPhamService.findOne(maDanhMuc));
 
                     Arrays.stream(listThuocTinh).forEach(item -> {
                         String itemKey = item.split(":")[0];
@@ -484,13 +482,13 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
                         thuocTinhSanPham.setSanPham(sanPham);
 
                         try {
-                            thuocTinhSanPhamDAO.save(thuocTinhSanPham);
+                            thuocTinhSanPhamService.save(thuocTinhSanPham);
                         } catch (RemoteException ex) {
                             throw new RuntimeException(ex);
                         }
                     });
 
-                    sanPhamDAO.save(sanPham);
+                    sanPhamService.save(sanPham);
 
                     dataModel.addRow(new Object[] {
                             sanPham.getMaSanPham(),
@@ -515,7 +513,7 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
                 String maSP = jTableContent.getValueAt(jTableContent.getSelectedRow(), 0).toString();
 
                 try {
-                    SanPham sanPham = sanPhamDAO.findOne(maSP);
+                    SanPham sanPham = sanPhamService.findOne(maSP);
                     if(sanPham != null){
                         String tenSP = txtTenSP.getText();
                         double giaSP = Double.parseDouble(txtGiaSP.getText());
@@ -545,17 +543,17 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
                         sanPham.setSoLuongTon(soLuong);
                         sanPham.setMoTa(moTa);
                         sanPham.setTrangThai(trangThai);
-                        sanPham.setDanhMucSanPham(danhMucSanPhamDAO.findOne(maDanhMuc));
+                        sanPham.setDanhMucSanPham(danhMucSanPhamService.findOne(maDanhMuc));
                         sanPham.setNgayNhap(localDateNgayNhap);
                         sanPham.setHanSuDung(localDateHanSuDung);
 
-                        sanPhamDAO.update(sanPham);
+                        sanPhamService.update(sanPham);
 
-                        List<ThuocTinhSanPham> thuocTinhSanPhamList = thuocTinhSanPhamDAO.getListByProductId(maSP);
+                        List<ThuocTinhSanPham> thuocTinhSanPhamList = thuocTinhSanPhamService.getListByProductId(maSP);
 
                         thuocTinhSanPhamList.forEach(ttSP -> {
                             try {
-                                thuocTinhSanPhamDAO.delete(ttSP.getMaThuocTinhSanPham());
+                                thuocTinhSanPhamService.delete(ttSP.getMaThuocTinhSanPham());
                             } catch (RemoteException ex) {
                                 throw new RuntimeException(ex);
                             }
@@ -571,7 +569,7 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
                             thuocTinhSanPham.setSanPham(sanPham);
 
                             try {
-                                thuocTinhSanPhamDAO.save(thuocTinhSanPham);
+                                thuocTinhSanPhamService.save(thuocTinhSanPham);
                             } catch (RemoteException ex) {
                                 throw new RuntimeException(ex);
                             }
@@ -605,10 +603,10 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
             else if (source.equals(btnFind)) {
                 String maSP = txtFind.getText();
                 try {
-                    SanPham sanPham = sanPhamDAO.findOne(maSP);
+                    SanPham sanPham = sanPhamService.findOne(maSP);
                     if(sanPham != null) {
                         dataModel.setRowCount(0);
-                        String thuocTinh =  thuocTinhSanPhamDAO.getListByProductId(sanPham.getMaSanPham())
+                        String thuocTinh =  thuocTinhSanPhamService.getListByProductId(sanPham.getMaSanPham())
                                 .stream().map(thuocTinhSanPham ->
                                 thuocTinhSanPham.getTenThuocTinh() + ":" + thuocTinhSanPham.getGiaTriThuocTinh()
                         ).collect(Collectors.joining(","));
@@ -635,10 +633,10 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
             else if (source.equals(btnResetTable)){
                 try {
                     dataModel.setRowCount(0);
-                    sanPhamDAO.getList().forEach(sanPham -> {
+                    sanPhamService.getList().forEach(sanPham -> {
                         List<ThuocTinhSanPham> thuocTinhSanPhamList = null;
                         try {
-                            thuocTinhSanPhamList = thuocTinhSanPhamDAO.getListByProductId(sanPham.getMaSanPham());
+                            thuocTinhSanPhamList = thuocTinhSanPhamService.getListByProductId(sanPham.getMaSanPham());
                             String thuocTinh =  thuocTinhSanPhamList.stream().map(thuocTinhSanPham ->
                                     thuocTinhSanPham.getTenThuocTinh() + ":" + thuocTinhSanPham.getGiaTriThuocTinh()
                             ).collect(Collectors.joining(","));
@@ -672,9 +670,9 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
                 String year = jComboBoxYear.getSelectedItem().toString();
                 try {
                     dataModel.setRowCount(0);
-                    sanPhamDAO.getListByFitter(danhMuc, month, year, status).forEach(sanPham -> {
+                    sanPhamService.getListByFitter(danhMuc, month, year, status).forEach(sanPham -> {
                         try {
-                            String thuocTinh = thuocTinhSanPhamDAO.getListByProductId(sanPham.getMaSanPham())
+                            String thuocTinh = thuocTinhSanPhamService.getListByProductId(sanPham.getMaSanPham())
                                     .stream().map(thuocTinhSanPham ->
                                             thuocTinhSanPham.getTenThuocTinh() + ":" + thuocTinhSanPham.getGiaTriThuocTinh()
                                     ).collect(Collectors.joining(","));
@@ -710,7 +708,7 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
             if(source.equals(jTableContent)) {
                 String maSP = jTableContent.getValueAt(jTableContent.getSelectedRow(), 0).toString();
                 try {
-                    SanPham sanPham = sanPhamDAO.findOne(maSP);
+                    SanPham sanPham = sanPhamService.findOne(maSP);
                     txtMaSP.setText(sanPham.getMaSanPham());
                     txtTenSP.setText(sanPham.getTenSanPham());
                     txtGiaSP.setText(sanPham.getGiaBan() + "");
@@ -720,7 +718,7 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
                     txtSoLuong.setText(sanPham.getSoLuongTon() + "");
                     Date dateNgaynhap = java.sql.Date.valueOf(sanPham.getNgayNhap());
                     dateNgayNhap.setDate(dateNgaynhap);
-                    String thuocTinh =  thuocTinhSanPhamDAO.getListByProductId(sanPham.getMaSanPham()).stream().map(thuocTinhSanPham ->
+                    String thuocTinh =  thuocTinhSanPhamService.getListByProductId(sanPham.getMaSanPham()).stream().map(thuocTinhSanPham ->
                             thuocTinhSanPham.getTenThuocTinh() + ":" + thuocTinhSanPham.getGiaTriThuocTinh()
                     ).collect(Collectors.joining(","));
 

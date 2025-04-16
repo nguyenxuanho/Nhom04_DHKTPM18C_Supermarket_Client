@@ -1,23 +1,19 @@
 package gui.panel;
 
-import InterF.KhachHangDAOInterface;
 import gui.components.ComponentUtils;
 import io.github.cdimascio.dotenv.Dotenv;
 import model.GioiTinh;
 import model.KhachHang;
 import net.datafaker.Faker;
+import service.KhachHangService;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.swing.*;
-import javax.swing.border.Border;
-import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.JTableHeader;
 
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -49,7 +45,7 @@ public class PanelKhachHang extends JPanel {
     String drivername = dotenv.get("DRIVER_NAME");
 
     private final Context context = new InitialContext();
-    private final KhachHangDAOInterface khachHangDAO = (KhachHangDAOInterface) context.lookup("rmi://" + drivername + ":9090/khachHangDAO");
+    private final KhachHangService khachHangService = (KhachHangService) context.lookup("rmi://" + drivername + ":9020/khachHangService");
 
     public PanelKhachHang() throws NamingException, RemoteException {
 
@@ -239,7 +235,7 @@ public class PanelKhachHang extends JPanel {
                 String tenKH = txtTimTenKH.getText().trim();
                 if (!tenKH.isEmpty()) {
                     try {
-                        List<KhachHang> dsKH = khachHangDAO.findAll();
+                        List<KhachHang> dsKH = khachHangService.findAll();
                         List<KhachHang> khachHangTheoTen = dsKH.stream()
                                         .filter(kh -> kh.getTenKhachHang().contains(tenKH))
                                         .collect(Collectors.toList());
@@ -275,7 +271,7 @@ public class PanelKhachHang extends JPanel {
                 String sdt = txtTimSDT.getText().trim();
                 if (!sdt.isEmpty()) {
                     try {
-                        List<KhachHang> allKhachHang = khachHangDAO.findAll();
+                        List<KhachHang> allKhachHang = khachHangService.findAll();
 
                         List<KhachHang> khachHangTheoSoDienThoai = allKhachHang.stream()
                                 .filter(kh -> kh.getSoDienThoai().contains(sdt))
@@ -359,7 +355,7 @@ public class PanelKhachHang extends JPanel {
                 GioiTinh enumGT = GioiTinh.valueOf(enumGioiTinh);
                 KhachHang khachHang = new KhachHang(maKH, tenKH, sdt, enumGT, diem);
 
-                if(khachHangDAO.themKhachHang(khachHang)) {
+                if(khachHangService.themKhachHang(khachHang)) {
                     tableModel.addRow(new Object[]{
                             maKH,
                             tenKH,
@@ -395,7 +391,7 @@ public class PanelKhachHang extends JPanel {
                         JOptionPane.YES_NO_OPTION);
 
                 if (confirm == JOptionPane.YES_OPTION) {
-                    if (khachHangDAO.delete(maKH)) {
+                    if (khachHangService.delete(maKH)) {
                         tableModel.removeRow(selectedRow);
                         resetForm();
                         JOptionPane.showMessageDialog(
@@ -453,7 +449,7 @@ public class PanelKhachHang extends JPanel {
                     );
 
                     if(confirm == JOptionPane.YES_OPTION) {
-                        if(khachHangDAO.suaKhachHang(maKH, khachHang)) {
+                        if(khachHangService.suaKhachHang(maKH, khachHang)) {
                             tableModel.setValueAt(maKH, row, 0);
                             tableModel.setValueAt(tenKH, row, 1);
                             tableModel.setValueAt(sdt, row, 2);
@@ -507,7 +503,7 @@ public class PanelKhachHang extends JPanel {
         String makh = txtTimMaKH.getText().trim();
 
         try {
-            KhachHang khachHang = khachHangDAO.findById(makh);
+            KhachHang khachHang = khachHangService.findById(makh);
             if(khachHang != null) {
                 tableModel.setRowCount(0);
                 tableModel.addRow(new Object[]{
@@ -601,7 +597,7 @@ public class PanelKhachHang extends JPanel {
 
     private void addSampleData() throws RemoteException{
 
-        List<KhachHang> khachHangs = khachHangDAO.findAll();
+        List<KhachHang> khachHangs = khachHangService.findAll();
 
 //        String[] columns = {"Mã khách hàng", "Tên khách hàng", "Số điện thoại", "Giới tính", "Điểm tích lũy"};
         for (KhachHang khachHang : khachHangs) {

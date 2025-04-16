@@ -8,19 +8,16 @@ import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.JTableHeader;
 
-import InterF.NhanVienDAOInterface;
 import com.toedter.calendar.JDateChooser;
 import gui.components.ComponentUtils;
 import io.github.cdimascio.dotenv.Dotenv;
 import model.ChucVuNhanVien;
 import model.GioiTinh;
-import model.KhachHang;
 import model.NhanVien;
 import net.datafaker.Faker;
+import service.NhanVienService;
 
 import java.awt.*;
 import java.awt.event.ItemEvent;
@@ -54,7 +51,7 @@ public class PanelNhanVien extends JPanel {
     String drivername = dotenv.get("DRIVER_NAME");
 
     private final Context context = new InitialContext();
-    private final NhanVienDAOInterface nhanVienDAO = (NhanVienDAOInterface) context.lookup("rmi://" + drivername + ":9090/nhanVienDAO");
+    private final NhanVienService nhanVienService = (NhanVienService) context.lookup("rmi://" + drivername + ":9020/nhanVienService");
 
     public PanelNhanVien() throws NamingException, RemoteException{
         setLayout(new BorderLayout(10, 10));
@@ -300,7 +297,7 @@ public class PanelNhanVien extends JPanel {
                 String tenNV = txtTimTenNV.getText();
                 if(!tenNV.isEmpty()) {
                     try {
-                        List<NhanVien> nhanViens = nhanVienDAO.getAllNhanVien();
+                        List<NhanVien> nhanViens = nhanVienService.getAllNhanVien();
                         List<NhanVien> nhanVientheoten = nhanViens.stream()
                                 .filter(nv -> nv.getTenNhanVien().contains(tenNV))
                                 .collect(Collectors.toList());
@@ -330,7 +327,7 @@ public class PanelNhanVien extends JPanel {
                             } else {
                                 return;
                             }
-                            List<NhanVien> allNhanViens = nhanVienDAO.getAllNhanVien();
+                            List<NhanVien> allNhanViens = nhanVienService.getAllNhanVien();
                             List<NhanVien> filteredList = allNhanViens.stream()
                                     .filter(nv -> nv.getChucVuNhanVien() == chucVuEnum)
                                     .collect(Collectors.toList());
@@ -450,7 +447,7 @@ public class PanelNhanVien extends JPanel {
 
                 NhanVien nhanVien = new NhanVien(maNV, tenNV, localDateNgaySinh, sdt, diaChi, soDinhDanh, enumGT, chucVuNhanVien);
 
-                if(nhanVienDAO.insertNhanVien(nhanVien)) {
+                if(nhanVienService.insertNhanVien(nhanVien)) {
                     tableModel.addRow(new Object[]{
                             nhanVien.getMaNhanVien(),
                             nhanVien.getTenNhanVien(),
@@ -491,7 +488,7 @@ public class PanelNhanVien extends JPanel {
                         JOptionPane.YES_NO_OPTION);
 
                 if (confirm == JOptionPane.YES_OPTION) {
-                    if (nhanVienDAO.deleteNhanVien(maNV)) {
+                    if (nhanVienService.deleteNhanVien(maNV)) {
                         tableModel.removeRow(selectedRow);
                         resetForm();
                         JOptionPane.showMessageDialog(
@@ -555,7 +552,7 @@ public class PanelNhanVien extends JPanel {
                     );
 
                     if(confirm == JOptionPane.YES_OPTION) {
-                        if(nhanVienDAO.updateNhanVien(nhanVien)) {
+                        if(nhanVienService.updateNhanVien(nhanVien)) {
                             tableModel.setValueAt(nhanVien.getTenNhanVien(), row, 1);
                             tableModel.setValueAt(nhanVien.getNgaySinh(), row, 2);
                             tableModel.setValueAt(nhanVien.getSoDienThoai(), row, 3);
@@ -752,7 +749,7 @@ public class PanelNhanVien extends JPanel {
 
     private void addSampleData() throws RemoteException{
 
-        List<NhanVien> dsNhanVien = nhanVienDAO.getAllNhanVien();
+        List<NhanVien> dsNhanVien = nhanVienService.getAllNhanVien();
 
 
 //        String[] columns = {"Mã NV", "Tên NV", "Ngày sinh", "SĐT", "Địa chỉ", "Số định danh", "Giới tính", "Chức vụ"};

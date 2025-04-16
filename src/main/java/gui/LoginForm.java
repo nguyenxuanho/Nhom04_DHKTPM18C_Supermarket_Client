@@ -1,10 +1,9 @@
 package gui;
 
-import InterF.DanhMucSanPhamDAOInterface;
-import InterF.TaiKhoanDAOInterface;
 import dto.TaiKhoanDTO;
 import io.github.cdimascio.dotenv.Dotenv;
 import model.TaiKhoan;
+import service.TaiKhoanService;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -13,7 +12,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.rmi.RemoteException;
 
 public class LoginForm extends JFrame {
     private JTextField txtUsername;
@@ -23,7 +21,7 @@ public class LoginForm extends JFrame {
 
     String drivername = dotenv.get("DRIVER_NAME");
     private final Context context = new InitialContext();
-    private final TaiKhoanDAOInterface taiKhoanDAO = (TaiKhoanDAOInterface) context.lookup("rmi://" + drivername + ":9090/taiKhoanDAO");
+    private final TaiKhoanService taiKhoanService = (TaiKhoanService) context.lookup("rmi://" + drivername + ":9020/taiKhoanService");
 
 
     public LoginForm() throws NamingException {
@@ -108,7 +106,7 @@ public class LoginForm extends JFrame {
                 String password = new String(txtPassword.getPassword()).trim();
 
                 try {
-                    TaiKhoan taiKhoan = taiKhoanDAO.verifyTaiKhoan(username, password);
+                    TaiKhoan taiKhoan = taiKhoanService.verifyTaiKhoan(username, password);
                     if(taiKhoan != null){
                         JOptionPane.showMessageDialog(LoginForm.this, "Đăng nhập thành công!");
                         dispose();
