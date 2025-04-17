@@ -5,6 +5,7 @@ import chart.PieChart;
 import gui.components.ComponentUtils;
 import io.github.cdimascio.dotenv.Dotenv;
 import net.datafaker.Faker;
+import service.ChiTietHoaDonService;
 import service.SanPhamService;
 
 import javax.naming.Context;
@@ -18,6 +19,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.rmi.RemoteException;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 public class PanelDashboard extends JPanel implements MouseListener, ActionListener {
     private final JLabel labelFind;
@@ -41,7 +47,7 @@ public class PanelDashboard extends JPanel implements MouseListener, ActionListe
     private final Context context = new InitialContext();
 
     private final SanPhamService sanPhamService = (SanPhamService) context.lookup("rmi://" + drivername + ":9020/sanPhamService");
-
+    private final ChiTietHoaDonService chiTietHoaDonService = (ChiTietHoaDonService) context.lookup("rmi://" + drivername + ":9020/chiTietHoaDonService");
     public PanelDashboard () throws NamingException, RemoteException {
         setLayout(new BorderLayout());
 
@@ -95,17 +101,26 @@ public class PanelDashboard extends JPanel implements MouseListener, ActionListe
 
 
         chart = new chart.Chart();
-        chart.addLegend("Income", new Color(245, 189, 135));
-        chart.addLegend("Expense", new Color(135, 189, 245));
-        chart.addLegend("Profit", new Color(189, 135, 245));
-        chart.addLegend("Cost", new Color(139, 229, 222));
+//        chart.addLegend("Income", new Color(245, 189, 135));
+//        chart.addLegend("Expense", new Color(135, 189, 245));
+//        chart.addLegend("Profit", new Color(189, 135, 245));
+//        chart.addLegend("Cost", new Color(139, 229, 222));
+//
+//        chart.addData(new ModelChart("January", new double[]{500, 200, 80,89}));
+//        chart.addData(new ModelChart("February", new double[]{600, 750, 90,150}));
+//        chart.addData(new ModelChart("March", new double[]{200, 350, 460,900}));
+//        chart.addData(new ModelChart("April", new double[]{480, 150, 750,700}));
+//        chart.addData(new ModelChart("May", new double[]{350, 540, 300,150}));
+//        chart.addData(new ModelChart("June", new double[]{190, 280, 81,200}));
 
-        chart.addData(new ModelChart("January", new double[]{500, 200, 80,89}));
-        chart.addData(new ModelChart("February", new double[]{600, 750, 90,150}));
-        chart.addData(new ModelChart("March", new double[]{200, 350, 460,900}));
-        chart.addData(new ModelChart("April", new double[]{480, 150, 750,700}));
-        chart.addData(new ModelChart("May", new double[]{350, 540, 300,150}));
-        chart.addData(new ModelChart("June", new double[]{190, 280, 81,200}));
+        chart.addLegend("Lợi nhuận trong hôm nay", new Color(245, 189, 135));
+
+        chiTietHoaDonService.doanhThuTheoNgayGanNhat(23).entrySet()
+                .stream().sorted(Map.Entry.<LocalDate, Double>comparingByKey())
+                .forEach(entry -> {
+            chart.addData(new ModelChart(entry.getKey().toString(), new double[]{entry.getValue()}));
+        });
+
 
 
         pieChart = new PieChart();
@@ -115,10 +130,31 @@ public class PanelDashboard extends JPanel implements MouseListener, ActionListe
         pieChart.setFont(new java.awt.Font("sansserif", 1, 15)); // NOI18N
 
         pieChart.setChartType(PieChart.PeiChartType.DONUT_CHART);
-        pieChart.addData(new ModelPieChart("Tigher", 150, new Color(23, 126, 238)));
-        pieChart.addData(new ModelPieChart("ABC", 100, new Color(221, 65, 65)));
-        pieChart.addData(new ModelPieChart("Coca", 30, new Color(47, 157, 64)));
-        pieChart.addData(new ModelPieChart("Vita", 60, new Color(196, 151, 58)));
+
+        List<Map.Entry<String, Integer>> dataList = new ArrayList<>(sanPhamService.thongKeSoLuongTheoTrangThai().entrySet());
+
+        List<Color> colorList = List.of(
+                new Color(117, 229, 56),
+                new Color(99, 194, 255),
+                new Color(255, 193, 7),
+                new Color(40, 167, 69),
+                new Color(250, 34, 188),
+                new Color(255, 193, 7),
+                new Color(184, 174, 48),
+                new Color(143, 23, 64)
+        );
+
+
+
+        for (int i = 0; i < dataList.size(); i++) {
+            String label = dataList.get(i).getKey();
+            int value = dataList.get(i).getValue();
+
+            Color color = colorList.get(i % colorList.size()); // Quay vòng nếu màu ít hơn dữ liệu
+
+            pieChart.addData(new ModelPieChart(label, value, color));
+        }
+
 
 
         boxTable.add(scrollPane);

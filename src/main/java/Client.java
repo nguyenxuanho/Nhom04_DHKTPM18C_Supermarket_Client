@@ -1,12 +1,6 @@
-import InterF.KhachHangDAOInterface;
-import InterF.SanPhamDAOInterface;
-import dao.KhachHangDAO;
-import gui.LoginForm;
-import gui.TrangChu;
-import io.github.cdimascio.dotenv.Dotenv;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
+import gui.TrangChu;
+
 import javax.naming.NamingException;
 import javax.swing.*;
 import java.rmi.RemoteException;

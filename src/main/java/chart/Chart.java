@@ -6,6 +6,7 @@ import chart.blankchart.SeriesSize;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Chart extends javax.swing.JPanel {
@@ -53,6 +54,8 @@ public class Chart extends javax.swing.JPanel {
         if (max > blankPlotChart.getMaxValues()) {
             blankPlotChart.setMaxValues(max);
         }
+
+
     }
 
     @SuppressWarnings("unchecked")
@@ -62,7 +65,7 @@ public class Chart extends javax.swing.JPanel {
         blankPlotChart = new chart.blankchart.BlankPlotChart();
         panelLegend = new javax.swing.JPanel();
 
-        setBackground(new Color(255, 255, 255));
+//        setBackground(new Color(255, 255, 255));
 
         panelLegend.setOpaque(false);
         panelLegend.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 5, 0));

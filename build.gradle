@@ -58,9 +58,18 @@ dependencies {
     // https://mvnrepository.com/artifact/com.formdev/flatlaf
     implementation("com.formdev:flatlaf:3.5.4")
 
+    // https://mvnrepository.com/artifact/net.java.dev.swing-layout/swing-layout
+    implementation 'net.java.dev.swing-layout:swing-layout:1.0.2'
+
+
+
+
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
+
+
+
 }
 
 test {
