@@ -23,7 +23,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 public class PanelDashboard extends JPanel implements MouseListener, ActionListener {
     private final JLabel labelFind;
@@ -46,8 +45,8 @@ public class PanelDashboard extends JPanel implements MouseListener, ActionListe
 
     private final Context context = new InitialContext();
 
-    private final SanPhamService sanPhamService = (SanPhamService) context.lookup("rmi://" + drivername + ":9020/sanPhamService");
-    private final ChiTietHoaDonService chiTietHoaDonService = (ChiTietHoaDonService) context.lookup("rmi://" + drivername + ":9020/chiTietHoaDonService");
+    private final SanPhamService sanPhamService = (SanPhamService) context.lookup("rmi://" + drivername + ":9090/sanPhamService");
+    private final ChiTietHoaDonService chiTietHoaDonService = (ChiTietHoaDonService) context.lookup("rmi://" + drivername + ":9090/chiTietHoaDonService");
     public PanelDashboard () throws NamingException, RemoteException {
         setLayout(new BorderLayout());
 

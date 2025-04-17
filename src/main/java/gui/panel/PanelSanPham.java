@@ -50,9 +50,9 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
     private final JButton btnThem, btnXoa, btnSua, btnReset, btnResetTable, btnFind;
 
     private final Context context = new InitialContext();
-    private final SanPhamService sanPhamService = (SanPhamService)context.lookup("rmi://" + drivername + ":9020/sanPhamService");
-    private final ThuocTinhSanPhamService thuocTinhSanPhamService = (ThuocTinhSanPhamService)context.lookup("rmi://" + drivername + ":9020/thuocTinhSanPhamService");
-    private final DanhMucSanPhamService danhMucSanPhamService = (DanhMucSanPhamService) context.lookup("rmi://" + drivername + ":9020/danhMucSanPhamService");
+    private final SanPhamService sanPhamService = (SanPhamService)context.lookup("rmi://" + drivername + ":9090/sanPhamService");
+    private final ThuocTinhSanPhamService thuocTinhSanPhamService = (ThuocTinhSanPhamService)context.lookup("rmi://" + drivername + ":9090/thuocTinhSanPhamService");
+    private final DanhMucSanPhamService danhMucSanPhamService = (DanhMucSanPhamService) context.lookup("rmi://" + drivername + ":9090/danhMucSanPhamService");
 
     public PanelSanPham () throws NamingException, RemoteException {
         setLayout(new BorderLayout());

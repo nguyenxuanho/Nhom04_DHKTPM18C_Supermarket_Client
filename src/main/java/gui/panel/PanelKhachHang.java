@@ -45,7 +45,7 @@ public class PanelKhachHang extends JPanel {
     String drivername = dotenv.get("DRIVER_NAME");
 
     private final Context context = new InitialContext();
-    private final KhachHangService khachHangService = (KhachHangService) context.lookup("rmi://" + drivername + ":9020/khachHangService");
+    private final KhachHangService khachHangService = (KhachHangService) context.lookup("rmi://" + drivername + ":9090/khachHangService");
 
     public PanelKhachHang() throws NamingException, RemoteException {
 

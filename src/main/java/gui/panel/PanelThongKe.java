@@ -50,8 +50,8 @@ public class PanelThongKe extends JPanel implements MouseListener, ActionListene
     private final JButton btnThongKe, btnThongKeNam;
     private PieChart pieChart;
     private final Context context = new InitialContext();
-    private final ChiTietHoaDonService chiTietHoaDonService = (ChiTietHoaDonService) context.lookup("rmi://" + drivername + ":9020/chiTietHoaDonService");
-    private final SanPhamService sanPhamService = (SanPhamService) context.lookup("rmi://" + drivername + ":9020/sanPhamService");
+    private final ChiTietHoaDonService chiTietHoaDonService = (ChiTietHoaDonService) context.lookup("rmi://" + drivername + ":9090/chiTietHoaDonService");
+    private final SanPhamService sanPhamService = (SanPhamService) context.lookup("rmi://" + drivername + ":9090/sanPhamService");
 
     public PanelThongKe () throws NamingException, RemoteException {
         setLayout(new BorderLayout());

@@ -52,8 +52,8 @@ public class PanelTaiKhoan extends JPanel {
 	String drivername = dotenv.get("DRIVER_NAME");
 
 	private final Context context = new InitialContext();
-	private final TaiKhoanService taiKhoanService = (TaiKhoanService) context.lookup("rmi://" + drivername + ":9020/taiKhoanService");
-	private final NhanVienService nhanVienService = (NhanVienService) context.lookup("rmi://" + drivername + ":9020/nhanVienService");
+	private final TaiKhoanService taiKhoanService = (TaiKhoanService) context.lookup("rmi://" + drivername + ":9090/taiKhoanService");
+	private final NhanVienService nhanVienService = (NhanVienService) context.lookup("rmi://" + drivername + ":9090/nhanVienService");
 	private JComboBox<String> cbbMaNV;
 
 	public PanelTaiKhoan() throws NamingException, RemoteException {
