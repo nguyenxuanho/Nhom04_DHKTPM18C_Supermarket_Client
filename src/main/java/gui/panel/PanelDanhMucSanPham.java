@@ -37,7 +37,7 @@ public class PanelDanhMucSanPham extends JPanel implements MouseListener, Action
 
     private final Context context = new InitialContext();
 
-    private final DanhMucSanPhamService danhMucSanPhamService = (DanhMucSanPhamService) context.lookup("rmi://" + drivername + ":9020/danhMucSanPhamService");
+    private final DanhMucSanPhamService danhMucSanPhamService = (DanhMucSanPhamService) context.lookup("rmi://" + drivername + ":9090/danhMucSanPhamService");
 
     public PanelDanhMucSanPham () throws NamingException, RemoteException {
         setLayout(new BorderLayout());

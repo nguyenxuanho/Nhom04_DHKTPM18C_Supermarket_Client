@@ -40,7 +40,7 @@ public class PanelDashboard extends JPanel implements MouseListener, ActionListe
 
     private final Context context = new InitialContext();
 
-    private final SanPhamService sanPhamService = (SanPhamService) context.lookup("rmi://" + drivername + ":9020/sanPhamService");
+    private final SanPhamService sanPhamService = (SanPhamService) context.lookup("rmi://" + drivername + ":9090/sanPhamService");
 
     public PanelDashboard () throws NamingException, RemoteException {
         setLayout(new BorderLayout());

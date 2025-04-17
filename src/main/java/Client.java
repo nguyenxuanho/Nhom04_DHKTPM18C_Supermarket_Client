@@ -1,5 +1,4 @@
-import InterF.KhachHangDAOInterface;
-import InterF.SanPhamDAOInterface;
+
 import dao.KhachHangDAO;
 import gui.LoginForm;
 import gui.TrangChu;
@@ -15,7 +14,7 @@ public class Client {
     public static void main(String[] args) throws NamingException, RemoteException {
         SwingUtilities.invokeLater(() -> {
             try {
-                new TrangChu().setVisible(true); // 👈 Mở form đăng nhập trước
+                new LoginForm().setVisible(true); // 👈 Mở form đăng nhập trước
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
