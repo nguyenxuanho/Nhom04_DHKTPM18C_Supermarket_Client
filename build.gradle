@@ -68,6 +68,9 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
 
+    // https://mvnrepository.com/artifact/org.mindrot/jbcrypt
+//    implementation("org.mindrot:jbcrypt:0.4")
+
 
 
 }

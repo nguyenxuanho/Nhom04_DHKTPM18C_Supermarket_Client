@@ -13,11 +13,13 @@ import javax.swing.table.DefaultTableModel;
 import com.formdev.flatlaf.FlatLightLaf;
 import com.toedter.calendar.JDateChooser;
 import io.github.cdimascio.dotenv.Dotenv;
+import lombok.extern.slf4j.Slf4j;
 import model.*;
 import net.datafaker.Faker;
 import gui.components.ComponentUtils;
 import service.NhanVienService;
 import service.TaiKhoanService;
+import utils.PasswordUtil;
 
 import java.awt.*;
 
@@ -26,6 +28,7 @@ import java.awt.event.MouseEvent;
 import java.rmi.RemoteException;
 import java.util.List;
 
+@Slf4j
 public class PanelTaiKhoan extends JPanel {
 	private JTextField txtMaNV, txtTenNV, txtNgaySinh, txtSDT, txtDiaChi, txtSoDinhDanh, txtTimMaNV, txtTimTenNV;
 	private JComboBox<String> cboGioiTinh, cboChucVu;
@@ -79,7 +82,7 @@ public class PanelTaiKhoan extends JPanel {
 		JPanel tablePanel = createTablePanel();
 		container.add(tablePanel, BorderLayout.CENTER);
 
-//		loadMaNVcbbox();
+		loadMaNVcbbox();
 
 		// Thêm dữ liệu mẫu
 		addSampleData();
@@ -273,7 +276,7 @@ public class PanelTaiKhoan extends JPanel {
 		lammoi.setPreferredSize(new Dimension(100, 30));
 		jPanelLamMoi.add(lammoi);
 
-		String[] columns = {"Mã tài khoản", "Tên đăng nhập", "Password", "Trạng thái"};
+		String[] columns = {"Mã tài khoản", "Tên đăng nhập", "Password", "Nhân viên", "Trạng thái"};
 		tableModel = new DefaultTableModel(columns, 0) {
 			@Override
 			public boolean isCellEditable(int row, int column) {
@@ -320,42 +323,29 @@ public class PanelTaiKhoan extends JPanel {
 		btnReset.addActionListener(e -> resetForm());
 	}
 
-	private void loadMaNVcbbox() throws RemoteException {
-		System.out.println("hlnll");
-		List<NhanVien> dsNhanVien = nhanVienService.getAllNhanVien();
-		System.out.println(dsNhanVien);
-//		List<NhanVien> nhanVienDaCoTaiKhoan = taiKhoanDAO.getNhanVien();
-//		Set<String> maNVCoTaiKhoan = nhanVienDaCoTaiKhoan.stream()
-//				.map(NhanVien::getMaNhanVien)
-//				.collect(Collectors.toSet());
-//
-//
-//		List<NhanVien> nhanVienChuaCoTaiKhoan = allNhanViens.stream()
-//				.filter(nv -> !maNVCoTaiKhoan.contains(nv.getMaNhanVien()))
-//				.collect(Collectors.toList());
-//
-//		System.out.println(nhanVienDaCoTaiKhoan);
-//
-//		for (NhanVien nhanVien :  nhanVienChuaCoTaiKhoan) {
-//			cbbMaNV.addItem(nhanVien.getMaNhanVien());
-//		}
-	}
+
 
 	private void addTaiKhoan() {
 		try {
 			if(validateInput()) {
-				String maNV = "TK" + faker.number().digits(5);
+				String maTK = "TK" + faker.number().digits(5);
 				String tenDangNhap = txtTenDangNhap.getText();
 				String password = txtPassword.getText();
+				String hashPassword = PasswordUtil.hashPassword(password);
 				String trangthai = cboTrangThai.getSelectedItem().toString();
+				String maNV = cbbMaNV.getSelectedItem().toString();
 
-				TaiKhoan taiKhoan = new TaiKhoan(maNV, tenDangNhap, password, trangthai);
+				NhanVien nhanVien = nhanVienService.getNhanVienById(maNV);
+
+				TaiKhoan taiKhoan = new TaiKhoan(maTK, tenDangNhap, hashPassword, trangthai);
+				taiKhoan.setNhanVien(nhanVien);
 
 				if(taiKhoanService.insertTaiKhoan(taiKhoan)) {
 					tableModel.addRow(new Object[]{
 							taiKhoan.getMaTaiKhoan(),
 							taiKhoan.getTenDangNhap(),
 							taiKhoan.getMatKhau(),
+							nhanVien.getMaNhanVien(),
 							taiKhoan.getTrangThai()
 					});
 					resetForm();
@@ -421,74 +411,82 @@ public class PanelTaiKhoan extends JPanel {
 	}
 
 	private void updateTaiKhoan() {
-//		try {
-//			int row = table.getSelectedRow();
-//			if (row >= 0) {
-//				if(validateInput()) {
-//					String maTK = table.getValueAt(row, 0).toString();
-//					String tenDangNhap = txtTenDangNhap.getText().toString();
-//					String sdt = txtSDT.getText();
-//					String gioiTinh = cboGioiTinh.getSelectedItem().toString();
-//					String enumGioiTinh = gioiTinh.equals("Nam") ? "NAM" : "NU";
-//					String diemTichLuy = txtDiemTichluy.getText().trim();
-//					int diem = Integer.parseInt(diemTichLuy);
-//
-//					GioiTinh enumGT = GioiTinh.valueOf(enumGioiTinh);
-//					KhachHang khachHang = new KhachHang(maKH, tenKH, sdt, enumGT, diem);
-//
-//					int confirm = JOptionPane.showConfirmDialog(
-//							this,
-//							"Bạn có chắc muốn cập nhật khách hàng " + tenKH,
-//							"Xác nhận cập nhật",
-//							JOptionPane.YES_NO_OPTION
-//					);
-//
-//					if(confirm == JOptionPane.YES_OPTION) {
-//						if(khachHangDAO.suaKhachHang(maKH, khachHang)) {
-//							tableModel.setValueAt(maKH, row, 0);
-//							tableModel.setValueAt(tenKH, row, 1);
-//							tableModel.setValueAt(sdt, row, 2);
-//							tableModel.setValueAt(gioiTinh, row, 3);
-//							tableModel.setValueAt(diemTichLuy, row, 4);
-//							resetForm();
-//							JOptionPane.showMessageDialog(
-//									this,
-//									"Cập nhật khách hàng "+tenKH+"thành công",
-//									"Thành công",
-//									JOptionPane.INFORMATION_MESSAGE
-//							);
-//						} else {
-//							JOptionPane.showMessageDialog(
-//									this,
-//									"Không thể cập nhật khách hàng" + tenKH,
-//									"Lỗi",
-//									JOptionPane.ERROR_MESSAGE
-//							);
-//						}
-//					}
-//				}
-//			} else {
-//				JOptionPane.showMessageDialog(
-//						this,
-//						"Vui lòng chọn khách cần cập nhật",
-//						"Thông báo",
-//						JOptionPane.ERROR_MESSAGE
-//				);
-//			}
-//		} catch (RemoteException e) {
-//			e.printStackTrace();
-//			JOptionPane.showMessageDialog(
-//					this,
-//					"Lỗi kết nối máy chủ: " + e.getMessage(),
-//					"Lỗi kết nối",
-//					JOptionPane.ERROR_MESSAGE);
-//		}
+		try {
+			int row = table.getSelectedRow();
+			if (row >= 0) {
+				if(validateInput()) {
+					String maTK = table.getValueAt(row, 0).toString();
+					String tenDangNhap = txtTenDangNhap.getText().toString();
+					NhanVien nhanVien = taiKhoanService.getNhanVienByTaiKhoan(maTK);
+					String password = txtPassword.getText().toString();
+					String trangthai = cboTrangThai.getSelectedItem().toString();
+
+					TaiKhoan taiKhoanHienTai = taiKhoanService.getTaiKhoanById(maTK);
+					TaiKhoan taiKhoan = new TaiKhoan();
+					taiKhoan.setMaTaiKhoan(maTK);
+					taiKhoan.setTenDangNhap(tenDangNhap);
+					if(!password.trim().equals("")) {
+						taiKhoan.setMatKhau(password);
+					} else {
+						taiKhoan.setMatKhau(taiKhoanHienTai.getMatKhau());
+					}
+					taiKhoan.setTrangThai(trangthai);
+					taiKhoan.setNhanVien(nhanVien);
+
+					int confirm = JOptionPane.showConfirmDialog(
+							this,
+							"Bạn có chắc muốn cập nhật tài khoản của " + tenDangNhap,
+							"Xác nhận cập nhật",
+							JOptionPane.YES_NO_OPTION
+					);
+
+					if(confirm == JOptionPane.YES_OPTION) {
+						if(taiKhoanService.updateTaiKhoan(taiKhoan)) {
+							tableModel.setValueAt(maTK, row, 0);
+							tableModel.setValueAt(tenDangNhap, row, 1);
+							tableModel.setValueAt(password, row, 2);
+							tableModel.setValueAt(nhanVien.getMaNhanVien(), row, 3);
+							tableModel.setValueAt(trangthai, row, 3);
+							resetForm();
+							JOptionPane.showMessageDialog(
+									this,
+									"Cập nhật khách hàng thành công",
+									"Thành công",
+									JOptionPane.INFORMATION_MESSAGE
+							);
+						} else {
+							JOptionPane.showMessageDialog(
+									this,
+									"Không thể cập nhật khách hàng" ,
+									"Lỗi",
+									JOptionPane.ERROR_MESSAGE
+							);
+						}
+					}
+				}
+			} else {
+				JOptionPane.showMessageDialog(
+						this,
+						"Vui lòng chọn khách cần cập nhật",
+						"Thông báo",
+						JOptionPane.ERROR_MESSAGE
+				);
+			}
+		} catch (RemoteException e) {
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(
+					this,
+					"Lỗi kết nối máy chủ: " + e.getMessage(),
+					"Lỗi kết nối",
+					JOptionPane.ERROR_MESSAGE);
+		}
 	}
 
 	private void resetForm() {
 		txtMaTK.setText("");
 		txtTenDangNhap.setText("");
 		cboTrangThai.setSelectedIndex(0);
+		txtPassword.setText("");
 		table.clearSelection();
 	}
 
@@ -557,12 +555,25 @@ public class PanelTaiKhoan extends JPanel {
 
 //		String[] columns = {"Mã tài khoản", "Tên đăng nhập", "Password", "Trạng thái"};
 		for(TaiKhoan taiKhoan : taiKhoans) {
+
+
+			NhanVien nhanVien = taiKhoanService.getNhanVienByTaiKhoan(taiKhoan.getMaTaiKhoan());
+
 			tableModel.addRow(new Object[]{
 					taiKhoan.getMaTaiKhoan(),
 					taiKhoan.getTenDangNhap(),
 					taiKhoan.getMatKhau(),
+					nhanVien.getMaNhanVien(),
 					taiKhoan.getTrangThai(),
 			});
+		}
+	}
+
+	private void loadMaNVcbbox() throws RemoteException {
+		List<NhanVien> dsNhanVienChuaCoTaiKhoan = taiKhoanService.getNhanVienChuaCoTaiKhoan();
+
+		for (NhanVien nhanVien : dsNhanVienChuaCoTaiKhoan) {
+			cbbMaNV.addItem(nhanVien.getMaNhanVien());
 		}
 	}
 }
