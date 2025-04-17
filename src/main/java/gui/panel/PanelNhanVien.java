@@ -51,7 +51,7 @@ public class PanelNhanVien extends JPanel {
     String drivername = dotenv.get("DRIVER_NAME");
 
     private final Context context = new InitialContext();
-    private final NhanVienService nhanVienService = (NhanVienService) context.lookup("rmi://" + drivername + ":9020/nhanVienService");
+    private final NhanVienService nhanVienService = (NhanVienService) context.lookup("rmi://" + drivername + ":9090/nhanVienService");
 
     public PanelNhanVien() throws NamingException, RemoteException{
         setLayout(new BorderLayout(10, 10));

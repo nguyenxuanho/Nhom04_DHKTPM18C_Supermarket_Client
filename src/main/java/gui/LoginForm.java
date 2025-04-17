@@ -21,7 +21,7 @@ public class LoginForm extends JFrame {
 
     String drivername = dotenv.get("DRIVER_NAME");
     private final Context context = new InitialContext();
-    private final TaiKhoanService taiKhoanService = (TaiKhoanService) context.lookup("rmi://" + drivername + ":9020/taiKhoanService");
+    private final TaiKhoanService taiKhoanService = (TaiKhoanService) context.lookup("rmi://" + drivername + ":9090/taiKhoanService");
 
 
     public LoginForm() throws NamingException {
