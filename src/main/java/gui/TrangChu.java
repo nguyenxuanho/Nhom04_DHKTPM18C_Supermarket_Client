@@ -11,18 +11,21 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.net.URISyntaxException;
 import java.rmi.RemoteException;
 
 public class TrangChu extends JFrame {
     private CardLayout cardLayout;
     private JPanel contentPanel;
+    private static JPanel trangchu;
+    private static JPanel selectedPanel = null;
 
     private int x;
     private int y;
 
 
 
-    public TrangChu() throws NamingException, RemoteException {
+    public TrangChu() throws NamingException, RemoteException, URISyntaxException {
 
         try {
             // Set FlatLaf Light theme
@@ -163,6 +166,7 @@ public class TrangChu extends JFrame {
         JButton btnTaiKhoan = createMenuButton("Tài khoản");
         JButton btnThongKe = createMenuButton("Thống kê");
         JButton btnTimHoaDon = createMenuButton("Tìm hóa đơn");
+
 
 
         menuPanel.add(btnDashboard);
@@ -314,9 +318,7 @@ public class TrangChu extends JFrame {
         SwingUtilities.invokeLater(() -> {
             try {
                 new TrangChu().setVisible(true);
-            } catch (NamingException e) {
-                throw new RuntimeException(e);
-            } catch (RemoteException e) {
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         });

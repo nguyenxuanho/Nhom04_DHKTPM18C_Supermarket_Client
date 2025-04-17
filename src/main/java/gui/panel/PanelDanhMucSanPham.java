@@ -1,6 +1,7 @@
 package gui.panel;
 
 import gui.components.ComponentUtils;
+import gui.components.CustomToastNotification;
 import io.github.cdimascio.dotenv.Dotenv;
 import model.DanhMucSanPham;
 import net.datafaker.Faker;
@@ -16,7 +17,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.net.URISyntaxException;
 import java.rmi.RemoteException;
+import java.util.Date;
 
 public class PanelDanhMucSanPham extends JPanel implements MouseListener, ActionListener {
     private final JLabel jLabelMaDanhMucSP, jLabelTenDanhMucSP, labelFind;
@@ -39,7 +42,7 @@ public class PanelDanhMucSanPham extends JPanel implements MouseListener, Action
 
     private final DanhMucSanPhamService danhMucSanPhamService = (DanhMucSanPhamService) context.lookup("rmi://" + drivername + ":9090/danhMucSanPhamService");
 
-    public PanelDanhMucSanPham () throws NamingException, RemoteException {
+    public PanelDanhMucSanPham () throws NamingException, RemoteException, URISyntaxException {
         setLayout(new BorderLayout());
 
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -81,7 +84,10 @@ public class PanelDanhMucSanPham extends JPanel implements MouseListener, Action
 
 
         Box boxButton = Box.createHorizontalBox();
-        boxButton.add(btnResetTable = new JButton("Làm mới"));
+        boxButton.add(btnResetTable = new JButton("Refresh"));
+
+
+
         boxButton.add(Box.createHorizontalGlue()); // đẩy nút sang trái
 
 
@@ -225,10 +231,32 @@ public class PanelDanhMucSanPham extends JPanel implements MouseListener, Action
         ComponentUtils.setButtonMain(btnResetTable);
 
 
+        btnThem.setIcon(new ImageIcon(getClass().getResource("/image/add.png")));
+        btnXoa.setIcon(new ImageIcon(getClass().getResource("/image/delete.png")));
+        btnSua.setIcon(new ImageIcon(getClass().getResource("/image/edit.png")));
+        btnReset.setIcon(new ImageIcon(getClass().getResource("/image/clean.png")));
+        btnResetTable.setIcon(new ImageIcon(getClass().getResource("/image/refresh.png")));
+        btnFind.setIcon(new ImageIcon(getClass().getResource("/image/search.png")));
 
 
 //        End custom GUI
 
+    }
+
+    private boolean validateInput() {
+        if (txtTenDanhMucSP.getText().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Không thể để trống",
+                    "Lỗi",
+                    JOptionPane.ERROR_MESSAGE
+            );
+
+            txtTenDanhMucSP.requestFocus();
+            return false;
+        }
+
+        return true;
     }
 
 
@@ -242,60 +270,99 @@ public class PanelDanhMucSanPham extends JPanel implements MouseListener, Action
                 txtTenDanhMucSP.setText("");
             }
             else if (source.equals(btnXoa)) {
-                String maDanhMucSP = jTableContent.getValueAt(jTableContent.getSelectedRow(), 0).toString();
-                int xoa = JOptionPane.showConfirmDialog(null, "Bạn có chắc muốn xóa dòng này ?");
-                if(xoa == 0) {
+                if(jTableContent.getSelectedRow() != -1){
+                    String maDanhMucSP = jTableContent.getValueAt(jTableContent.getSelectedRow(), 0).toString();
+                    int xoa = JOptionPane.showConfirmDialog(null, "Bạn có chắc muốn xóa dòng này ?");
+                    if(xoa == 0) {
+                        try {
+                            danhMucSanPhamService.delete(maDanhMucSP);
+                            dataModel.removeRow(jTableContent.getSelectedRow());
+                            JOptionPane.showMessageDialog(
+                                    this,
+                                    "Xóa danh mục thành công",
+                                    "Thành công",
+                                    JOptionPane.INFORMATION_MESSAGE
+                            );
+                        } catch (RemoteException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "Cần chọn dòng để xóa",
+                            "Lỗi",
+                            JOptionPane.ERROR_MESSAGE
+                    );
+                }
+
+            }
+            else if (source.equals(btnThem)) {
+                if(validateInput()){
+                    String maDanhMucSP = "DMSP" + faker.number().digits(5);
+                    String tenDanhMucSP = txtTenDanhMucSP.getText();
+
+                    DanhMucSanPham danhMucSanPham = new DanhMucSanPham(maDanhMucSP, tenDanhMucSP);
+
                     try {
-                        danhMucSanPhamService.delete(maDanhMucSP);
-                        dataModel.removeRow(jTableContent.getSelectedRow());
+                        danhMucSanPhamService.save(danhMucSanPham);
+                        dataModel.addRow(new Object[] {
+                                danhMucSanPham.getMaDanhMucSanPham(),
+                                danhMucSanPham.getTenDanhMucSanPham(),
+                        });
+                        JOptionPane.showMessageDialog(
+                                this,
+                                "Thêm danh mục thành công",
+                                "Thành công",
+                                JOptionPane.INFORMATION_MESSAGE
+                        );
                     } catch (RemoteException ex) {
                         throw new RuntimeException(ex);
+
                     }
                 }
             }
-            else if (source.equals(btnThem)) {
-                String maDanhMucSP = "DMSP" + faker.number().digits(5);
-                String tenDanhMucSP = txtTenDanhMucSP.getText();
-
-                DanhMucSanPham danhMucSanPham = new DanhMucSanPham(maDanhMucSP, tenDanhMucSP);
-
-                try {
-                    danhMucSanPhamService.save(danhMucSanPham);
-                    dataModel.addRow(new Object[] {
-                            danhMucSanPham.getMaDanhMucSanPham(),
-                            danhMucSanPham.getTenDanhMucSanPham(),
-                    });
-                    JOptionPane.showMessageDialog(null, "Đã thêm danh mục sản phẩm thành công");
-                } catch (RemoteException ex) {
-                    throw new RuntimeException(ex);
-
-                }
-
-            }
             else if (source.equals(btnSua)) {
-                String maDanhMucSP = jTableContent.getValueAt(jTableContent.getSelectedRow(), 0).toString();
+                if(jTableContent.getSelectedRow() != -1){
+                    if(validateInput()){
+                        String maDanhMucSP = jTableContent.getValueAt(jTableContent.getSelectedRow(), 0).toString();
 
-                try {
-                    DanhMucSanPham danhMucSanPham = danhMucSanPhamService.findOne(maDanhMucSP);
-                    if(danhMucSanPham != null){
-                        String tenDanhMucSP = txtTenDanhMucSP.getText();
+                        try {
+                            DanhMucSanPham danhMucSanPham = danhMucSanPhamService.findOne(maDanhMucSP);
+                            if(danhMucSanPham != null){
+                                String tenDanhMucSP = txtTenDanhMucSP.getText();
 
-                        danhMucSanPham.setTenDanhMucSanPham(tenDanhMucSP);
+                                danhMucSanPham.setTenDanhMucSanPham(tenDanhMucSP);
 
-                        danhMucSanPhamService.update(danhMucSanPham);
+                                danhMucSanPhamService.update(danhMucSanPham);
 
-                        for(int i = 0; i < jTableContent.getRowCount(); i++) {
-                            if(jTableContent.getValueAt(i, 0).toString().equals(maDanhMucSP)) {
-                                jTableContent.setValueAt(tenDanhMucSP, i, 1);
-                            }
+                                for(int i = 0; i < jTableContent.getRowCount(); i++) {
+                                    if(jTableContent.getValueAt(i, 0).toString().equals(maDanhMucSP)) {
+                                        jTableContent.setValueAt(tenDanhMucSP, i, 1);
+                                    }
+                                }
+
+                                JOptionPane.showMessageDialog(
+                                        this,
+                                        "Cập nhật danh mục thành công",
+                                        "Thành công",
+                                        JOptionPane.INFORMATION_MESSAGE
+                                );
+                                JOptionPane.showMessageDialog(null, "Sửa danh mục sản phẩm thành công");
+
+                            } else JOptionPane.showMessageDialog(null, "Không tìm thấy mã danh mục sản phẩm để sửa");
+
+                        } catch (RemoteException ex) {
+                            throw new RuntimeException(ex);
                         }
-                        JOptionPane.showMessageDialog(null, "Sửa danh mục sản phẩm thành công");
-
-                    } else JOptionPane.showMessageDialog(null, "Không tìm thấy mã danh mục sản phẩm để sửa");
-
-                } catch (RemoteException ex) {
-                    throw new RuntimeException(ex);
-                }
+                    }
+                } else
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "Chọn dòng danh mục sản phẩm cần sửa",
+                            "Lỗi",
+                            JOptionPane.ERROR_MESSAGE
+                    );
             }
             else if (source.equals(btnFind)) {
                 String maDanhMucSP = txtFind.getText();
@@ -303,12 +370,17 @@ public class PanelDanhMucSanPham extends JPanel implements MouseListener, Action
                     DanhMucSanPham danhMucSanPham = danhMucSanPhamService.findOne(maDanhMucSP);
                     if(danhMucSanPham != null) {
                         dataModel.setRowCount(0);
-
                         dataModel.addRow(new Object[] {
                                 danhMucSanPham.getMaDanhMucSanPham(),
                                 danhMucSanPham.getTenDanhMucSanPham(),
                         });
-                    } else JOptionPane.showMessageDialog(null, "Không tìm thấy mã danh mục sản phẩm này");
+                    } else
+                        JOptionPane.showMessageDialog(
+                                this,
+                                "Không tìm thấy mã danh mục sản phẩm này",
+                                "Lỗi",
+                                JOptionPane.ERROR_MESSAGE
+                        );
                 } catch (RemoteException ex) {
                     throw new RuntimeException(ex);
                 }

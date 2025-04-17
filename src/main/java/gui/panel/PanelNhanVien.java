@@ -112,7 +112,7 @@ public class PanelNhanVien extends JPanel {
         jLableNS.setPreferredSize(new Dimension(90, 25));
         dateNgaySinh = new JDateChooser();
         dateNgaySinh.setDateFormatString("dd - MM - yyyy");
-        dateNgaySinh.setPreferredSize(new Dimension(205, 25));
+        dateNgaySinh.setPreferredSize(new Dimension(212, 25));
 
         box1.add(Box.createHorizontalStrut(50));
         box1.add(jLableMaNV);
@@ -182,23 +182,15 @@ public class PanelNhanVien extends JPanel {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
 
         btnThem = new JButton("Thêm");
-        btnThem.setPreferredSize(new Dimension(100, 40));
         btnXoa = new JButton("Xóa");
-        btnXoa.setPreferredSize(new Dimension(100, 40));
         btnSua = new JButton("Sửa");
-        btnSua.setPreferredSize(new Dimension(100, 40));
         btnReset = new JButton("Reset");
-        btnReset.setPreferredSize(new Dimension(100, 40));
 
 
-        btnThem.setBackground(new Color(33, 150, 243));
-        btnThem.setForeground(Color.WHITE);
-        btnXoa.setBackground(new Color(244, 67, 54));
-        btnXoa.setForeground(Color.WHITE);
-        btnSua.setBackground(new Color(255, 193, 7));
-        btnSua.setForeground(Color.WHITE);
-        btnReset.setBackground(new Color(76, 175, 80));
-        btnReset.setForeground(Color.WHITE);
+        ComponentUtils.setButton(btnThem, new Color(33, 150, 243));
+        ComponentUtils.setButton(btnXoa, new Color(244, 67, 54));
+        ComponentUtils.setButton(btnSua, new Color(255, 193, 7));
+        ComponentUtils.setButton(btnReset, new Color(76, 175, 80));
 
         buttonPanel.add(btnThem);
         buttonPanel.add(btnXoa);
@@ -206,6 +198,11 @@ public class PanelNhanVien extends JPanel {
         buttonPanel.add(btnReset);
 
         panel.add(buttonPanel, BorderLayout.SOUTH);
+
+        btnThem.setIcon(new ImageIcon(getClass().getResource("/image/add.png")));
+        btnXoa.setIcon(new ImageIcon(getClass().getResource("/image/delete.png")));
+        btnSua.setIcon(new ImageIcon(getClass().getResource("/image/edit.png")));
+        btnReset.setIcon(new ImageIcon(getClass().getResource("/image/clean.png")));
 
         addButtonListeners();
 
@@ -219,7 +216,7 @@ public class PanelNhanVien extends JPanel {
 
         Border border = BorderFactory.createLineBorder(new Color(33, 150, 243), 2);
         TitledBorder titledBorder = BorderFactory.createTitledBorder(border,
-                "TRA CỨU NHÂN VIÊN",
+                "Tra cứu nhân viên",
                 TitledBorder.LEFT,
                 TitledBorder.TOP,
                 new Font("Arial", Font.BOLD, 16),
@@ -244,6 +241,7 @@ public class PanelNhanVien extends JPanel {
         btnTim.setForeground(Color.WHITE);
         btnTim.setFocusPainted(false);
         btnTim.setBorder(BorderFactory.createEmptyBorder(5, 15, 5, 15));
+        btnTim.setIcon(new ImageIcon(getClass().getResource("/image/search.png")));
 
         searchByIDPanel.add(lblMaNV);
         searchByIDPanel.add(txtTimMaNV);
@@ -374,9 +372,10 @@ public class PanelNhanVien extends JPanel {
         panel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
 
         JPanel jPanelLamMoi = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
-        JButton lammoi = new JButton("Làm mới");
-        lammoi.setPreferredSize(new Dimension(100, 30));
+        JButton lammoi = new JButton("Refresh");
+        ComponentUtils.setButtonMain(lammoi);
         jPanelLamMoi.add(lammoi);
+        lammoi.setIcon(new ImageIcon(getClass().getResource("/image/refresh.png")));
 
         String[] columns = {"Mã NV", "Tên NV", "Ngày sinh", "SĐT", "Địa chỉ", "Số định danh", "Giới tính", "Chức vụ"};
         tableModel = new DefaultTableModel(columns, 0) {
@@ -761,7 +760,7 @@ public class PanelNhanVien extends JPanel {
                     nhanVien.getSoDienThoai(),
                     nhanVien.getDiaChi(),
                     nhanVien.getSoDinhDanh(),
-                    nhanVien.getNgaySinh(),
+                    nhanVien.getGioiTinh(),
                     nhanVien.getChucVuNhanVien()
             });
         }

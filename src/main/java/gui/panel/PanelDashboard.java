@@ -25,8 +25,6 @@ import java.util.List;
 import java.util.Map;
 
 public class PanelDashboard extends JPanel implements MouseListener, ActionListener {
-    private final JLabel labelFind;
-    private final JTextField txtFind;
     private chart.Chart chart;
     private chart.PieChart pieChart;
 
@@ -40,8 +38,6 @@ public class PanelDashboard extends JPanel implements MouseListener, ActionListe
 
     private final DefaultTableModel dataModel;
 
-
-    private final JButton btnFind;
 
     private final Context context = new InitialContext();
 
@@ -74,7 +70,7 @@ public class PanelDashboard extends JPanel implements MouseListener, ActionListe
 
         ComponentUtils.setTable(jTableContent);
 
-        sanPhamService.getList().forEach(sanPham -> {
+        sanPhamService.getDanhSachSanPhamSapHetHan().forEach(sanPham -> {
             dataModel.addRow ( new Object[]{
                     sanPham.getMaSanPham(),
                     sanPham.getTenSanPham(),
@@ -94,25 +90,16 @@ public class PanelDashboard extends JPanel implements MouseListener, ActionListe
         Box boxTable = Box.createHorizontalBox();
 
         boxTable.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createEmptyBorder(50, 50, 50, 50),
-                ComponentUtils.getTitleBorder("Danh sách sản phẩm sắp hết hạn")
+                BorderFactory.createEmptyBorder( 10, 10, 10, 10),
+                ComponentUtils.getTitleBorder("Danh sách sản phẩm hết hạn")
         ));
+
+        scrollPane.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
 
         chart = new chart.Chart();
-//        chart.addLegend("Income", new Color(245, 189, 135));
-//        chart.addLegend("Expense", new Color(135, 189, 245));
-//        chart.addLegend("Profit", new Color(189, 135, 245));
-//        chart.addLegend("Cost", new Color(139, 229, 222));
-//
-//        chart.addData(new ModelChart("January", new double[]{500, 200, 80,89}));
-//        chart.addData(new ModelChart("February", new double[]{600, 750, 90,150}));
-//        chart.addData(new ModelChart("March", new double[]{200, 350, 460,900}));
-//        chart.addData(new ModelChart("April", new double[]{480, 150, 750,700}));
-//        chart.addData(new ModelChart("May", new double[]{350, 540, 300,150}));
-//        chart.addData(new ModelChart("June", new double[]{190, 280, 81,200}));
 
-        chart.addLegend("Lợi nhuận trong hôm nay", new Color(245, 189, 135));
+        chart.addLegend("Doanh thu trong ngày", new Color(245, 189, 135));
 
         chiTietHoaDonService.doanhThuTheoNgayGanNhat(23).entrySet()
                 .stream().sorted(Map.Entry.<LocalDate, Double>comparingByKey())
@@ -163,7 +150,7 @@ public class PanelDashboard extends JPanel implements MouseListener, ActionListe
         Box boxChartDetail1 = Box.createVerticalBox();
         boxChartDetail1.add(chart);
 
-        JLabel chartLabel1 = new JLabel("Biểu đồ thống kê");
+        JLabel chartLabel1 = new JLabel("Doanh thu 7 ngày gần đây");
         chartLabel1.setFont(new Font("SansSerif", Font.BOLD, 16));
         chartLabel1.setAlignmentX(Component.CENTER_ALIGNMENT);
         chartLabel1.setForeground(new Color(33, 37, 41)); // Màu nhẹ
@@ -176,19 +163,24 @@ public class PanelDashboard extends JPanel implements MouseListener, ActionListe
 
         Box boxChartDetail2 = Box.createVerticalBox();
         boxChartDetail2.add(pieChart);
-        JLabel chartLabel2 = new JLabel("Biểu đồ thống kê trạng thái");
+        JLabel chartLabel2 = new JLabel("Biểu đồ thống kê trạng thái của sản phẩm");
         chartLabel2.setFont(new Font("SansSerif", Font.BOLD, 16));
         chartLabel2.setAlignmentX(Component.CENTER_ALIGNMENT);
         chartLabel2.setForeground(new Color(33, 37, 41)); // Màu nhẹ
         chartLabel2.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0)); // Padding top
         boxChartDetail2.add(chartLabel2);
 
+        boxChart.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createEmptyBorder(10, 10, 10, 10),
+                ComponentUtils.getTitleBorder("Tổng quan")
+        ));
+
         boxChart.add(boxChartDetail2);
 
         boxChart.add(boxChartDetail2);
 
         boxContent.add(boxChart);
-        boxContent.add(Box.createVerticalStrut(20));
+        boxContent.add(Box.createVerticalStrut(10));
         boxContent.add(boxTable);
 
 
@@ -199,70 +191,12 @@ public class PanelDashboard extends JPanel implements MouseListener, ActionListe
 
         add(boxContent, BorderLayout.CENTER);
 
-        JPanel filterPanel = new JPanel();
-
-        Box boxHorizonFilter = Box.createHorizontalBox();
-
-        Box boxSearch = Box.createHorizontalBox();
-        labelFind = new JLabel("Nhập mã để tìm: ");
-        txtFind = new JTextField(50);
-        btnFind = new JButton("Tìm");
-
-
-
-        boxSearch.add(labelFind);
-        boxSearch.add(Box.createHorizontalStrut(10));
-        boxSearch.add(txtFind);
-        boxSearch.add(Box.createHorizontalStrut(10));
-        boxSearch.add(btnFind);
-
-
-
-        boxHorizonFilter.add(boxSearch);
-
-
-        filterPanel.add(boxHorizonFilter);
-
-
-
-        // Panel nhập liệu và nút chức năng
-        JPanel bottomPanel = new JPanel(new BorderLayout());
-        JPanel inputPanel = new JPanel();
-
-        inputPanel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createEmptyBorder(20, 20, 10, 20),
-                ComponentUtils.getTitleBorder("Thông tin nhập")
-        ));
-
-        Font labelFont = new Font("Arial", Font.BOLD, 14); // Chữ lớn và đậm
-        Font textFieldFont = new Font("Arial", Font.PLAIN, 14); // Chữ to cho input
-
-
-
-        Box boxVerticalFormGroup = Box.createVerticalBox();
-
-
-
-
-
-
-
-
 
 
 //        Action
         jTableContent.addMouseListener(this);
 
-        btnFind.addActionListener(this);
 
-
-//        End action
-
-
-
-
-
-//        End custom GUI
 
     }
 
