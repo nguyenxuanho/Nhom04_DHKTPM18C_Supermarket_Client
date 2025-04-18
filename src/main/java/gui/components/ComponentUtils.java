@@ -6,6 +6,8 @@ import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class ComponentUtils {
     public static TitledBorder getTitleBorder(String title){
@@ -41,7 +43,7 @@ public class ComponentUtils {
 
     public static void setButtonMain(JButton button){
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        button.setBackground(new Color(53, 78, 211));
+        button.setBackground(new Color(30, 144, 255));
         button.setForeground(Color.WHITE);
         button.setBorder(BorderFactory.createEmptyBorder(7, 25, 7, 25)); // padding nhẹ
         button.setFont( new Font("Arial", Font.BOLD, 14));
@@ -52,6 +54,7 @@ public class ComponentUtils {
         centerRenderer.setHorizontalAlignment(JLabel.CENTER);
         table.setDefaultRenderer(Object.class, centerRenderer);
         table.setFocusable(false);
+        table.setShowGrid(true);
         table.setDefaultEditor(Object.class, null);
         table.setAutoCreateRowSorter(true);
         table.getTableHeader().setFont(new Font("Arial", Font.PLAIN, 15));
@@ -62,9 +65,61 @@ public class ComponentUtils {
         table.setSelectionBackground(new Color(33, 150, 243));
         table.setSelectionForeground(Color.WHITE);
         table.setGridColor(Color.LIGHT_GRAY);
-
         JTableHeader tableHeader = table.getTableHeader();
         tableHeader.setForeground(Color.WHITE);
         tableHeader.setPreferredSize(new Dimension(tableHeader.getWidth(), 40));
+
+
+
+        // Tạo renderer tùy chỉnh với hiệu ứng hover
+        table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+            private int hoverRow = -1;
+
+            {
+                // Thêm mouse listener để theo dõi hàng đang hover
+                table.addMouseMotionListener(new MouseAdapter() {
+                    @Override
+                    public void mouseMoved(MouseEvent e) {
+                        int row = table.rowAtPoint(e.getPoint());
+                        if (row != hoverRow) {
+                            hoverRow = row;
+                            table.repaint();
+                        }
+                        // Thiết lập cursor HAND khi di chuyển chuột vào bảng
+                        table.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                    }
+
+                    @Override
+                    public void mouseExited(MouseEvent e) {
+                        if (hoverRow != -1) {
+                            hoverRow = -1;
+                            table.repaint();
+                        }
+                        // Trả về cursor mặc định khi chuột rời khỏi bảng
+                        table.setCursor(Cursor.getDefaultCursor());
+                    }
+                });
+            }
+
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                                                           boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(
+                        table, value, isSelected, hasFocus, row, column);
+
+                // Đặt màu nền tùy theo trạng thái
+                if (isSelected) {
+                    c.setBackground(new Color(63, 167, 236)); // Màu khi chọn
+                } else if (row == hoverRow) {
+                    c.setBackground(new Color(63, 167, 236)); // Màu khi hover
+                } else {
+                    c.setBackground(Color.WHITE); // Màu mặc định
+                }
+
+                return c;
+            }
+        });
+
+
     }
 }

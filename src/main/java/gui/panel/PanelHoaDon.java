@@ -99,7 +99,6 @@ public class PanelHoaDon extends JPanel {
 
 
     private JPanel createRightPanel() throws RemoteException {
-
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBorder(BorderFactory.createTitledBorder("Thông tin thanh toán"));
         GridBagConstraints gbc = new GridBagConstraints();
@@ -449,6 +448,13 @@ public class PanelHoaDon extends JPanel {
         buttonPanel.add(btnXoa);
         buttonPanel.add(btnSua);
         buttonPanel.add(btnReset);
+
+        btnThem.setIcon(new ImageIcon(getClass().getResource("/image/add.png")));
+        btnXoa.setIcon(new ImageIcon(getClass().getResource("/image/delete.png")));
+        btnSua.setIcon(new ImageIcon(getClass().getResource("/image/edit.png")));
+        btnReset.setIcon(new ImageIcon(getClass().getResource("/image/clean.png")));
+//        btnResetTable.setIcon(new ImageIcon(getClass().getResource("/image/refresh.png")));
+//        btnFind.setIcon(new ImageIcon(getClass().getResource("/image/search.png")));
 
         panel.add(buttonPanel, BorderLayout.SOUTH);
 

@@ -402,6 +402,14 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
         ComponentUtils.setJcombobox(jComboBoxStatus);
         ComponentUtils.setJcombobox(JcomboboxTrangThai);
         ComponentUtils.setJcombobox(JcomboboxLoaiSP);
+
+
+        btnThem.setIcon(new ImageIcon(getClass().getResource("/image/add.png")));
+        btnXoa.setIcon(new ImageIcon(getClass().getResource("/image/delete.png")));
+        btnSua.setIcon(new ImageIcon(getClass().getResource("/image/edit.png")));
+        btnReset.setIcon(new ImageIcon(getClass().getResource("/image/clean.png")));
+        btnResetTable.setIcon(new ImageIcon(getClass().getResource("/image/refresh.png")));
+        btnFind.setIcon(new ImageIcon(getClass().getResource("/image/search.png")));
 //        End custom GUI
 
     }
@@ -430,141 +438,69 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
 
             }
             else if (source.equals(btnXoa)) {
-                String maSP = jTableContent.getValueAt(jTableContent.getSelectedRow(), 0).toString();
-                int xoa = JOptionPane.showConfirmDialog(null, "Bạn có chắc muốn xóa dòng này ?");
-                if(xoa == 0) {
-                    try {
-                        sanPhamService.delete(maSP);
-                        dataModel.removeRow(jTableContent.getSelectedRow());
-                    } catch (RemoteException ex) {
-                        throw new RuntimeException(ex);
-                    }
-                }
-            }
-            else if (source.equals(btnThem)) {
-
-                String maSP = "SP" + faker.number().digits(5);
-                String tenSP = txtTenSP.getText();
-                double giaSP = Double.parseDouble(txtGiaSP.getText());
-                double thueVAT = Double.parseDouble(txtThueVAT.getText());
-                int soLuong = Integer.parseInt(txtSoLuong.getText());
-                String moTa = txtMoTa.getText();
-
-                String[] listThuocTinh = txtThuocTinh.getText().split(",");
-
-                String trangThai = JcomboboxTrangThai.getSelectedItem().toString();
-                String maDanhMuc = JcomboboxLoaiSP.getSelectedItem().toString().split("_")[0];
-
-
-                java.util.Date dateNgaynhap = dateNgayNhap.getDate(); // Lấy ngày từ JDateChooser
-                LocalDate localDateNgayNhap = dateNgaynhap.toInstant()
-                        .atZone(ZoneId.systemDefault())
-                        .toLocalDate();
-
-                java.util.Date dateHSD =  dateHanSuDung.getDate(); // Lấy ngày từ JDateChooser
-                LocalDate localDateHanSuDung = dateHSD.toInstant()
-                        .atZone(ZoneId.systemDefault())
-                        .toLocalDate();
-
-
-                SanPham sanPham = new SanPham(maSP, tenSP,
-                        localDateHanSuDung, giaSP, thueVAT, trangThai, soLuong, localDateNgayNhap, moTa);
-
-
-                try {
-                    sanPham.setDanhMucSanPham(danhMucSanPhamService.findOne(maDanhMuc));
-
-                    Arrays.stream(listThuocTinh).forEach(item -> {
-                        String itemKey = item.split(":")[0];
-                        String itemValue = item.split(":")[1];
-                        String thuocTinhID = "TT" + faker.number().digits(5);
-                        ThuocTinhSanPham thuocTinhSanPham = new ThuocTinhSanPham(thuocTinhID, itemKey, itemValue);
-                        thuocTinhSanPham.setSanPham(sanPham);
-
+                if(jTableContent.getSelectedRow() != -1){
+                    String maSP = jTableContent.getValueAt(jTableContent.getSelectedRow(), 0).toString();
+                    int xoa = JOptionPane.showConfirmDialog(null, "Bạn có chắc muốn xóa dòng này ?");
+                    if(xoa == 0) {
                         try {
-                            thuocTinhSanPhamService.save(thuocTinhSanPham);
+                            sanPhamService.delete(maSP);
+                            dataModel.removeRow(jTableContent.getSelectedRow());
+                            JOptionPane.showMessageDialog(
+                                    this,
+                                    "Đã xóa thành công sản phẩm này!!",
+                                    "Thành công",
+                                    JOptionPane.INFORMATION_MESSAGE
+                            );
                         } catch (RemoteException ex) {
                             throw new RuntimeException(ex);
                         }
-                    });
-
-                    sanPhamService.save(sanPham);
-
-                    dataModel.addRow(new Object[] {
-                            sanPham.getMaSanPham(),
-                            sanPham.getTenSanPham(),
-                            sanPham.getDanhMucSanPham().getTenDanhMucSanPham(),
-                            sanPham.getGiaBan(),
-                            sanPham.getSoLuongTon(),
-                            String.format("%.2f", sanPham.getThueVAT()),
-                            sanPham.getNgayNhap().toString(),
-                            txtThuocTinh.getText(),
-                            sanPham.getMoTa(),
-                            sanPham.getHanSuDung().toString(),
-                            sanPham.getTrangThai()
-                    });
-                    JOptionPane.showMessageDialog(null, "Thêm sản phẩm thành công");
-                } catch (RemoteException ex) {
-                    throw new RuntimeException(ex);
-                }
+                    }
+                } else
+                    JOptionPane.showMessageDialog(
+                        this,
+                        "Hãy chọn dòng để xóa",
+                        "Lỗi",
+                        JOptionPane.ERROR_MESSAGE
+                    );
 
             }
-            else if (source.equals(btnSua)) {
-                String maSP = jTableContent.getValueAt(jTableContent.getSelectedRow(), 0).toString();
+            else if (source.equals(btnThem)) {
+                if(validateInput()){
+                    String maSP = "SP" + faker.number().digits(5);
+                    String tenSP = txtTenSP.getText();
+                    double giaSP = Double.parseDouble(txtGiaSP.getText());
+                    double thueVAT = Double.parseDouble(txtThueVAT.getText());
+                    int soLuong = Integer.parseInt(txtSoLuong.getText());
+                    String moTa = txtMoTa.getText();
 
-                try {
-                    SanPham sanPham = sanPhamService.findOne(maSP);
-                    if(sanPham != null){
-                        String tenSP = txtTenSP.getText();
-                        double giaSP = Double.parseDouble(txtGiaSP.getText());
-                        double thueVAT = Double.parseDouble(txtThueVAT.getText());
-                        int soLuong = Integer.parseInt(txtSoLuong.getText());
-                        String moTa = txtMoTa.getText();
+                    String[] listThuocTinh = txtThuocTinh.getText().split(",");
 
-                        String[] listThuocTinh = txtThuocTinh.getText().split(",");
-
-                        String trangThai = JcomboboxTrangThai.getSelectedItem().toString();
-                        String maDanhMuc = JcomboboxLoaiSP.getSelectedItem().toString().split("_")[0];
+                    String trangThai = JcomboboxTrangThai.getSelectedItem().toString();
+                    String maDanhMuc = JcomboboxLoaiSP.getSelectedItem().toString().split("_")[0];
 
 
-                        java.util.Date dateNgaynhap = dateNgayNhap.getDate(); // Lấy ngày từ JDateChooser
-                        LocalDate localDateNgayNhap = dateNgaynhap.toInstant()
-                                .atZone(ZoneId.systemDefault())
-                                .toLocalDate();
+                    java.util.Date dateNgaynhap = dateNgayNhap.getDate(); // Lấy ngày từ JDateChooser
+                    LocalDate localDateNgayNhap = dateNgaynhap.toInstant()
+                            .atZone(ZoneId.systemDefault())
+                            .toLocalDate();
 
-                        java.util.Date dateHSD =  dateHanSuDung.getDate(); // Lấy ngày từ JDateChooser
-                        LocalDate localDateHanSuDung = dateHSD.toInstant()
-                                .atZone(ZoneId.systemDefault())
-                                .toLocalDate();
+                    java.util.Date dateHSD =  dateHanSuDung.getDate(); // Lấy ngày từ JDateChooser
+                    LocalDate localDateHanSuDung = dateHSD.toInstant()
+                            .atZone(ZoneId.systemDefault())
+                            .toLocalDate();
 
-                        sanPham.setTenSanPham(tenSP);
-                        sanPham.setGiaBan(giaSP);
-                        sanPham.setThueVAT(thueVAT);
-                        sanPham.setSoLuongTon(soLuong);
-                        sanPham.setMoTa(moTa);
-                        sanPham.setTrangThai(trangThai);
+
+                    SanPham sanPham = new SanPham(maSP, tenSP,
+                            localDateHanSuDung, giaSP, thueVAT, trangThai, soLuong, localDateNgayNhap, moTa);
+
+
+                    try {
                         sanPham.setDanhMucSanPham(danhMucSanPhamService.findOne(maDanhMuc));
-                        sanPham.setNgayNhap(localDateNgayNhap);
-                        sanPham.setHanSuDung(localDateHanSuDung);
-
-                        sanPhamService.update(sanPham);
-
-                        List<ThuocTinhSanPham> thuocTinhSanPhamList = thuocTinhSanPhamService.getListByProductId(maSP);
-
-                        thuocTinhSanPhamList.forEach(ttSP -> {
-                            try {
-                                thuocTinhSanPhamService.delete(ttSP.getMaThuocTinhSanPham());
-                            } catch (RemoteException ex) {
-                                throw new RuntimeException(ex);
-                            }
-                        });
-
 
                         Arrays.stream(listThuocTinh).forEach(item -> {
                             String itemKey = item.split(":")[0];
                             String itemValue = item.split(":")[1];
                             String thuocTinhID = "TT" + faker.number().digits(5);
-
                             ThuocTinhSanPham thuocTinhSanPham = new ThuocTinhSanPham(thuocTinhID, itemKey, itemValue);
                             thuocTinhSanPham.setSanPham(sanPham);
 
@@ -575,30 +511,148 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
                             }
                         });
 
-                        for(int i = 0; i < jTableContent.getRowCount(); i++) {
-                            if(jTableContent.getValueAt(i, 0).toString().equals(maSP)) {
-                                jTableContent.setValueAt(tenSP, i, 1);
-                                jTableContent.setValueAt(JcomboboxLoaiSP.getSelectedItem()
-                                        .toString().split("_")[1], i, 2);
-                                jTableContent.setValueAt(giaSP, i, 3);
-                                jTableContent.setValueAt(soLuong, i, 4);
-                                jTableContent.setValueAt(String.format("%.2f", thueVAT), i, 5);
-                                jTableContent.setValueAt(localDateNgayNhap.toString(), i, 6);
-                                jTableContent.setValueAt(txtThuocTinh.getText(), i, 7);
-                                jTableContent.setValueAt(moTa, i, 8);
-                                jTableContent.setValueAt(localDateHanSuDung.toString(), i, 9);
-                                jTableContent.setValueAt(trangThai, i, 10);
-                            }
-                        }
+                        sanPhamService.save(sanPham);
 
-                        JOptionPane.showMessageDialog(null, "Sửa sản phẩm thành công");
-
+                        dataModel.addRow(new Object[] {
+                                sanPham.getMaSanPham(),
+                                sanPham.getTenSanPham(),
+                                sanPham.getDanhMucSanPham().getTenDanhMucSanPham(),
+                                sanPham.getGiaBan(),
+                                sanPham.getSoLuongTon(),
+                                String.format("%.2f", sanPham.getThueVAT()),
+                                sanPham.getNgayNhap().toString(),
+                                txtThuocTinh.getText(),
+                                sanPham.getMoTa(),
+                                sanPham.getHanSuDung().toString(),
+                                sanPham.getTrangThai()
+                        });
+                        JOptionPane.showMessageDialog(
+                                this,
+                                "Thêm sản phẩm thành công",
+                                "Thành công",
+                                JOptionPane.INFORMATION_MESSAGE
+                        );
+                    } catch (RemoteException ex) {
+                        throw new RuntimeException(ex);
                     }
-                    else JOptionPane.showMessageDialog(null, "Không tìm thấy mã sản phẩm để sửa");
-
-                } catch (RemoteException ex) {
-                    throw new RuntimeException(ex);
                 }
+
+            }
+            else if (source.equals(btnSua)) {
+                if(jTableContent.getSelectedRow() != -1){
+                   if(validateInput()){
+                       String maSP = jTableContent.getValueAt(jTableContent.getSelectedRow(), 0).toString();
+
+                       try {
+                           SanPham sanPham = sanPhamService.findOne(maSP);
+                           if(sanPham != null){
+                               String tenSP = txtTenSP.getText();
+                               double giaSP = Double.parseDouble(txtGiaSP.getText());
+                               double thueVAT = Double.parseDouble(txtThueVAT.getText());
+                               int soLuong = Integer.parseInt(txtSoLuong.getText());
+                               String moTa = txtMoTa.getText();
+
+                               String[] listThuocTinh = txtThuocTinh.getText().split(",");
+
+                               String trangThai = JcomboboxTrangThai.getSelectedItem().toString();
+                               String maDanhMuc = JcomboboxLoaiSP.getSelectedItem().toString().split("_")[0];
+
+
+                               java.util.Date dateNgaynhap = dateNgayNhap.getDate(); // Lấy ngày từ JDateChooser
+                               LocalDate localDateNgayNhap = dateNgaynhap.toInstant()
+                                       .atZone(ZoneId.systemDefault())
+                                       .toLocalDate();
+
+                               java.util.Date dateHSD =  dateHanSuDung.getDate(); // Lấy ngày từ JDateChooser
+                               LocalDate localDateHanSuDung = dateHSD.toInstant()
+                                       .atZone(ZoneId.systemDefault())
+                                       .toLocalDate();
+
+                               sanPham.setTenSanPham(tenSP);
+                               sanPham.setGiaBan(giaSP);
+                               sanPham.setThueVAT(thueVAT);
+                               sanPham.setSoLuongTon(soLuong);
+                               sanPham.setMoTa(moTa);
+                               sanPham.setTrangThai(trangThai);
+                               sanPham.setDanhMucSanPham(danhMucSanPhamService.findOne(maDanhMuc));
+                               sanPham.setNgayNhap(localDateNgayNhap);
+                               sanPham.setHanSuDung(localDateHanSuDung);
+
+                               sanPhamService.update(sanPham);
+
+                               List<ThuocTinhSanPham> thuocTinhSanPhamList = thuocTinhSanPhamService.getListByProductId(maSP);
+
+                               thuocTinhSanPhamList.forEach(ttSP -> {
+                                   try {
+                                       thuocTinhSanPhamService.delete(ttSP.getMaThuocTinhSanPham());
+                                   } catch (RemoteException ex) {
+                                       throw new RuntimeException(ex);
+                                   }
+                               });
+
+
+                               Arrays.stream(listThuocTinh).forEach(item -> {
+                                   String itemKey = item.split(":")[0];
+                                   String itemValue = item.split(":")[1];
+                                   String thuocTinhID = "TT" + faker.number().digits(5);
+
+                                   ThuocTinhSanPham thuocTinhSanPham = new ThuocTinhSanPham(thuocTinhID, itemKey, itemValue);
+                                   thuocTinhSanPham.setSanPham(sanPham);
+
+                                   try {
+                                       thuocTinhSanPhamService.save(thuocTinhSanPham);
+                                   } catch (RemoteException ex) {
+                                       throw new RuntimeException(ex);
+                                   }
+                               });
+
+                               for(int i = 0; i < jTableContent.getRowCount(); i++) {
+                                   if(jTableContent.getValueAt(i, 0).toString().equals(maSP)) {
+                                       jTableContent.setValueAt(tenSP, i, 1);
+                                       jTableContent.setValueAt(JcomboboxLoaiSP.getSelectedItem()
+                                               .toString().split("_")[1], i, 2);
+                                       jTableContent.setValueAt(giaSP, i, 3);
+                                       jTableContent.setValueAt(soLuong, i, 4);
+                                       jTableContent.setValueAt(String.format("%.2f", thueVAT), i, 5);
+                                       jTableContent.setValueAt(localDateNgayNhap.toString(), i, 6);
+                                       jTableContent.setValueAt(txtThuocTinh.getText(), i, 7);
+                                       jTableContent.setValueAt(moTa, i, 8);
+                                       jTableContent.setValueAt(localDateHanSuDung.toString(), i, 9);
+                                       jTableContent.setValueAt(trangThai, i, 10);
+                                   }
+                               }
+
+                               JOptionPane.showMessageDialog(
+                                       this,
+                                       "Sửa sản phẩm thành công",
+                                       "Thành công",
+                                       JOptionPane.INFORMATION_MESSAGE
+                               );
+
+
+                           }
+                           else
+                               JOptionPane.showMessageDialog(
+                                       this,
+                                       "Không tìm thấy mã sản phẩm để sửa",
+                                       "Lỗi",
+                                       JOptionPane.ERROR_MESSAGE
+                               );
+
+                       }
+                       catch (RemoteException ex) {
+                           throw new RuntimeException(ex);
+                       }
+                   }
+                }
+                else
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "Chọn dòng sản phẩm cần sửa",
+                            "Lỗi",
+                            JOptionPane.ERROR_MESSAGE
+                    );
+
             }
             else if (source.equals(btnFind)) {
                 String maSP = txtFind.getText();
@@ -624,7 +678,13 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
                                 sanPham.getTrangThai()
                         });
                     }
-                    else JOptionPane.showMessageDialog(null, "Không tìm thấy mã sản phẩm");
+                    else
+                        JOptionPane.showMessageDialog(
+                                this,
+                                "Không tìm thấy mã sản phẩm",
+                                "Lỗi",
+                                JOptionPane.ERROR_MESSAGE
+                        );
                 } catch (RemoteException ex) {
                     throw new RuntimeException(ex);
                 }
@@ -699,6 +759,93 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
                 }
             }
         }
+    }
+
+
+    private boolean validateInput() {
+        if (txtTenSP.getText().trim().isEmpty() || txtGiaSP.getText().trim().isEmpty()
+                || txtSoLuong.getText().trim().isEmpty() || txtThueVAT.getText().trim().isEmpty()
+                || dateNgayNhap.getDate() == null || dateHanSuDung.getDate() == null
+                || txtThuocTinh.getText().trim().isEmpty())  {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Không thể để trống các trường trừ Mô Tả",
+                    "Lỗi",
+                    JOptionPane.ERROR_MESSAGE
+            );
+            return false;
+        }
+
+        if(!txtGiaSP.getText().matches("\\d+(\\.\\d+)?")){
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Giá sản phẩm phải lớn hơn 0",
+                    "Lỗi",
+                    JOptionPane.ERROR_MESSAGE
+            );
+            txtGiaSP.requestFocus();
+            return false;
+        }
+
+        if(!txtSoLuong.getText().matches("\\d+")){
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Số lượng phải là số nguyên lớn hơn 0",
+                    "Lỗi",
+                    JOptionPane.ERROR_MESSAGE
+            );
+            txtSoLuong.requestFocus();
+            return false;
+        }
+
+        if(!txtThueVAT.getText().matches("0(\\.\\d+)?|1(\\.0+)?")){
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Thuế phải có giá trị từ 0.0 đến 1.0 (0% -> 100%) ",
+                    "Lỗi",
+                    JOptionPane.ERROR_MESSAGE
+            );
+            txtThueVAT.requestFocus();
+            return false;
+        }
+
+        if (!txtThuocTinh.getText().matches("([\\p{L} ]+:[^:,]+)(,\\s*[\\p{L} ]+:[^:,]+)*")) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Mỗi thuộc tính phải có dạng KEY:VALUE và cách nhau bằng dấu phẩy",
+                    "Lỗi",
+                    JOptionPane.ERROR_MESSAGE
+            );
+            txtThuocTinh.requestFocus();
+            return false;
+        }
+
+        if(dateNgayNhap.getDate().after(new java.util.Date())){
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Ngày nhập phải trước ngày hiện tại",
+                    "Lỗi",
+                    JOptionPane.ERROR_MESSAGE
+            );
+            dateNgayNhap.requestFocus();
+            return false;
+        }
+
+        if(dateNgayNhap.getDate().after(dateHanSuDung.getDate())){
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Hạn sử dụng phải sau ngày nhập",
+                    "Lỗi",
+                    JOptionPane.ERROR_MESSAGE
+            );
+            dateNgayNhap.requestFocus();
+            return false;
+        }
+
+
+
+
+        return true;
     }
 
     @Override

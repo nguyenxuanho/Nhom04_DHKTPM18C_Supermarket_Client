@@ -128,6 +128,7 @@ public class PanelTaiKhoan extends JPanel {
 		JLabel jLabelmaNV = new JLabel("Mã nhân viên:");
 		jLabelmaNV.setPreferredSize(new Dimension(90, 25));
 		cbbMaNV = new JComboBox<String>();
+		cbbMaNV.setPreferredSize(new Dimension(168, 25));
 		JLabel jLabelTrangThai = new JLabel("Trạng thái:");
 		jLabelTrangThai.setPreferredSize(new Dimension(90, 25));
 		cboTrangThai = new JComboBox<>(new String[]{"Đang hoạt động", "Không còn hoạt đông"});
@@ -169,6 +170,12 @@ public class PanelTaiKhoan extends JPanel {
 		buttonPanel.add(btnSua);
 		buttonPanel.add(btnReset);
 
+		btnThem.setIcon(new ImageIcon(getClass().getResource("/image/add.png")));
+		btnXoa.setIcon(new ImageIcon(getClass().getResource("/image/delete.png")));
+		btnSua.setIcon(new ImageIcon(getClass().getResource("/image/edit.png")));
+		btnReset.setIcon(new ImageIcon(getClass().getResource("/image/clean.png")));
+
+
 		panel.add(buttonPanel, BorderLayout.SOUTH);
 
 		addButtonListeners();
@@ -208,6 +215,7 @@ public class PanelTaiKhoan extends JPanel {
 		btnTim.setForeground(Color.WHITE);
 		btnTim.setFocusPainted(false);
 		btnTim.setBorder(BorderFactory.createEmptyBorder(5, 15, 5, 15));
+		btnTim.setIcon(new ImageIcon(getClass().getResource("/image/search.png")));
 
 		searchByIDPanel.add(lblMaNV);
 		searchByIDPanel.add(txtTimMaTK);
@@ -272,9 +280,10 @@ public class PanelTaiKhoan extends JPanel {
 		panel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
 
 		JPanel jPanelLamMoi = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
-		JButton lammoi = new JButton("Làm mới");
-		lammoi.setPreferredSize(new Dimension(100, 30));
+		JButton lammoi = new JButton("Refresh");
+		ComponentUtils.setButtonMain(lammoi);
 		jPanelLamMoi.add(lammoi);
+		lammoi.setIcon(new ImageIcon(getClass().getResource("/image/refresh.png")));
 
 		String[] columns = {"Mã tài khoản", "Tên đăng nhập", "Password", "Nhân viên", "Trạng thái"};
 		tableModel = new DefaultTableModel(columns, 0) {

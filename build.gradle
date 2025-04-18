@@ -62,6 +62,12 @@ dependencies {
     implementation 'net.java.dev.swing-layout:swing-layout:1.0.2'
 
 
+    // https://mvnrepository.com/artifact/com.formdev/flatlaf
+    runtimeOnly 'com.formdev:flatlaf:3.4.1'
+    // https://mvnrepository.com/artifact/com.formdev/flatlaf-extras
+    implementation 'com.formdev:flatlaf-extras:3.4.1'
+
+    implementation(files("libs/swing-toast-notifications-1.0.4.jar"))
 
 
 

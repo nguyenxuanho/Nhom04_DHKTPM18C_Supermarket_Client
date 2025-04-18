@@ -6,8 +6,10 @@ import chart.ModelPieChart;
 import chart.PieChart;
 import com.toedter.calendar.JDateChooser;
 import gui.components.ComponentUtils;
+import gui.components.CustomToastNotification;
 import io.github.cdimascio.dotenv.Dotenv;
 import net.datafaker.Faker;
+import raven.toast.Notifications;
 import service.ChiTietHoaDonService;
 import service.DanhMucSanPhamService;
 import service.SanPhamService;
@@ -25,9 +27,8 @@ import java.rmi.RemoteException;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -72,6 +73,15 @@ public class PanelThongKe extends JPanel implements MouseListener, ActionListene
         dateNgayKetThuc.setDateFormatString("dd/MM/yyyy");
         dateNgayKetThuc.setPreferredSize(new Dimension(100, 10));
 
+
+        // Lấy ngày 1/1 của năm hiện tại
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.DAY_OF_MONTH, 1);  // Ngày 1
+        cal.set(Calendar.MONTH, Calendar.JANUARY);  // Tháng 1
+        Date ngayDauNam = cal.getTime();
+        dateNgayBatDau.setDate(ngayDauNam);
+        dateNgayKetThuc.setDate(new Date());
+
         Box boxContent = Box.createVerticalBox();
         Box boxFilter = Box.createHorizontalBox();
 
@@ -88,8 +98,9 @@ public class PanelThongKe extends JPanel implements MouseListener, ActionListene
         boxFilter.add(new JLabel("Nhập năm cần thống kê: "));
         boxFilter.add(Box.createHorizontalStrut(10));
         boxFilter.add(txtNam = new JTextField(10));
+        txtNam.setText(LocalDate.now().getYear() + "");
         boxFilter.add(Box.createHorizontalStrut(10));
-        boxFilter.add(btnThongKeNam = new JButton("Thống kê theo năm"));
+        boxFilter.add(btnThongKeNam = new JButton("Thống kê năm"));
         boxFilter.add(Box.createHorizontalStrut(10));
         boxContent.add(boxFilter);
 
@@ -121,7 +132,6 @@ public class PanelThongKe extends JPanel implements MouseListener, ActionListene
 
 
         chartBox.add(chart);
-        chartBox.add(Box.createHorizontalStrut(50));
         chartBox.add(pieChart);
 
         add(chartBox, BorderLayout.SOUTH);
@@ -130,6 +140,10 @@ public class PanelThongKe extends JPanel implements MouseListener, ActionListene
         ComponentUtils.setButtonMain(btnThongKeNam);
         btnThongKe.addActionListener(this);
         btnThongKeNam.addActionListener(this);
+
+
+        btnThongKeNam.setIcon(new ImageIcon(getClass().getResource("/image/analytic.png")));
+        btnThongKe.setIcon(new ImageIcon(getClass().getResource("/image/analytic.png")));
 
     }
 
@@ -273,11 +287,17 @@ public class PanelThongKe extends JPanel implements MouseListener, ActionListene
 
 
                     }catch (Exception ex){
-                        JOptionPane.showMessageDialog(this, "Ngày tháng năm không hợp lệ", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                        Notifications.getInstance().show(Notifications.Type.ERROR, Notifications.Location.TOP_RIGHT, "Ngày tháng năm không hợp lệ");
+                        Notifications.getInstance().clear(Notifications.Location.TOP_RIGHT);
                     }
 
                 }
             } else if (source.equals(btnThongKeNam)){
+
+                JPanel parentPanel = (JPanel) SwingUtilities.getAncestorOfClass(JPanel.class, btnThongKeNam);
+                CustomToastNotification.showNotification(parentPanel, "Test toastify", "success");
+
+
                 String inputNam = txtNam.getText();
                 try{
                     int nam = Integer.parseInt(inputNam);
@@ -358,10 +378,12 @@ public class PanelThongKe extends JPanel implements MouseListener, ActionListene
                         pieChart.repaint();
 
                     } else {
-                        JOptionPane.showMessageDialog(this, "Năm phải lớn hơn 0", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                        Notifications.getInstance().show(Notifications.Type.ERROR, Notifications.Location.TOP_RIGHT, "Năm phải lớn hơn 0");
+                        Notifications.getInstance().clear(Notifications.Location.TOP_RIGHT);
                     }
                 }catch (Exception ex){
-                    JOptionPane.showMessageDialog(this, "Năm phải là số nguyên!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    Notifications.getInstance().show(Notifications.Type.ERROR, Notifications.Location.TOP_RIGHT, "Năm phải là số nguyên!");
+                    Notifications.getInstance().clear(Notifications.Location.TOP_RIGHT);
 
                 }
             }
