@@ -136,12 +136,10 @@ public class TrangChu extends JFrame {
 
 
 // Label chào mừng
-//        JLabel welcomeLabel = new JLabel(
-//                TaiKhoanDTO.getTaiKhoan().getNhanVien().getChucVuNhanVien().toString()
-//                        + ": Xin chào, " + TaiKhoanDTO.getTaiKhoan().getNhanVien().getTenNhanVien());
         JLabel welcomeLabel = new JLabel(
-
-                         ": Xin chào, " );
+                TaiKhoanDTO.getTaiKhoan().getNhanVien().getChucVuNhanVien().toString()
+                        + ": Xin chào, " + TaiKhoanDTO.getTaiKhoan().getNhanVien().getTenNhanVien());
+//        JLabel welcomeLabel = new JLabel(": Xin chào, " );
         welcomeLabel.setFont(new Font("Segoe UI", Font.PLAIN, 16));
         welcomeLabel.setForeground(Color.WHITE);
         welcomeLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 15));
@@ -172,7 +170,7 @@ public class TrangChu extends JFrame {
         JPanel menuPanel = new JPanel();
         menuPanel.setPreferredSize(new Dimension(260, getHeight()));
         menuPanel.setLayout(new BoxLayout(menuPanel, BoxLayout.Y_AXIS));
-        menuPanel.setBackground(new Color(0, 123, 255));
+        menuPanel.setBackground(new Color(88, 151, 220));
 
         JLabel appTitle = new JLabel("MENU", SwingConstants.CENTER);
         appTitle.setFont(new Font("Segoe UI", Font.BOLD, 22));
@@ -190,7 +188,7 @@ public class TrangChu extends JFrame {
         JButton btnNhanVien = createMenuButton("Nhân viên", "/image/staff.png");
         JButton btnTaiKhoan = createMenuButton("Tài khoản", "/image/account.png");
         JButton btnThongKe = createMenuButton("Thống kê", "/image/statistics.png");
-        JButton btnTimHoaDon = createMenuButton("Tìm hóa đơn", "/image/searchMenu.png");
+        JButton btnTimHoaDon = createMenuButton("Tìm hóa đơn", "/image/search.png");
 
 
 

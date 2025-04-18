@@ -4,10 +4,7 @@ import dto.HoaDonDTO;
 import dto.TaiKhoanDTO;
 import gui.components.ComponentUtils;
 import io.github.cdimascio.dotenv.Dotenv;
-import model.ChiTietHoaDon;
-import model.HoaDon;
-import model.KhachHang;
-import model.SanPham;
+import model.*;
 import service.*;
 
 import javax.naming.Context;
@@ -413,7 +410,6 @@ public class PanelHoaDon extends JPanel {
        
 
         Box box2 = Box.createHorizontalBox();
-
         box2.add(Box.createHorizontalStrut(50));
         box2.add(jLabelSoLuong);
         box2.add(txtSoLuong);
@@ -682,18 +678,16 @@ public class PanelHoaDon extends JPanel {
         }
     }
     private void handleAddHD() throws RemoteException, ParseException, NamingException {
-//        if(!validateAddHD()){
-//            return;
-//        }
+        if(!validateAddHD()){
+            return;
+        }
+
         String maHoaDon = "HD" + (String.format("%05d",Integer.parseInt(hoaDonService.findAll().get(hoaDonService.findAll().size()-1).getMaHoaDon().replace("HD",""))+1)) ;
-        HoaDon hoaDon = new HoaDon();
-        hoaDon.setMaHoaDon(maHoaDon);
-        hoaDon.setNgayLapHoaDon(LocalDate.now());
-        hoaDon.setKhachHang(khachHangService.findById(txtMaKH.getText()));
-        hoaDon.setDiemTichLuySuDung(Integer.parseInt(txtDiemTichLuyDung.getText()));
-        hoaDon.setNhanVien(nhanVienService.getNhanVienById(txtMaNV.getText()));
-        hoaDon.setGhiChu(txtGhiChu.getText());
-        hoaDon.setTongTien(Double.parseDouble(txtTongTien.getText()));
+        HoaDon hoaDon = new HoaDon(LocalDate.now(),
+                maHoaDon, Integer.parseInt(txtDiemTichLuyDung.getText()),
+                txtGhiChu.getText().trim().toString(), khachHangService.findById(txtMaKH.getText()),
+                nhanVienService.getNhanVienById(txtMaNV.getText()));
+
         List<ChiTietHoaDon> chiTietHoaDonList = new ArrayList<>();
             for (int i = 0; i < tableModel.getRowCount(); i++) {
                 String maSP = tableModel.getValueAt(i, 0).toString().split("_")[0];
@@ -708,8 +702,11 @@ public class PanelHoaDon extends JPanel {
                 chiTietHoaDonList.add(cthd);
             }
         hoaDon.setChiTietHoaDons(chiTietHoaDonList);
+        hoaDon.setDiemTichLuySuDung(Integer.parseInt(txtDiemTichLuyDung.getText()));
 
         if(hoaDonService.lapHoaDon(hoaDon)){
+            int diemTichLuyCong = (int) Math.ceil(hoaDon.getTongTien() * 0.01);
+            khachHangService.capNhatDiemTichLuy(hoaDon.getKhachHang().getMaKhachHang(), diemTichLuyCong - hoaDon.getDiemTichLuySuDung());
             JOptionPane.showMessageDialog(null, "Thêm hóa đơn thành công", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
             resetTable();
             resetForm();

@@ -113,7 +113,7 @@ public class JDialogHoaDon extends JDialog implements ActionListener{
 
         // Thông tin khách hàng
         bottomPanel.add(new JLabel("Khách hàng: " + HoaDonDTO.getHoaDon().getKhachHang().getTenKhachHang()));
-        bottomPanel.add(new JLabel("Số điện thoại: " + HoaDonDTO.getHoaDon().getKhachHang().getTenKhachHang()));
+        bottomPanel.add(new JLabel("Số điện thoại: " + HoaDonDTO.getHoaDon().getKhachHang().getSoDienThoai()));
         bottomPanel.add(new JLabel("Điểm tích lũy hiện tại: " + HoaDonDTO.getHoaDon().getKhachHang().getDiemTichLuy() + " điểm"));
 
         // Nút đóng
@@ -338,7 +338,7 @@ public class JDialogHoaDon extends JDialog implements ActionListener{
 
             // Ô số tiền
 
-            PdfPCell totalPriceCell = new PdfPCell(new Paragraph(df.format(hoaDon.getTongTien() - hoaDon.getKhachHang().getDiemTichLuy()) + " VND", finalLabelFont));
+            PdfPCell totalPriceCell = new PdfPCell(new Paragraph(df.format(hoaDon.getTongTien()) + " VND", finalLabelFont));
             totalPriceCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
             totalPriceCell.setBorder(PdfPCell.NO_BORDER); // Không viền
             finalTable.addCell(totalPriceCell);
@@ -354,7 +354,7 @@ public class JDialogHoaDon extends JDialog implements ActionListener{
             finalTable.addCell(moneyCell);
 
             // Ô Tổng tiền
-            PdfPCell moneyFinalCell = new PdfPCell(new Paragraph(df.format(hoaDon.getTongTien() - hoaDon.getKhachHang().getDiemTichLuy()) + " VND", finalLabelFont));
+            PdfPCell moneyFinalCell = new PdfPCell(new Paragraph(df.format(hoaDon.getTongTien()) + " VND", finalLabelFont));
             moneyFinalCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
             moneyFinalCell.setBorder(PdfPCell.NO_BORDER); // Không viền
             finalTable.addCell(moneyFinalCell);
