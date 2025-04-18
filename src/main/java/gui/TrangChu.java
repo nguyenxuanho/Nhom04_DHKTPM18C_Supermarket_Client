@@ -17,8 +17,17 @@ import java.rmi.RemoteException;
 public class TrangChu extends JFrame {
     private CardLayout cardLayout;
     private JPanel contentPanel;
-    private static JPanel trangchu;
-    private static JPanel selectedPanel = null;
+    private JButton activeButton;
+
+    private void setActiveButton(JButton button) {
+        if (activeButton != null) {
+            activeButton.setBackground(new Color(0, 123, 255));
+        }
+        activeButton = button;
+        if (activeButton != null) {
+            activeButton.setBackground(new Color(0, 86, 179));
+        }
+    }
 
     private int x;
     private int y;
@@ -30,6 +39,7 @@ public class TrangChu extends JFrame {
         try {
             // Set FlatLaf Light theme
             UIManager.setLookAndFeel(new FlatLightLaf());
+            UIManager.put("Button.arc", 5);
         } catch (UnsupportedLookAndFeelException e) {
             e.printStackTrace();
         }
@@ -157,15 +167,16 @@ public class TrangChu extends JFrame {
         menuPanel.add(appTitle);
 
 
-        JButton btnDashboard = createMenuButton("Trang chủ");
-        JButton btnSanPham = createMenuButton("Sản phẩm");
-        JButton btnKhachHang = createMenuButton("Khách hàng");
-        JButton btnHoaDon = createMenuButton("Hóa đơn");
-        JButton btnDanhMucSanPham = createMenuButton("Danh mục sản phẩm");
-        JButton btnNhanVien = createMenuButton("Nhân viên");
-        JButton btnTaiKhoan = createMenuButton("Tài khoản");
-        JButton btnThongKe = createMenuButton("Thống kê");
-        JButton btnTimHoaDon = createMenuButton("Tìm hóa đơn");
+        JButton btnDashboard = createMenuButton("Trang chủ", "/image/home.png");
+        JButton btnSanPham = createMenuButton("Sản phẩm", "/image/product.png");
+        JButton btnKhachHang = createMenuButton("Khách hàng", "/image/customer.png");
+        JButton btnHoaDon = createMenuButton("Hóa đơn", "/image/invoice.png");
+        JButton btnDanhMucSanPham = createMenuButton("Danh mục sản phẩm", "/image/category.png");
+        JButton btnNhanVien = createMenuButton("Nhân viên", "/image/staff.png");
+        JButton btnTaiKhoan = createMenuButton("Tài khoản", "/image/account.png");
+        JButton btnThongKe = createMenuButton("Thống kê", "/image/statistics.png");
+        JButton btnTimHoaDon = createMenuButton("Tìm hóa đơn", "/image/search.png");
+
 
 
 
@@ -279,35 +290,77 @@ public class TrangChu extends JFrame {
 
         add(contentPanel, BorderLayout.CENTER);
 
-        btnDashboard.addActionListener((ActionEvent e) -> cardLayout.show(contentPanel, "dashboard"));
-        btnSanPham.addActionListener((ActionEvent e) -> cardLayout.show(contentPanel, "sanpham"));
-        btnKhachHang.addActionListener((ActionEvent e) -> cardLayout.show(contentPanel, "khachhang"));
-        btnHoaDon.addActionListener((ActionEvent e) -> cardLayout.show(contentPanel, "hoadon"));
-        btnThongKe.addActionListener((ActionEvent e) -> cardLayout.show(contentPanel, "thongke"));
-        btnDanhMucSanPham.addActionListener((ActionEvent e) -> cardLayout.show(contentPanel, "danhmucsanpham"));
-        btnNhanVien.addActionListener((ActionEvent e) -> cardLayout.show(contentPanel, "nhanvien"));
-        btnTaiKhoan.addActionListener((ActionEvent e) -> cardLayout.show(contentPanel, "taikhoan"));
-        btnTimHoaDon.addActionListener((ActionEvent e) -> cardLayout.show(contentPanel, "timhoadon"));
+        setActiveButton(btnDashboard);
+        btnDashboard.addActionListener((ActionEvent e) -> {
+            cardLayout.show(contentPanel, "dashboard");
+            setActiveButton(btnDashboard);
+        });
+        btnSanPham.addActionListener((ActionEvent e) -> {
+            cardLayout.show(contentPanel, "sanpham");
+            setActiveButton(btnSanPham);
+        });
+        btnKhachHang.addActionListener((ActionEvent e) -> {
+            cardLayout.show(contentPanel, "khachhang");
+            setActiveButton(btnKhachHang);
+        });
+        btnHoaDon.addActionListener((ActionEvent e) -> {
+            cardLayout.show(contentPanel, "hoadon");
+            setActiveButton(btnHoaDon);
+        });
+        btnThongKe.addActionListener((ActionEvent e) -> {
+            cardLayout.show(contentPanel, "thongke");
+            setActiveButton(btnThongKe);
+        });
+        btnDanhMucSanPham.addActionListener((ActionEvent e) -> {
+            cardLayout.show(contentPanel, "danhmucsanpham");
+            setActiveButton(btnDanhMucSanPham);
+        });
+        btnNhanVien.addActionListener((ActionEvent e) -> {
+            cardLayout.show(contentPanel, "nhanvien");
+            setActiveButton(btnNhanVien);
+        });
+        btnTaiKhoan.addActionListener((ActionEvent e) -> {
+            cardLayout.show(contentPanel, "taikhoan");
+            setActiveButton(btnTaiKhoan);
+        });
+        btnTimHoaDon.addActionListener((ActionEvent e) -> {
+            cardLayout.show(contentPanel, "timhoadon");
+            setActiveButton(btnTimHoaDon);
+        });
     }
 
-    private JButton createMenuButton(String text) {
+    private JButton createMenuButton(String text, String iconPath) {
         JButton button = new JButton(text);
+
+        // Thiết lập icon nếu có
+        if (iconPath != null && !iconPath.isEmpty()) {
+            ImageIcon originalIcon = new ImageIcon(getClass().getResource(iconPath));
+            Image scaledImage = originalIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH);
+            button.setIcon(new ImageIcon(scaledImage));
+            button.setIconTextGap(15); // Khoảng cách giữa icon và text
+        }
+
         button.setMaximumSize(new Dimension(230, 45));
         button.setAlignmentX(Component.CENTER_ALIGNMENT);
         button.setFont(new Font("Segoe UI", Font.PLAIN, 16));
         button.setFocusPainted(false);
         button.setForeground(Color.WHITE);
         button.setBackground(new Color(0, 123, 255));
-        button.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
+        button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 15));
         button.setHorizontalAlignment(SwingConstants.LEFT);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
+        // Hiệu ứng hover
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                button.setBackground(new Color(0, 102, 204));
+                if (!button.getBackground().equals(new Color(0, 86, 179))) {
+                    button.setBackground(new Color(0, 102, 204));
+                }
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                button.setBackground(new Color(0, 123, 255));
+                if (!button.getBackground().equals(new Color(0, 86, 179))) {
+                    button.setBackground(new Color(0, 123, 255));
+                }
             }
         });
 
