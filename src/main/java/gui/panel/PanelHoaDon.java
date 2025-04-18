@@ -388,6 +388,7 @@ public class PanelHoaDon extends JPanel {
         jLableMaSP.setPreferredSize(new Dimension(90, 25));
         txtMaSP = new JTextField(20);
         btnTimSP = new JButton("Tìm");
+        btnTimSP.setIcon(new ImageIcon(getClass().getResource("/image/search.png")));
 
         ComponentUtils.setButtonMain(btnTimSP);
         jLableDonGia = new JLabel("Đơn giá:") ;
@@ -417,9 +418,9 @@ public class PanelHoaDon extends JPanel {
         box2.add(jLabelSoLuong);
         box2.add(txtSoLuong);
         box2.add(buttonEmpty);
-        box2.add(Box.createHorizontalStrut(48));
+        box2.add(Box.createHorizontalStrut(53));
         jLabelThanhTien = new JLabel("Thành tiền:");
-        jLabelThanhTien.setPreferredSize(new Dimension(90, 29));
+        jLabelThanhTien.setPreferredSize(new Dimension(90, 33));
         txtThanhTien = new JTextField(28);
         txtThanhTien.setEditable(false);
         box2.add(jLabelThanhTien);

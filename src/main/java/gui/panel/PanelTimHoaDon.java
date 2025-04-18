@@ -195,6 +195,7 @@ public class PanelTimHoaDon extends JPanel {
         txtTimMaHoaDon.setFont(new Font("Arial", Font.PLAIN, 14));
 
         btnTimMaHD = new JButton("Tìm kiếm");
+        btnTimMaHD.setIcon(new ImageIcon(getClass().getResource("/image/search.png")));
         btnTimMaHD.setFont(new Font("Arial", Font.BOLD, 14));
         btnTimMaHD.setBackground(new Color(33, 150, 243));
         btnTimMaHD.setForeground(Color.WHITE);

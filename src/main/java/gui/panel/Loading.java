@@ -98,7 +98,7 @@ public class Loading extends JFrame {
             case 100:
                 this.dispose(); // Đóng cửa sổ tải
 
-                new TrangChu().setVisible(true);
+                new LoginForm().setVisible(true);
                 break;
         }
     }
