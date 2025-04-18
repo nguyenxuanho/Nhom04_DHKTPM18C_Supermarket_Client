@@ -1,5 +1,6 @@
 package gui.panel;
 
+import dto.HoaDonDTO;
 import dto.TaiKhoanDTO;
 import gui.components.ComponentUtils;
 import io.github.cdimascio.dotenv.Dotenv;
@@ -13,23 +14,23 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.rmi.RemoteException;
+import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class PanelHoaDon extends JPanel {
     // Các trường cho phần chi tiết sản phẩm
     private JTextField txtMaSP, txtDonGia, txtSoLuong, txtThanhTien, txtTimMaHoaDon, txtTimTenKH;
     private JButton btnTimSP, btnThem , btnXoa, btnSua, btnReset, btnTimMaHD, btnTimKHTheoSDT ;
+
+    private DecimalFormat df = new DecimalFormat("#,##0.00");
 
     // Các thành phần bên phải
     private JTextField txtMaNV;
@@ -126,8 +127,11 @@ public class PanelHoaDon extends JPanel {
         panel.add(lblSDT, gbc);
         gbc.gridx = 1;
         panel.add(txtTimSDT, gbc);
-         btnTimKHTheoSDT = new JButton("Tìm");
-        ComponentUtils.setButton(btnTimKHTheoSDT, new Color(33, 150, 243));
+        btnTimKHTheoSDT = new JButton("Tìm");
+        btnTimKHTheoSDT.setForeground(new Color(255, 255, 255));
+        btnTimKHTheoSDT.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnTimKHTheoSDT.setBackground(new Color(33, 150, 243));
+//        ComponentUtils.setButton(btnTimKHTheoSDT, new Color(33, 150, 243));
         gbc.gridx = 2;
         panel.add(btnTimKHTheoSDT, gbc);
         JLabel lblDiemTichLuy = new JLabel("Điểm tích lũy:");
@@ -351,7 +355,7 @@ public class PanelHoaDon extends JPanel {
     private JPanel createTablePanel() {
         JPanel panel = new JPanel(new BorderLayout());
 
-        String[] columns = {"Sản phẩm", "Đơn giá", "Số lượng", "Thành tiền"};
+        String[] columns = {"Sản phẩm", "Khuyến Mãi", "Thuế VAT", "Đơn giá", "Số lượng", "Thành tiền"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -384,26 +388,27 @@ public class PanelHoaDon extends JPanel {
         jLableMaSP.setPreferredSize(new Dimension(90, 25));
         txtMaSP = new JTextField(20);
         btnTimSP = new JButton("Tìm");
-        btnTimSP.setPreferredSize(new Dimension(60, 25));
-        ComponentUtils.setButton(btnTimSP, new Color(33, 150, 243));
+
+        ComponentUtils.setButtonMain(btnTimSP);
         jLableDonGia = new JLabel("Đơn giá:") ;
         jLableDonGia.setPreferredSize(new Dimension(90, 25));
         txtDonGia = new JTextField(20);
         txtDonGia.setEditable(false);
         jLabelSoLuong = new JLabel("Số lượng");
         jLabelSoLuong.setPreferredSize(new Dimension(90, 25));
-        txtSoLuong = new JTextField(20);
+        txtSoLuong = new JTextField(27);
 
         buttonEmpty = new JLabel("");
         buttonEmpty.setPreferredSize(new Dimension(95, 0));
         box1.add(Box.createHorizontalStrut(50));
         box1.add(jLableMaSP);
         box1.add(txtMaSP);
+        box1.add(Box.createHorizontalStrut(10));
         box1.add(btnTimSP);
         box1.add(Box.createHorizontalStrut(50));
         box1.add(jLableDonGia);
         box1.add(txtDonGia);
-        box1.add(Box.createHorizontalStrut(50));
+        box1.add(Box.createHorizontalStrut(30));
        
 
         Box box2 = Box.createHorizontalBox();
@@ -412,14 +417,14 @@ public class PanelHoaDon extends JPanel {
         box2.add(jLabelSoLuong);
         box2.add(txtSoLuong);
         box2.add(buttonEmpty);
-        box2.add(Box.createHorizontalStrut(50));
+        box2.add(Box.createHorizontalStrut(48));
         jLabelThanhTien = new JLabel("Thành tiền:");
-        jLabelThanhTien.setPreferredSize(new Dimension(90, 25));
-        txtThanhTien = new JTextField(20);
+        jLabelThanhTien.setPreferredSize(new Dimension(90, 29));
+        txtThanhTien = new JTextField(28);
         txtThanhTien.setEditable(false);
         box2.add(jLabelThanhTien);
         box2.add(txtThanhTien);
-        box2.add(Box.createHorizontalStrut(50));
+        box2.add(Box.createHorizontalStrut(28));
         
 
         boxFormInput.add(Box.createVerticalStrut(10));
@@ -549,7 +554,7 @@ public class PanelHoaDon extends JPanel {
         }
         return true;
     }
-    private boolean addCTHDVaoTable(){
+    private boolean addCTHDVaoTable() throws RemoteException, ParseException {
         if(!validateCTHD()){
             return false;
         }
@@ -558,17 +563,64 @@ public class PanelHoaDon extends JPanel {
         String soLuong = txtSoLuong.getText().trim();
         String thanhTien = txtThanhTien.getText().trim();
 
-        Object[] rowData = {maSP, donGia, soLuong, thanhTien};
-        tableModel.addRow(rowData);
-        resetForm();
-        calculateTongTien();
-        return true;
+        boolean isExist = false;
+        for (int i = 0; i < tableModel.getRowCount(); i++) {
+            String maSanPham = tableModel.getValueAt(i, 0).toString().split("_")[0];
+            if(maSanPham.equalsIgnoreCase(maSP)){
+                isExist = true;
+                break;
+            }
+        }
+
+        if(isExist){
+            for (int i = 0; i < tableModel.getRowCount(); i++) {
+                String maSanPham = tableModel.getValueAt(i, 0).toString().split("_")[0];
+                if(maSanPham.equalsIgnoreCase(maSP)){
+                    String thanhTienGoc = tableModel.getValueAt(i, 5).toString().split(" VND")[0];
+                    Number numberThanhTienGoc = df.parse(thanhTienGoc);
+                    tableModel.setValueAt(Integer.parseInt(soLuong) + Integer.parseInt(tableModel.getValueAt(i, 4).toString()) + "", i, 4);
+                    tableModel.setValueAt(Double.parseDouble(txtThanhTien.getText()) + numberThanhTienGoc.doubleValue(), i, 5);
+                    resetForm();
+                    calculateTongTien();
+                    break;
+                }
+            }
+        }
+        else {
+            SanPham sanPham = sanPhamService.findOne(maSP);
+
+            if(sanPham != null && sanPham.getKhuyenMai() == null){
+                Object[] rowData = {maSP + "_" + sanPham.getTenSanPham(),
+                        "0%",
+                        String.format("%.2f", sanPham.getThueVAT() * 100) + "%",
+                        df.format(Double.parseDouble(donGia)) + " VND",
+                        soLuong,
+                        df.format(Double.parseDouble(thanhTien)) + " VND"
+                };
+                tableModel.addRow(rowData);
+            }
+            else if (sanPham != null  && sanPham.getKhuyenMai() != null){
+                Object[] rowData = {maSP + "_" + sanPham.getTenSanPham(),
+                        String.format("%.2f", (sanPham.getKhuyenMai().getNgayKetThuc().isAfter(LocalDate.now()) ? 0 : sanPham.getKhuyenMai().getTienGiam()) * 100) + "%",
+                        String.format("%.2f", sanPham.getThueVAT() * 100) + "%",
+                        df.format(Double.parseDouble(donGia)) + " VND",
+                        soLuong,
+                        df.format(Double.parseDouble(thanhTien)) + " VND"
+                };
+                tableModel.addRow(rowData);
+            }
+            resetForm();
+            calculateTongTien();
+        }
+
+        return false;
     }
-    private void calculateTongTien(){
+    private void calculateTongTien() throws ParseException {
         double tongTien = 0;
         for (int i = 0; i < tableModel.getRowCount(); i++) {
-            String thanhTienStr = (String) tableModel.getValueAt(i, 3);
-            double thanhTien = Double.parseDouble(thanhTienStr);
+            String thanhTienStr = tableModel.getValueAt(i, 5).toString().split("VND")[0];
+            Number number = df.parse(thanhTienStr);
+            double thanhTien = number.doubleValue();
             tongTien += thanhTien;
         }
         txtTongTien.setText(String.valueOf(tongTien));
@@ -584,10 +636,12 @@ public class PanelHoaDon extends JPanel {
             return;
         }
         txtMaSP.setText(maSP);
-        if(khuyenMaiService.getKhuyenMaiBySanPhamId(maSP) == null){
-            txtDonGia.setText(String.valueOf(sp.getGiaBan()));}
+
+        if(sp.getKhuyenMai() == null || sp.getKhuyenMai().getNgayKetThuc().isAfter(LocalDate.now())){
+            txtDonGia.setText(String.valueOf(sp.getGiaBan()));
+        }
         else {
-            txtDonGia.setText(String.valueOf(sp.getGiaBan() - khuyenMaiService.getKhuyenMaiBySanPhamId(maSP).getTienGiam()));
+            txtDonGia.setText(String.valueOf(sp.getGiaBan()));
         }
 
     }
@@ -596,33 +650,41 @@ public class PanelHoaDon extends JPanel {
         if (!validateCTHD()) return;
 
         try {
-            double donGia = Double.parseDouble(txtDonGia.getText());
-            int soLuong = Integer.parseInt(txtSoLuong.getText());
-            txtThanhTien.setText(String.valueOf(donGia * soLuong));
+            String maSP = txtMaSP.getText();
+            SanPham sanPham = sanPhamService.findOne(maSP);
+            if(sanPham != null){
+                double donGia = Double.parseDouble(txtDonGia.getText());
+                int soLuong = Integer.parseInt(txtSoLuong.getText());
+                double tienGiam = sanPham.getKhuyenMai() == null || sanPham.getKhuyenMai().getNgayKetThuc().isAfter(LocalDate.now()) ? 0.0 : sanPham.getKhuyenMai().getTienGiam();
+                txtThanhTien.setText(String.valueOf(donGia * soLuong * (1 - tienGiam) * (1 + sanPham.getThueVAT())));
+            }
         } catch (NumberFormatException e) {
             txtThanhTien.setText("");
         }
     }
 
-    private  void handleClickRowTable() {
+    private  void handleClickRowTable() throws ParseException {
         int selectedRow = table.getSelectedRow();
         if (selectedRow != -1) {
-            String maSP = (String) tableModel.getValueAt(selectedRow, 0);
-            String donGia = (String) tableModel.getValueAt(selectedRow, 1);
-            String soLuong = (String) tableModel.getValueAt(selectedRow, 2);
-            String thanhTien = (String) tableModel.getValueAt(selectedRow, 3);
+            String maSP = tableModel.getValueAt(selectedRow, 0).toString().split("_")[0];
+            String donGia =  tableModel.getValueAt(selectedRow, 3).toString().split(" VND")[0];
+            String soLuong = (String) tableModel.getValueAt(selectedRow, 4);
+            String thanhTien =  tableModel.getValueAt(selectedRow, 5).toString().split(" VND")[0];
+
+            Number numberDonGia = df.parse(donGia);
+            Number numberThanhTien = df.parse(thanhTien);
 
             txtMaSP.setText(maSP);
-            txtDonGia.setText(donGia);
+            txtDonGia.setText(numberDonGia.doubleValue() + "");
             txtSoLuong.setText(soLuong);
-            txtThanhTien.setText(thanhTien);
+            txtThanhTien.setText(numberThanhTien.doubleValue() + "");
         }
     }
-    private void handleAddHD() throws RemoteException {
-        if(!validateAddHD()){
-            return;
-        }
-        String maHoaDon ="HD" + (String.format("%05d",Integer.parseInt(hoaDonService.findAll().get(hoaDonService.findAll().size()-1).getMaHoaDon().replace("HD",""))+1)) ;
+    private void handleAddHD() throws RemoteException, ParseException, NamingException {
+//        if(!validateAddHD()){
+//            return;
+//        }
+        String maHoaDon = "HD" + (String.format("%05d",Integer.parseInt(hoaDonService.findAll().get(hoaDonService.findAll().size()-1).getMaHoaDon().replace("HD",""))+1)) ;
         HoaDon hoaDon = new HoaDon();
         hoaDon.setMaHoaDon(maHoaDon);
         hoaDon.setNgayLapHoaDon(LocalDate.now());
@@ -632,12 +694,16 @@ public class PanelHoaDon extends JPanel {
         hoaDon.setGhiChu(txtGhiChu.getText());
         hoaDon.setTongTien(Double.parseDouble(txtTongTien.getText()));
         List<ChiTietHoaDon> chiTietHoaDonList = new ArrayList<>();
-        System.out.println("oke1");
             for (int i = 0; i < tableModel.getRowCount(); i++) {
-                String maSP = (String) tableModel.getValueAt(i, 0);
-                double donGia = Double.parseDouble((String) tableModel.getValueAt(i, 1));
-                int soLuong = Integer.parseInt((String) tableModel.getValueAt(i, 2));
-                ChiTietHoaDon cthd = new ChiTietHoaDon(soLuong, donGia, maHoaDon, maSP);
+                String maSP = tableModel.getValueAt(i, 0).toString().split("_")[0];
+                String donGia = tableModel.getValueAt(i, 3).toString().split(" VND")[0];
+                double khuyenMai = Double.parseDouble(tableModel.getValueAt(i, 1).toString().split("%")[0]);
+                double thueVAT = Double.parseDouble(tableModel.getValueAt(i, 2).toString().split("%")[0]);
+                Number numberDonGia = df.parse(donGia);
+                double donGiaMain = numberDonGia.doubleValue();
+                double donGiaAfterThueAndKhuyenMai = donGiaMain * (1 - (khuyenMai/100)) * (1 + (thueVAT/100));
+                int soLuong = Integer.parseInt((String) tableModel.getValueAt(i, 4));
+                ChiTietHoaDon cthd = new ChiTietHoaDon(soLuong, donGiaAfterThueAndKhuyenMai, maHoaDon, maSP);
                 chiTietHoaDonList.add(cthd);
             }
         hoaDon.setChiTietHoaDons(chiTietHoaDonList);
@@ -652,6 +718,12 @@ public class PanelHoaDon extends JPanel {
             txtDiemTichLuy.setText("");
             txtDiemTichLuyDung.setText("");
             txtTongTien.setText("");
+
+            HoaDonDTO.setHoaDon(hoaDon);
+            JFrame frame = new JFrame();
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            JDialogHoaDon dialog = new JDialogHoaDon(frame);
+            dialog.setVisible(true);
         }
     }
     private void resetTable(){
@@ -665,8 +737,12 @@ public class PanelHoaDon extends JPanel {
         btnThem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if(addCTHDVaoTable()){
-                    JOptionPane.showMessageDialog(null, "Thêm thành công", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+                try {
+                    if(addCTHDVaoTable()){
+                        JOptionPane.showMessageDialog(null, "Thêm thành công", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+                    }
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
                 }
             }
         });
@@ -692,14 +768,18 @@ public class PanelHoaDon extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 try {
                     handleAddHD();
-                } catch (RemoteException ex) {
+                } catch (RemoteException | ParseException | NamingException ex) {
                     throw new RuntimeException(ex);
                 }
             }
         });
         table.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                handleClickRowTable();
+                try {
+                    handleClickRowTable();
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
         txtSoLuong.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -716,7 +796,7 @@ public class PanelHoaDon extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 try {
                     updateChiTiet();
-                } catch (RemoteException ex) {
+                } catch (Exception ex) {
                     ex.printStackTrace();
                 }
             }
@@ -726,7 +806,7 @@ public class PanelHoaDon extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 try {
                     deleteChiTiet();
-                } catch (RemoteException ex) {
+                } catch (RemoteException | ParseException ex) {
                     ex.printStackTrace();
                 }
             }
@@ -740,7 +820,7 @@ public class PanelHoaDon extends JPanel {
         });
 
     }
-    private boolean updateChiTiet() throws RemoteException {
+    private boolean updateChiTiet() throws RemoteException, ParseException {
         if (!validateCTHD()) {
             return false;
         }
@@ -751,11 +831,16 @@ public class PanelHoaDon extends JPanel {
             String donGia = txtDonGia.getText().trim();
             String soLuong = txtSoLuong.getText().trim();
             String thanhTien = txtThanhTien.getText().trim();
+            SanPham sanPham = sanPhamService.findOne(maSP);
+            if(sanPham != null){
+                tableModel.setValueAt(maSP + "_" + sanPham.getTenSanPham(), selectedRow, 0);
+                tableModel.setValueAt(String.format("%.2f", sanPham.getKhuyenMai().getTienGiam() * 100) + "%", selectedRow, 1);
+                tableModel.setValueAt(String.format("%.2f", sanPham.getThueVAT() * 100) + "%", selectedRow, 2);
+                tableModel.setValueAt(df.format(Double.parseDouble(donGia)) + " VND", selectedRow, 3);
+                tableModel.setValueAt(soLuong, selectedRow, 4);
+                tableModel.setValueAt(df.format(Double.parseDouble(thanhTien)) + " VND", selectedRow, 5);
+            }
 
-            tableModel.setValueAt(maSP, selectedRow, 0);
-            tableModel.setValueAt(donGia, selectedRow, 1);
-            tableModel.setValueAt(soLuong, selectedRow, 2);
-            tableModel.setValueAt(thanhTien, selectedRow, 3);
 
             resetForm();
             calculateTongTien();
@@ -767,7 +852,7 @@ public class PanelHoaDon extends JPanel {
 
     }
 
-    private boolean deleteChiTiet() throws RemoteException {
+    private boolean deleteChiTiet() throws RemoteException, ParseException {
         int selectedRow = table.getSelectedRow();
         if (selectedRow != -1) {
                 tableModel.removeRow(selectedRow);

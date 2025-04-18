@@ -69,6 +69,9 @@ dependencies {
 
     implementation(files("libs/swing-toast-notifications-1.0.4.jar"))
 
+    // https://mvnrepository.com/artifact/com.itextpdf/itextpdf
+    implementation 'com.itextpdf:itextpdf:5.5.13.3'
+
 
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")

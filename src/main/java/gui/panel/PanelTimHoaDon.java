@@ -18,39 +18,32 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.rmi.RemoteException;
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 
 public class PanelTimHoaDon extends JPanel {
     // Các trường cho phần chi tiết sản phẩm
-    private JTextField txtMaSP, txtDonGia, txtSoLuong, txtThanhTien, txtTimMaHoaDon, txtTimTenKH;
-    private JButton btnTimSP, btnThem , btnXoa, btnSua, btnReset, btnTimMaHD, btnTimKHTheoSDT ;
+    private JTextField txtTimMaHoaDon, txtTimTenKH;
+    private JButton btnTimMaHD ;
+    private DecimalFormat df = new DecimalFormat("#,##0.00");
+
 
     // Các thành phần bên phải
     private JTextField txtMaNV;
     private JTextField txtDiemTichLuy;
     private JTextArea txtGhiChu;
-    private JButton btnThemHD;
-
     private JTable table;
     private DefaultTableModel tableModel;
     private final HoaDonService hoaDonService;
     private  final ChiTietHoaDonService chiTietHoaDonService;
-    private  final KhachHangService khachHangService;
     private  final TaiKhoanService taiKhoanService;
-    private  final NhanVienService nhanVienService;
-    private  final SanPhamService sanPhamService;
-    private  final KhuyenMaiService khuyenMaiService;
-
     private final Dotenv dotenv = Dotenv.load();
     private final String drivername = dotenv.get("DRIVER_NAME");
-    private JLabel jLableMaSP;
-    private JLabel jLableDonGia;
-    private JLabel jLabelSoLuong , jLabelThanhTien, lblMaHoaDon, lblDiem, lbltongTien;
-    private JTextField txtMaKH;
+    private JLabel lblMaHoaDon, lbltongTien, lblDiem;
+    private JTextField txtMaKH,txtMaSP, txtDonGia, txtSoLuong, txtThanhTien;
     private JTextField txtTimSDT;
-    private JLabel buttonEmpty;
     private JTextField txtTongTien, txtTim;
     private JTextField txtDiemTichLuyDung;
     public PanelTimHoaDon() throws NamingException, RemoteException {
@@ -59,11 +52,7 @@ public class PanelTimHoaDon extends JPanel {
 
         Context context = new InitialContext();
         this.hoaDonService = (HoaDonService) context.lookup("rmi://" + drivername + ":9090/hoaDonService");
-        this.khachHangService = (KhachHangService) context.lookup("rmi://" + drivername + ":9090/khachHangService");
         this.taiKhoanService = (TaiKhoanService) context.lookup("rmi://" + drivername + ":9090/taiKhoanService");
-        this.nhanVienService = (NhanVienService) context.lookup("rmi://" + drivername + ":9090/nhanVienService");
-        this.sanPhamService = (SanPhamService) context.lookup("rmi://" + drivername + ":9090/sanPhamService");
-        this.khuyenMaiService = (KhuyenMaiService) context.lookup("rmi://" + drivername + ":9090/khuyenMaiService");
         this.chiTietHoaDonService = (ChiTietHoaDonService) context.lookup("rmi://" + drivername + ":9090/chiTietHoaDonService");
 
 
@@ -375,7 +364,7 @@ public class PanelTimHoaDon extends JPanel {
     private void hienThiKetQua(HoaDon hoaDon,List<ChiTietHoaDon> dscthd){
         tableModel.setRowCount(0);
         for (ChiTietHoaDon cthd : dscthd) {
-            Object[] rowData = {cthd.getSanPham().getMaSanPham(), cthd.getDonGia(), cthd.getSoLuong(), cthd.getThanhTien()};
+            Object[] rowData = {cthd.getSanPham().getMaSanPham(), df.format(cthd.getDonGia()) + "VND", cthd.getSoLuong(), df.format(cthd.getThanhTien()) + "VND"};
             tableModel.addRow(rowData);
         }
         txtMaKH.setText(hoaDon.getKhachHang().getMaKhachHang());
@@ -384,7 +373,7 @@ public class PanelTimHoaDon extends JPanel {
         txtDiemTichLuy.setText(hoaDon.getKhachHang().getDiemTichLuy()+"");
         txtMaNV.setText(hoaDon.getNhanVien().getMaNhanVien());
         txtGhiChu.setText(hoaDon.getGhiChu());
-        txtTongTien.setText(hoaDon.getTongTien()+"");
+        txtTongTien.setText(df.format(hoaDon.getTongTien())+"VND");
     }
 
 

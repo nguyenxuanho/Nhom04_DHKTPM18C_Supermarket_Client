@@ -1,6 +1,7 @@
 package gui;
 
 import com.formdev.flatlaf.*;
+import dto.TaiKhoanDTO;
 import gui.panel.*;
 
 import javax.naming.NamingException;
@@ -82,6 +83,15 @@ public class TrangChu extends JFrame {
 
 // Thêm icon bên trái tiêu đề (tùy chọn)
 
+        ImageIcon IconHeader = new ImageIcon(getClass().getResource("/image/store.png"));
+
+        // Resize icon (30x30 pixels)
+        Image scaledImageHeader = IconHeader.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
+        JLabel iconLabel = new JLabel(new ImageIcon(scaledImageHeader));
+        iconLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10)); // Khoảng cách với text
+
+
+        titleContainer.add(iconLabel);
         titleContainer.add(titleLabel);
         headerPanel.add(titleContainer, BorderLayout.WEST);
 
@@ -116,7 +126,12 @@ public class TrangChu extends JFrame {
 
 
 // Label chào mừng
-        JLabel welcomeLabel = new JLabel("Xin chào, Nguyễn Xuân Hồ");
+//        JLabel welcomeLabel = new JLabel(
+//                TaiKhoanDTO.getTaiKhoan().getNhanVien().getChucVuNhanVien().toString()
+//                        + ": Xin chào, " + TaiKhoanDTO.getTaiKhoan().getNhanVien().getTenNhanVien());
+        JLabel welcomeLabel = new JLabel(
+
+                         ": Xin chào, " );
         welcomeLabel.setFont(new Font("Segoe UI", Font.PLAIN, 16));
         welcomeLabel.setForeground(Color.WHITE);
         welcomeLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 15));
@@ -207,7 +222,7 @@ public class TrangChu extends JFrame {
         jPanel.setLayout(null);
 
 //        JLabel name = new JLabel(TaiKhoanDTO.getTaiKhoan().getNhanVien().getTenNhanVien());
-        JLabel name = new JLabel("Xuân Hồ");
+        JLabel name = new JLabel("Đăng xuất tài khoản");
 
         name.setFont(new Font("Tahoma", Font.PLAIN, 15));
         name.setBounds(44, 10, 152, 24);

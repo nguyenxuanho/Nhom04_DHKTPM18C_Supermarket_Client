@@ -70,6 +70,12 @@ public class ComponentUtils {
         tableHeader.setPreferredSize(new Dimension(tableHeader.getWidth(), 40));
 
 
+        // Căn giữa chữ trong tất cả các cột
+        for (int i = 0; i < table.getColumnCount(); i++) {
+            table.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+        }
+
+
 
         // Tạo renderer tùy chỉnh với hiệu ứng hover
         table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
