@@ -89,9 +89,7 @@ public class PanelTimHoaDon extends JPanel {
         JLabel lblMaNV = new JLabel("Mã NV:");
         txtMaNV = new JTextField(20);
         txtMaNV.setEditable(false);
-        if(TaiKhoanDTO.getTaiKhoan()!=null){
-            txtMaNV.setText(taiKhoanService.getNhanVienByTaiKhoan(TaiKhoanDTO.getTaiKhoan().getMaTaiKhoan()).getMaNhanVien());
-        }
+
         gbc.gridx = 0; gbc.gridy = 0;
 
         panel.add(lblMaNV, gbc);
