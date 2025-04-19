@@ -559,6 +559,7 @@ public class PanelHoaDon extends JPanel {
         String donGia = txtDonGia.getText().trim();
         String soLuong = txtSoLuong.getText().trim();
         String thanhTien = txtThanhTien.getText().trim();
+        SanPham sanPham = sanPhamService.findOne(maSP);
 
         boolean isExist = false;
         for (int i = 0; i < tableModel.getRowCount(); i++) {
@@ -572,7 +573,9 @@ public class PanelHoaDon extends JPanel {
         if(isExist){
             for (int i = 0; i < tableModel.getRowCount(); i++) {
                 String maSanPham = tableModel.getValueAt(i, 0).toString().split("_")[0];
-                if(maSanPham.equalsIgnoreCase(maSP)){
+                String soLuongTrongBang = tableModel.getValueAt(i, 4).toString();
+
+                if(maSanPham.equalsIgnoreCase(maSP) && sanPham.getSoLuongTon() >= (Integer.parseInt(soLuongTrongBang) + Integer.parseInt(soLuong))){
                     String thanhTienGoc = tableModel.getValueAt(i, 5).toString().split(" VND")[0];
                     Number numberThanhTienGoc = df.parse(thanhTienGoc);
                     tableModel.setValueAt(Integer.parseInt(soLuong) + Integer.parseInt(tableModel.getValueAt(i, 4).toString()) + "", i, 4);
@@ -580,13 +583,17 @@ public class PanelHoaDon extends JPanel {
                     resetForm();
                     calculateTongTien();
                     break;
+                } else if (sanPham.getSoLuongTon() < (Integer.parseInt(soLuongTrongBang) + Integer.parseInt(soLuong))){
+                    JOptionPane.showMessageDialog(null,
+                            "Số lượng tồn không đáp ứng đủ",
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE
+                    );
                 }
             }
         }
         else {
-            SanPham sanPham = sanPhamService.findOne(maSP);
-
-            if(sanPham != null && sanPham.getKhuyenMai() == null){
+            if(sanPham != null && sanPham.getKhuyenMai() == null && sanPham.getSoLuongTon() >= Integer.parseInt(soLuong)){
                 Object[] rowData = {maSP + "_" + sanPham.getTenSanPham(),
                         "0%",
                         String.format("%.2f", sanPham.getThueVAT() * 100) + "%",
@@ -595,8 +602,10 @@ public class PanelHoaDon extends JPanel {
                         df.format(Double.parseDouble(thanhTien)) + " VND"
                 };
                 tableModel.addRow(rowData);
+                resetForm();
+                calculateTongTien();
             }
-            else if (sanPham != null  && sanPham.getKhuyenMai() != null){
+            else if (sanPham != null  && sanPham.getKhuyenMai() != null && sanPham.getSoLuongTon() >= Integer.parseInt(soLuong)){
                 Object[] rowData = {maSP + "_" + sanPham.getTenSanPham(),
                         String.format("%.2f", (sanPham.getKhuyenMai().getNgayKetThuc().isAfter(LocalDate.now()) ? 0 : sanPham.getKhuyenMai().getTienGiam()) * 100) + "%",
                         String.format("%.2f", sanPham.getThueVAT() * 100) + "%",
@@ -605,9 +614,16 @@ public class PanelHoaDon extends JPanel {
                         df.format(Double.parseDouble(thanhTien)) + " VND"
                 };
                 tableModel.addRow(rowData);
+                resetForm();
+                calculateTongTien();
             }
-            resetForm();
-            calculateTongTien();
+            else {
+                JOptionPane.showMessageDialog(null,
+                        "Số lượng tồn không đáp ứng đủ",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
+            }
         }
 
         return false;
@@ -704,7 +720,10 @@ public class PanelHoaDon extends JPanel {
         hoaDon.setChiTietHoaDons(chiTietHoaDonList);
         hoaDon.setDiemTichLuySuDung(Integer.parseInt(txtDiemTichLuyDung.getText()));
 
+
+
         if(hoaDonService.lapHoaDon(hoaDon)){
+            sanPhamService.capNhatSoLuongSanPham(chiTietHoaDonList);
             int diemTichLuyCong = (int) Math.ceil(hoaDon.getTongTien() * 0.01);
             khachHangService.capNhatDiemTichLuy(hoaDon.getKhachHang().getMaKhachHang(), diemTichLuyCong - hoaDon.getDiemTichLuySuDung());
             JOptionPane.showMessageDialog(null, "Thêm hóa đơn thành công", "Thông báo", JOptionPane.INFORMATION_MESSAGE);

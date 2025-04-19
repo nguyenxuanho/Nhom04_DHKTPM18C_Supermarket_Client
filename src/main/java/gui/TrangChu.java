@@ -22,13 +22,15 @@ public class TrangChu extends JFrame {
 
     private void setActiveButton(JButton button) {
         if (activeButton != null) {
-            activeButton.setBackground(new Color(0, 123, 255));
+            activeButton.setBackground(Color.WHITE); // Không active thì trắng
         }
         activeButton = button;
         if (activeButton != null) {
-            activeButton.setBackground(new Color(0, 86, 179));
+            activeButton.setBackground(new Color(210, 227, 252)); // Màu đang chọn
         }
     }
+
+
 
     private int x;
     private int y;
@@ -44,6 +46,7 @@ public class TrangChu extends JFrame {
         } catch (UnsupportedLookAndFeelException e) {
             e.printStackTrace();
         }
+
 
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -170,7 +173,7 @@ public class TrangChu extends JFrame {
         JPanel menuPanel = new JPanel();
         menuPanel.setPreferredSize(new Dimension(260, getHeight()));
         menuPanel.setLayout(new BoxLayout(menuPanel, BoxLayout.Y_AXIS));
-        menuPanel.setBackground(new Color(88, 151, 220));
+        menuPanel.setBackground(new Color(135, 196, 243));
 
         JLabel appTitle = new JLabel("MENU", SwingConstants.CENTER);
         appTitle.setFont(new Font("Segoe UI", Font.BOLD, 22));
@@ -181,6 +184,7 @@ public class TrangChu extends JFrame {
 
 
         JButton btnDashboard = createMenuButton("Trang chủ", "/image/home.png");
+
         JButton btnSanPham = createMenuButton("Sản phẩm", "/image/product.png");
         JButton btnKhachHang = createMenuButton("Khách hàng", "/image/customer.png");
         JButton btnHoaDon = createMenuButton("Hóa đơn", "/image/invoice.png");
@@ -188,7 +192,7 @@ public class TrangChu extends JFrame {
         JButton btnNhanVien = createMenuButton("Nhân viên", "/image/staff.png");
         JButton btnTaiKhoan = createMenuButton("Tài khoản", "/image/account.png");
         JButton btnThongKe = createMenuButton("Thống kê", "/image/statistics.png");
-        JButton btnTimHoaDon = createMenuButton("Tìm hóa đơn", "/image/search.png");
+        JButton btnTimHoaDon = createMenuButton("Tìm hóa đơn", "/image/searchMenu.png");
 
 
 
@@ -345,40 +349,41 @@ public class TrangChu extends JFrame {
     private JButton createMenuButton(String text, String iconPath) {
         JButton button = new JButton(text);
 
-        // Thiết lập icon nếu có
         if (iconPath != null && !iconPath.isEmpty()) {
             ImageIcon originalIcon = new ImageIcon(getClass().getResource(iconPath));
             Image scaledImage = originalIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH);
             button.setIcon(new ImageIcon(scaledImage));
-            button.setIconTextGap(15); // Khoảng cách giữa icon và text
+            button.setIconTextGap(15);
         }
 
         button.setMaximumSize(new Dimension(230, 45));
         button.setAlignmentX(Component.CENTER_ALIGNMENT);
-        button.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        button.setFont(new Font("Segoe UI", Font.PLAIN, 15));
         button.setFocusPainted(false);
-        button.setForeground(Color.WHITE);
-        button.setBackground(new Color(0, 123, 255));
+        button.setForeground(Color.BLACK);
+        button.setBackground(Color.WHITE);  // Nền nhẹ nhàng
         button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 15));
         button.setHorizontalAlignment(SwingConstants.LEFT);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        // Hiệu ứng hover
+        // Hover
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                if (!button.getBackground().equals(new Color(0, 86, 179))) {
-                    button.setBackground(new Color(0, 102, 204));
+                if (!button.getBackground().equals(new Color(210, 227, 252))) {
+                    button.setBackground(new Color(230, 240, 250)); // Hover nhẹ
                 }
             }
+
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                if (!button.getBackground().equals(new Color(0, 86, 179))) {
-                    button.setBackground(new Color(0, 123, 255));
+                if (!button.getBackground().equals(new Color(210, 227, 252))) {
+                    button.setBackground(Color.WHITE); // Trở lại trắng
                 }
             }
         });
 
         return button;
     }
+
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
