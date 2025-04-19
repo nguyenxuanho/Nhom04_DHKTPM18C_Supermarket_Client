@@ -10,8 +10,6 @@ import gui.components.ComponentUtils;
 import io.github.cdimascio.dotenv.Dotenv;
 import model.ChiTietHoaDon;
 import model.HoaDon;
-import model.SanPham;
-import service.DanhMucSanPhamService;
 import service.SanPhamService;
 
 import javax.naming.Context;
@@ -36,13 +34,6 @@ public class JDialogHoaDon extends JDialog implements ActionListener{
     private DecimalFormat df = new DecimalFormat("#,##0.00");
     private JTable table;
     private DefaultTableModel tableModel;
-    Dotenv dotenv = Dotenv.load();
-
-    private final Context context = new InitialContext();
-
-    String drivername = dotenv.get("DRIVER_NAME");
-    private final SanPhamService sanPhamService = (SanPhamService) context.lookup("rmi://" + drivername + ":9090/sanPhamService");
-
     public JDialogHoaDon(Frame parent) throws NamingException, RemoteException {
         super(parent, "Phiếu Hóa Đơn", true);
         setSize(700, 600);
@@ -88,10 +79,8 @@ public class JDialogHoaDon extends JDialog implements ActionListener{
 
         int index = 0;
         for(ChiTietHoaDon chiTietHoaDons :  HoaDonDTO.getHoaDon().getChiTietHoaDons()){
-            SanPham sanPham = sanPhamService.findOne(chiTietHoaDons.getMaSanPham());
-
             Object[] rowData = {index + 1,
-                    sanPham.getTenSanPham(),
+                    chiTietHoaDons.getSanPham().getTenSanPham(),
                     chiTietHoaDons.getSoLuong(),
                     df.format(chiTietHoaDons.getDonGia()) + " VND",
                     df.format(chiTietHoaDons.getThanhTien()) + " VND"
@@ -265,7 +254,7 @@ public class JDialogHoaDon extends JDialog implements ActionListener{
             for (ChiTietHoaDon cthoaDon : danhSachCTHD) {
                 // Thêm các ô cho thông tin hóa đơn
 
-                PdfPCell tenSPCell = new PdfPCell(new Paragraph(sanPhamService.findOne(cthoaDon.getMaSanPham()).getTenSanPham(), cellFont));
+                PdfPCell tenSPCell = new PdfPCell(new Paragraph(cthoaDon.getSanPham().getTenSanPham(), cellFont));
                 tenSPCell.setHorizontalAlignment(Element.ALIGN_LEFT);
                 tenSPCell.setPadding(2);
                 table.addCell(tenSPCell);
