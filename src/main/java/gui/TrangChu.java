@@ -193,7 +193,7 @@ public class TrangChu extends JFrame {
         JButton btnTaiKhoan = createMenuButton("Tài khoản", "/image/account.png");
         JButton btnThongKe = createMenuButton("Thống kê", "/image/statistics.png");
         JButton btnTimHoaDon = createMenuButton("Tìm hóa đơn", "/image/searchMenu.png");
-
+        JButton btnKhuyenMai = createMenuButton("Khuyến mãi", "/image/discount.png");
 
 
 
@@ -214,6 +214,8 @@ public class TrangChu extends JFrame {
         menuPanel.add(btnNhanVien);
         menuPanel.add(Box.createVerticalStrut(10));
         menuPanel.add(btnTaiKhoan);
+        menuPanel.add(Box.createVerticalStrut(10));
+        menuPanel.add(btnKhuyenMai);
 
         menuPanel.add(Box.createVerticalGlue());
 
@@ -304,6 +306,7 @@ public class TrangChu extends JFrame {
         contentPanel.add(new PanelNhanVien(), "nhanvien");
         contentPanel.add(new PanelTaiKhoan(), "taikhoan");
         contentPanel.add(new PanelTimHoaDon(), "timhoadon");
+        contentPanel.add(new PanelKhuyenMai(), "khuyenmai");
 
         add(contentPanel, BorderLayout.CENTER);
 
@@ -343,6 +346,10 @@ public class TrangChu extends JFrame {
         btnTimHoaDon.addActionListener((ActionEvent e) -> {
             cardLayout.show(contentPanel, "timhoadon");
             setActiveButton(btnTimHoaDon);
+        });
+        btnKhuyenMai.addActionListener((ActionEvent e) -> {
+            cardLayout.show(contentPanel, "khuyenmai");
+            setActiveButton(btnKhuyenMai);
         });
     }
 
