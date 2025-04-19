@@ -526,7 +526,7 @@ public class PanelHoaDon extends JPanel {
         }
         return true;
     }
-    private boolean validateAddHD(){
+    private boolean validateAddHD() throws ParseException {
         if(txtMaKH.getText().trim().equals("")){
             JOptionPane.showMessageDialog(null, "Vui lòng nhập mã khách hàng", "Thông báo", JOptionPane.WARNING_MESSAGE);
             return false;
@@ -545,7 +545,7 @@ public class PanelHoaDon extends JPanel {
             JOptionPane.showMessageDialog(null, "Điểm tích lũy không được lớn hơn điểm tích lũy hiện tại", "Thông báo", JOptionPane.WARNING_MESSAGE);
             return false;
         }
-        if(txtTongTien.getText().trim().equals("") || Double.parseDouble(txtTongTien.getText()) == 0.0){
+        if(txtTongTien.getText().trim().equals("") || df.parse(txtTongTien.getText().split(" VND")[0]).doubleValue() == 0.0){
             JOptionPane.showMessageDialog(null, "Vui lòng thêm sản phẩm vào hóa đơn", "Thông báo", JOptionPane.WARNING_MESSAGE);
             return false;
         }
@@ -579,7 +579,7 @@ public class PanelHoaDon extends JPanel {
                     String thanhTienGoc = tableModel.getValueAt(i, 5).toString().split(" VND")[0];
                     Number numberThanhTienGoc = df.parse(thanhTienGoc);
                     tableModel.setValueAt(Integer.parseInt(soLuong) + Integer.parseInt(tableModel.getValueAt(i, 4).toString()) + "", i, 4);
-                    tableModel.setValueAt(Double.parseDouble(txtThanhTien.getText()) + numberThanhTienGoc.doubleValue(), i, 5);
+                    tableModel.setValueAt(df.format(Double.parseDouble(txtThanhTien.getText()) + numberThanhTienGoc.doubleValue()) + " VND", i, 5);
                     resetForm();
                     calculateTongTien();
                     break;
@@ -607,7 +607,7 @@ public class PanelHoaDon extends JPanel {
             }
             else if (sanPham != null  && sanPham.getKhuyenMai() != null && sanPham.getSoLuongTon() >= Integer.parseInt(soLuong)){
                 Object[] rowData = {maSP + "_" + sanPham.getTenSanPham(),
-                        String.format("%.2f", (sanPham.getKhuyenMai().getNgayKetThuc().isAfter(LocalDate.now()) ? 0 : sanPham.getKhuyenMai().getTienGiam()) * 100) + "%",
+                        String.format("%.2f", (sanPham.getKhuyenMai().getNgayKetThuc().isBefore(LocalDate.now()) ? 0 : sanPham.getKhuyenMai().getTienGiam()) * 100) + "%",
                         String.format("%.2f", sanPham.getThueVAT() * 100) + "%",
                         df.format(Double.parseDouble(donGia)) + " VND",
                         soLuong,
@@ -636,7 +636,7 @@ public class PanelHoaDon extends JPanel {
             double thanhTien = number.doubleValue();
             tongTien += thanhTien;
         }
-        txtTongTien.setText(String.valueOf(tongTien));
+        txtTongTien.setText(df.format(tongTien) + " VND");
     }
     private void handleTimSP() throws RemoteException {
         if(!validateMaSP()){
@@ -650,12 +650,11 @@ public class PanelHoaDon extends JPanel {
         }
         txtMaSP.setText(maSP);
 
-        if(sp.getKhuyenMai() == null || sp.getKhuyenMai().getNgayKetThuc().isAfter(LocalDate.now())){
-            txtDonGia.setText(String.valueOf(sp.getGiaBan()));
-        }
-        else {
-            txtDonGia.setText(String.valueOf(sp.getGiaBan()));
-        }
+
+        txtDonGia.setText(String.valueOf(sp.getGiaBan()));
+
+
+
 
     }
 
@@ -668,7 +667,7 @@ public class PanelHoaDon extends JPanel {
             if(sanPham != null){
                 double donGia = Double.parseDouble(txtDonGia.getText());
                 int soLuong = Integer.parseInt(txtSoLuong.getText());
-                double tienGiam = sanPham.getKhuyenMai() == null || sanPham.getKhuyenMai().getNgayKetThuc().isAfter(LocalDate.now()) ? 0.0 : sanPham.getKhuyenMai().getTienGiam();
+                double tienGiam = sanPham.getKhuyenMai() == null || sanPham.getKhuyenMai().getNgayKetThuc().isBefore(LocalDate.now()) ? 0.0 : sanPham.getKhuyenMai().getTienGiam();
                 txtThanhTien.setText(String.valueOf(donGia * soLuong * (1 - tienGiam) * (1 + sanPham.getThueVAT())));
             }
         } catch (NumberFormatException e) {
@@ -714,12 +713,11 @@ public class PanelHoaDon extends JPanel {
                 double donGiaMain = numberDonGia.doubleValue();
                 double donGiaAfterThueAndKhuyenMai = donGiaMain * (1 - (khuyenMai/100)) * (1 + (thueVAT/100));
                 int soLuong = Integer.parseInt((String) tableModel.getValueAt(i, 4));
-                ChiTietHoaDon cthd = new ChiTietHoaDon(soLuong, donGiaAfterThueAndKhuyenMai, maHoaDon, maSP);
+                ChiTietHoaDon cthd = new ChiTietHoaDon(soLuong, donGiaAfterThueAndKhuyenMai, hoaDon, sanPhamService.findOne(maSP));
                 chiTietHoaDonList.add(cthd);
             }
         hoaDon.setChiTietHoaDons(chiTietHoaDonList);
         hoaDon.setDiemTichLuySuDung(Integer.parseInt(txtDiemTichLuyDung.getText()));
-
 
 
         if(hoaDonService.lapHoaDon(hoaDon)){
@@ -851,11 +849,15 @@ public class PanelHoaDon extends JPanel {
             SanPham sanPham = sanPhamService.findOne(maSP);
             if(sanPham != null){
                 tableModel.setValueAt(maSP + "_" + sanPham.getTenSanPham(), selectedRow, 0);
-                tableModel.setValueAt(String.format("%.2f", sanPham.getKhuyenMai().getTienGiam() * 100) + "%", selectedRow, 1);
                 tableModel.setValueAt(String.format("%.2f", sanPham.getThueVAT() * 100) + "%", selectedRow, 2);
                 tableModel.setValueAt(df.format(Double.parseDouble(donGia)) + " VND", selectedRow, 3);
                 tableModel.setValueAt(soLuong, selectedRow, 4);
                 tableModel.setValueAt(df.format(Double.parseDouble(thanhTien)) + " VND", selectedRow, 5);
+                if(sanPham.getKhuyenMai() != null && sanPham.getKhuyenMai().getNgayKetThuc().isAfter(LocalDate.now())){
+                    tableModel.setValueAt(String.format("%.2f", sanPham.getKhuyenMai().getTienGiam() * 100) + "%", selectedRow, 1);
+                } else {
+                    tableModel.setValueAt( "0%", selectedRow, 1);
+                }
             }
 
 
