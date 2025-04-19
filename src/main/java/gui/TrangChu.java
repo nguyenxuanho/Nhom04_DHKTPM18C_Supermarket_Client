@@ -42,7 +42,7 @@ public class TrangChu extends JFrame {
         try {
             // Set FlatLaf Light theme
             UIManager.setLookAndFeel(new FlatLightLaf());
-            UIManager.put("Button.arc", 5);
+            UIManager.put("Button.arc", 60);
         } catch (UnsupportedLookAndFeelException e) {
             e.printStackTrace();
         }
@@ -363,15 +363,21 @@ public class TrangChu extends JFrame {
             button.setIconTextGap(15);
         }
 
-        button.setMaximumSize(new Dimension(230, 45));
+        button.setMaximumSize(new Dimension(230, 40));
+        button.setPreferredSize(new Dimension(getWidth(), 40));
         button.setAlignmentX(Component.CENTER_ALIGNMENT);
         button.setFont(new Font("Segoe UI", Font.PLAIN, 15));
         button.setFocusPainted(false);
         button.setForeground(Color.BLACK);
-        button.setBackground(Color.WHITE);  // Nền nhẹ nhàng
-        button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 15));
+        button.setBackground(Color.WHITE);
+//        button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 15));
         button.setHorizontalAlignment(SwingConstants.LEFT);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setOpaque(false);
+
+        button.putClientProperty("JButton.buttonType", "roundRect"); // Optional
+        button.putClientProperty("JComponent.roundRect", true); // Optional
+        button.putClientProperty("Button.arc", 20);
 
         // Hover
         button.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -395,7 +401,9 @@ public class TrangChu extends JFrame {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             try {
-                new TrangChu().setVisible(true);
+                FlatLightLaf.setup();
+                UIManager.put("Button.arc", 20); // bo góc cho tất cả nút
+                new LoginForm().setVisible(true);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

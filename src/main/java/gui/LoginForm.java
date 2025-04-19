@@ -98,6 +98,9 @@ public class LoginForm extends JFrame {
 
         add(panelMain, BorderLayout.CENTER);
 
+        txtUsername.setText("machxuan");
+        txtPassword.setText("123456789");
+
         // ===== XỬ LÝ ĐĂNG NHẬP =====
         btnLogin.addActionListener(new ActionListener() {
             @Override

@@ -23,10 +23,13 @@ import utils.PasswordUtil;
 
 import java.awt.*;
 
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.rmi.RemoteException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class PanelTaiKhoan extends JPanel {
@@ -225,7 +228,7 @@ public class PanelTaiKhoan extends JPanel {
 		JPanel filterByNamePanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 20, 20));
 		filterByNamePanel.setBackground(new Color(240, 240, 240));
 
-		JLabel lblTenNV = new JLabel("Tên tài khoản: ");
+		JLabel lblTenNV = new JLabel("Tên đăng nhập: ");
 		lblTenNV.setFont(new Font("Arial", Font.PLAIN, 15));
 		txtTimTenDangNhap = new JTextField(15);
 		txtTimTenDangNhap.setPreferredSize(new Dimension(205, 30));
@@ -247,7 +250,7 @@ public class PanelTaiKhoan extends JPanel {
 		searchByIDPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 		filterByNamePanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 10));
 
-		btnTim.addActionListener(e -> searchEmployee());
+		btnTim.addActionListener(e -> searchTaiKhoan());
 
 
 		txtTimTenDangNhap.getDocument().addDocumentListener(new DocumentListener() {
@@ -266,8 +269,50 @@ public class PanelTaiKhoan extends JPanel {
 			}
 
 			private void timKiem() {
-//				getListKHByPhone(txtTimKiem.getText().trim());
+				String tendanhnhap = txtTimTenDangNhap.getText().trim();
+                if (!tendanhnhap.isEmpty()) {
+                    try {
+                       List<TaiKhoan> taiKhoans = taiKhoanService.getAllTaiKhoan();
+                        List<TaiKhoan> taiKhoanList = taiKhoans.stream()
+                                        .filter(tk -> tk.getTenDangNhap().contains(tendanhnhap))
+                                        .collect(Collectors.toList());
+                        hienThiKetQuaTimKiem(taiKhoanList);
+                    } catch (RemoteException ex) {
+                        ex.printStackTrace();
+                        JOptionPane.showMessageDialog(null,
+                                "Lỗi kết nối máy chủ: " + ex.getMessage(),
+                                "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    }
+                } else {
+                    resetTable();
+                }
+			}
+		});
 
+		cboChucVuLoc.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.SELECTED) {
+					String selectedChucVu = cboChucVuLoc.getSelectedItem().toString();
+
+					if (!selectedChucVu.equals("Tất cả")) {
+						try {
+							List<TaiKhoan> allTaiKhoan = taiKhoanService.getAllTaiKhoan();
+							List<TaiKhoan> filteredList = allTaiKhoan.stream()
+									.filter(taiKhoan -> taiKhoan.getTrangThai().equalsIgnoreCase(selectedChucVu))
+									.collect(Collectors.toList());
+
+							hienThiKetQuaTimKiem(filteredList);
+
+						} catch (RemoteException ex) {
+							ex.printStackTrace();
+							JOptionPane.showMessageDialog(null,
+									"Lỗi kết nối: " + ex.getMessage(),
+									"Lỗi", JOptionPane.ERROR_MESSAGE);
+						}
+					} else {
+						resetTable();
+					}
+				}
 			}
 		});
 
@@ -309,20 +354,18 @@ public class PanelTaiKhoan extends JPanel {
 		JScrollPane scrollPane = new JScrollPane(table);
 		panel.add(scrollPane, BorderLayout.CENTER);
 
-		lammoi.addActionListener(e -> {
-            try {
-                resetTable();
-            } catch (RemoteException ex) {
-                throw new RuntimeException(ex);
-            }
-        });
+		lammoi.addActionListener(e -> resetTable());
 
 		return panel;
 	}
 
-	private void resetTable() throws RemoteException {
-        tableModel.setRowCount(0);
-        addSampleData();
+	private void resetTable() {
+		try{
+			tableModel.setRowCount(0);
+			addSampleData();
+		} catch (RemoteException e) {
+			throw new RuntimeException(e);
+		}
     }
 
 	private void addButtonListeners() {
@@ -340,20 +383,20 @@ public class PanelTaiKhoan extends JPanel {
 				String maTK = "TK" + faker.number().digits(5);
 				String tenDangNhap = txtTenDangNhap.getText();
 				String password = txtPassword.getText();
-				String hashPassword = PasswordUtil.hashPassword(password);
+//				String hashPassword = PasswordUtil.hashPassword(password);
 				String trangthai = cboTrangThai.getSelectedItem().toString();
 				String maNV = cbbMaNV.getSelectedItem().toString();
 
 				NhanVien nhanVien = nhanVienService.getNhanVienById(maNV);
 
-				TaiKhoan taiKhoan = new TaiKhoan(maTK, tenDangNhap, hashPassword, trangthai);
+				TaiKhoan taiKhoan = new TaiKhoan(maTK, tenDangNhap, password, trangthai);
 				taiKhoan.setNhanVien(nhanVien);
 
 				if(taiKhoanService.insertTaiKhoan(taiKhoan)) {
 					tableModel.addRow(new Object[]{
 							taiKhoan.getMaTaiKhoan(),
 							taiKhoan.getTenDangNhap(),
-							taiKhoan.getMatKhau(),
+							"...",
 							nhanVien.getMaNhanVien(),
 							taiKhoan.getTrangThai()
 					});
@@ -428,17 +471,20 @@ public class PanelTaiKhoan extends JPanel {
 					String tenDangNhap = txtTenDangNhap.getText().toString();
 					NhanVien nhanVien = taiKhoanService.getNhanVienByTaiKhoan(maTK);
 					String password = txtPassword.getText().toString();
-					String trangthai = cboTrangThai.getSelectedItem().toString();
+//					String trangthai = cboTrangThai.getSelectedItem().toString();
 
 					TaiKhoan taiKhoanHienTai = taiKhoanService.getTaiKhoanById(maTK);
 					TaiKhoan taiKhoan = new TaiKhoan();
 					taiKhoan.setMaTaiKhoan(maTK);
 					taiKhoan.setTenDangNhap(tenDangNhap);
-					if(!password.trim().equals("")) {
-						taiKhoan.setMatKhau(password);
-					} else {
-						taiKhoan.setMatKhau(taiKhoanHienTai.getMatKhau());
-					}
+//					if(!password.trim().equals("")) {
+//						taiKhoan.setMatKhau(password);
+//					} else {
+//						taiKhoan.setMatKhau(taiKhoanHienTai.getMatKhau());
+//					}
+
+					String trangthai = taiKhoanHienTai.getTrangThai();
+					taiKhoan.setMatKhau(password);
 					taiKhoan.setTrangThai(trangthai);
 					taiKhoan.setNhanVien(nhanVien);
 
@@ -453,7 +499,7 @@ public class PanelTaiKhoan extends JPanel {
 						if(taiKhoanService.updateTaiKhoan(taiKhoan)) {
 							tableModel.setValueAt(maTK, row, 0);
 							tableModel.setValueAt(tenDangNhap, row, 1);
-							tableModel.setValueAt(password, row, 2);
+							tableModel.setValueAt("...", row, 2);
 							tableModel.setValueAt(nhanVien.getMaNhanVien(), row, 3);
 							tableModel.setValueAt(trangthai, row, 3);
 							resetForm();
@@ -499,27 +545,32 @@ public class PanelTaiKhoan extends JPanel {
 		table.clearSelection();
 	}
 
-	private void searchEmployee() {
-		String maNV = txtTimMaNV.getText().trim().toLowerCase();
+	private void searchTaiKhoan(){
+		String maTaiKhoan = txtTimMaTK.getText().trim();
 
-		for (int i = 0; i < tableModel.getRowCount(); i++) {
-			String currentMaNV = tableModel.getValueAt(i, 0).toString().toLowerCase();
-
-			boolean match = true;
-
-			if (!maNV.isEmpty() && !currentMaNV.contains(maNV)) {
-				match = false;
+		try {
+			TaiKhoan taiKhoan = taiKhoanService.getTaiKhoanById(maTaiKhoan);
+			if(taiKhoan != null) {
+				NhanVien nhanVien = taiKhoanService.getNhanVienByTaiKhoan(taiKhoan.getMaTaiKhoan());
+				tableModel.setRowCount(0);
+				tableModel.addRow(new Object[]{
+						taiKhoan.getMaTaiKhoan(),
+						taiKhoan.getTenDangNhap(),
+						"...",
+						nhanVien.getMaNhanVien(),
+						taiKhoan.getTrangThai()
+				});
+			} else {
+				JOptionPane.showMessageDialog(null, "Mã " + maTaiKhoan + " không tồn tài");
 			}
-
-			if (match) {
-				table.setRowSelectionInterval(i, i);
-				table.scrollRectToVisible(table.getCellRect(i, 0, true));
-				displaySelectedTaiKhoan();
-				return;
-			}
+		} catch (RemoteException e) {
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(
+					this,
+					"Lỗi kết nối máy chủ: " + e.getMessage(),
+					"Lỗi kết nối",
+					JOptionPane.ERROR_MESSAGE);
 		}
-
-		JOptionPane.showMessageDialog(this, "Không tìm thấy nhân viên phù hợp!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
 	}
 
 	private void displaySelectedTaiKhoan() {
@@ -528,6 +579,7 @@ public class PanelTaiKhoan extends JPanel {
 
 			txtMaTK.setText(tableModel.getValueAt(selectedRow, 0).toString());
 			txtTenDangNhap.setText(tableModel.getValueAt(selectedRow, 1).toString());
+			txtPassword.setText(tableModel.getValueAt(selectedRow, 2).toString());
 			String trangthai = tableModel.getValueAt(selectedRow, 3).toString();
 			for (int i = 0; i < cboTrangThai.getItemCount(); i++) {
 				if (cboTrangThai.getItemAt(i).equals(trangthai)) {
@@ -551,11 +603,13 @@ public class PanelTaiKhoan extends JPanel {
 			return false;
 		}
 
-		return true;
-	}
+		if(txtPassword.getPassword().length < 6) {
+			JOptionPane.showMessageDialog(this, "Mật khẩu phải có ít nhất 6 ký tự!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+			txtPassword.requestFocus();
+			return false;
+		}
 
-	private String generateEmployeeId() {
-		return "TK" + (tableModel.getRowCount() + 1);
+		return true;
 	}
 
 	private void addSampleData() throws RemoteException{
@@ -571,7 +625,7 @@ public class PanelTaiKhoan extends JPanel {
 			tableModel.addRow(new Object[]{
 					taiKhoan.getMaTaiKhoan(),
 					taiKhoan.getTenDangNhap(),
-					taiKhoan.getMatKhau(),
+					"...",
 					nhanVien.getMaNhanVien(),
 					taiKhoan.getTrangThai(),
 			});
@@ -583,6 +637,22 @@ public class PanelTaiKhoan extends JPanel {
 
 		for (NhanVien nhanVien : dsNhanVienChuaCoTaiKhoan) {
 			cbbMaNV.addItem(nhanVien.getMaNhanVien());
+		}
+	}
+
+	private void hienThiKetQuaTimKiem(List<TaiKhoan> taiKhoans) throws RemoteException{
+		tableModel.setRowCount(0);
+		if (taiKhoans != null && !taiKhoans.isEmpty()) {
+			for (TaiKhoan taiKhoan : taiKhoans) {
+				NhanVien nhanVien = taiKhoanService.getNhanVienByTaiKhoan(taiKhoan.getMaTaiKhoan());
+				tableModel.addRow(new Object[]{
+						taiKhoan.getMaTaiKhoan(),
+						taiKhoan.getTenDangNhap(),
+						"...",
+						nhanVien.getMaNhanVien(),
+						taiKhoan.getTrangThai(),
+				});
+			}
 		}
 	}
 }
