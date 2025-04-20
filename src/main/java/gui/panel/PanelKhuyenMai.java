@@ -35,9 +35,20 @@ public class PanelKhuyenMai extends JPanel {
     private final KhuyenMaiService khuyenMaiService = (KhuyenMaiService) context.lookup("rmi://" + drivername + ":9090/khuyenMaiService");
 
     public PanelKhuyenMai() throws NamingException, RemoteException {
+        if(khuyenMaiService.getDanhSachKhuyenMaiHetHan() != null){
+            khuyenMaiService.getDanhSachKhuyenMaiHetHan().forEach(khuyenMai -> {
+                try {
+                    khuyenMaiService.deleteKhuyenMai(khuyenMai.getMaKhuyenMai());
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        }
+
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         add(createInfoPanel(), BorderLayout.NORTH);
+
 
         JPanel container = new JPanel(new BorderLayout());
         add(container, BorderLayout.CENTER);
@@ -165,7 +176,7 @@ public class PanelKhuyenMai extends JPanel {
                     txtTienGiam.setText(tableModel.getValueAt(i, 2).toString());
                     txtNgayBatDau.setText(tableModel.getValueAt(i, 3).toString());
                     txtNgayKetThuc.setText(tableModel.getValueAt(i, 4).toString());
-                    txtMaSP.setText(tableModel.getValueAt(i, 5).toString());
+                    txtMaSP.setText(tableModel.getValueAt(i, 5).toString().split("_")[0]);
                     table.scrollRectToVisible(table.getCellRect(i, 0, true));
                     found = true;
                     break;
@@ -206,7 +217,7 @@ public class PanelKhuyenMai extends JPanel {
                     txtTienGiam.setText(tableModel.getValueAt(row, 2).toString());
                     txtNgayBatDau.setText(tableModel.getValueAt(row, 3).toString());
                     txtNgayKetThuc.setText(tableModel.getValueAt(row, 4).toString());
-                    txtMaSP.setText(tableModel.getValueAt(row, 5).toString());
+                    txtMaSP.setText(tableModel.getValueAt(row, 5).toString().split("_")[0]);
                 }
             }
         });
@@ -269,6 +280,20 @@ public class PanelKhuyenMai extends JPanel {
                 JOptionPane.showMessageDialog(this, "Mã sản phẩm không tồn tại.");
                 return;
             }
+
+            KhuyenMai khuyenMai = khuyenMaiService.getKhuyenMaiBySanPhamId(txtMaSP.getText());
+            if(khuyenMai != null){
+                if(khuyenMai.getNgayKetThuc().isAfter(LocalDate.now())){
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "Khuyến mãi của sản phẩm này chưa kết thúc !!",
+                            "Lỗi",
+                            JOptionPane.ERROR_MESSAGE
+                    );
+                    return;
+                }
+            }
+
             KhuyenMai km = new KhuyenMai(
                     maKM,
                     txtTenKM.getText(),
@@ -277,9 +302,21 @@ public class PanelKhuyenMai extends JPanel {
                     LocalDate.parse(txtNgayKetThuc.getText()),
                     sp
             );
-            khuyenMaiService.insertKhuyenMai(km);
-            loadDanhSachKhuyenMai();
-            resetForm();
+            if(khuyenMaiService.insertKhuyenMai(km)){
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Thêm sản phẩm khuyến mãi thành công",
+                        "Thành công",
+                        JOptionPane.INFORMATION_MESSAGE);
+                loadDanhSachKhuyenMai();
+                resetForm();
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "Lỗi khi thêm khuyến mãi: ",
+                        "Lỗi",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Lỗi khi thêm khuyến mãi: " + e.getMessage());
         }
@@ -298,9 +335,23 @@ public class PanelKhuyenMai extends JPanel {
                     LocalDate.parse(txtNgayKetThuc.getText()),
                     sp
             );
-            khuyenMaiService.updateKhuyenMai(km);
-            loadDanhSachKhuyenMai();
-            resetForm();
+            if(khuyenMaiService.updateKhuyenMai(km)){
+                loadDanhSachKhuyenMai();
+                resetForm();
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Cập nhật khuyến mãi thành công",
+                        "Thành công",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
+            } else {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Cập nhật khuyến mãi thất bại",
+                        "Lỗi",
+                        JOptionPane.ERROR_MESSAGE
+                );
+            }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Lỗi khi sửa khuyến mãi: " + e.getMessage());
         }
@@ -322,7 +373,7 @@ public class PanelKhuyenMai extends JPanel {
                         km.getTienGiam(),
                         km.getNgayBatDau(),
                         km.getNgayKetThuc(),
-                        km.getSanPham().getMaSanPham()
+                        km.getSanPham().getMaSanPham() + "_" + km.getSanPham().getTenSanPham()
                 });
             }
         } catch (Exception e) {
@@ -334,9 +385,23 @@ public class PanelKhuyenMai extends JPanel {
         try {
             String ma = txtTimMaKM.getText().trim();
             if (!ma.isEmpty()) {
-                khuyenMaiService.deleteKhuyenMai(ma);
-                loadDanhSachKhuyenMai();
-                resetForm();
+                if(khuyenMaiService.deleteKhuyenMai(ma)){
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "Xóa khuyến mãi thành công",
+                            "Thành công",
+                            JOptionPane.INFORMATION_MESSAGE
+                    );
+                    loadDanhSachKhuyenMai();
+                    resetForm();
+                } else {
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "Xóa khuyến mãi thất bại",
+                            "Lỗi",
+                            JOptionPane.ERROR_MESSAGE
+                    );
+                }
             }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Lỗi khi xoá khuyến mãi: " + e.getMessage());
