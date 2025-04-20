@@ -7,13 +7,8 @@ import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import dto.HoaDonDTO;
 import gui.components.ComponentUtils;
-import io.github.cdimascio.dotenv.Dotenv;
 import model.ChiTietHoaDon;
 import model.HoaDon;
-import service.SanPhamService;
-
-import javax.naming.Context;
-import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;

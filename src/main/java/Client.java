@@ -20,7 +20,7 @@ public class Client {
                 new Thread(() -> {
                     try {
                         for (int i = 0; i <= 100; i++) {
-                            Thread.sleep(1);
+                            Thread.sleep(20);
                             loading.updateProgress(i);
                         }
                     } catch (Exception e1) {

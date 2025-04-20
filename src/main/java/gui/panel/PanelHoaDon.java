@@ -526,7 +526,7 @@ public class PanelHoaDon extends JPanel {
         }
         return true;
     }
-    private boolean validateAddHD() throws ParseException {
+    private boolean validateAddHD() throws ParseException, RemoteException {
         if(txtMaKH.getText().trim().equals("")){
             JOptionPane.showMessageDialog(null, "Vui lòng nhập mã khách hàng", "Thông báo", JOptionPane.WARNING_MESSAGE);
             return false;
@@ -549,6 +549,7 @@ public class PanelHoaDon extends JPanel {
             JOptionPane.showMessageDialog(null, "Vui lòng thêm sản phẩm vào hóa đơn", "Thông báo", JOptionPane.WARNING_MESSAGE);
             return false;
         }
+
         return true;
     }
     private boolean addCTHDVaoTable() throws RemoteException, ParseException {
@@ -560,6 +561,11 @@ public class PanelHoaDon extends JPanel {
         String soLuong = txtSoLuong.getText().trim();
         String thanhTien = txtThanhTien.getText().trim();
         SanPham sanPham = sanPhamService.findOne(maSP);
+
+        if(sanPham.getTrangThai().equalsIgnoreCase("Ngưng bán")){
+            JOptionPane.showMessageDialog(null, "Sản phẩm đang ở trạng thái ngưng bán", "Thông báo", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
 
         boolean isExist = false;
         for (int i = 0; i < tableModel.getRowCount(); i++) {
@@ -718,12 +724,14 @@ public class PanelHoaDon extends JPanel {
             }
         hoaDon.setChiTietHoaDons(chiTietHoaDonList);
         hoaDon.setDiemTichLuySuDung(Integer.parseInt(txtDiemTichLuyDung.getText()));
-
+        int diemTichLuyCong = (int) Math.ceil(hoaDon.getTongTien() * 0.01);
+        if(khachHangService.capNhatDiemTichLuy(hoaDon.getKhachHang().getMaKhachHang(), diemTichLuyCong - hoaDon.getDiemTichLuySuDung())){
+            hoaDon.setKhachHang(khachHangService.findById(txtMaKH.getText()));
+        }
 
         if(hoaDonService.lapHoaDon(hoaDon)){
             sanPhamService.capNhatSoLuongSanPham(chiTietHoaDonList);
-            int diemTichLuyCong = (int) Math.ceil(hoaDon.getTongTien() * 0.01);
-            khachHangService.capNhatDiemTichLuy(hoaDon.getKhachHang().getMaKhachHang(), diemTichLuyCong - hoaDon.getDiemTichLuySuDung());
+
             JOptionPane.showMessageDialog(null, "Thêm hóa đơn thành công", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
             resetTable();
             resetForm();
