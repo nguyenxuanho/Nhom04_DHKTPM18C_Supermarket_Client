@@ -20,6 +20,7 @@ import java.awt.event.MouseListener;
 import java.net.URISyntaxException;
 import java.rmi.RemoteException;
 import java.util.Date;
+import java.util.List;
 
 public class PanelDanhMucSanPham extends JPanel implements MouseListener, ActionListener {
     private final JLabel jLabelMaDanhMucSP, jLabelTenDanhMucSP, labelFind;
@@ -44,7 +45,7 @@ public class PanelDanhMucSanPham extends JPanel implements MouseListener, Action
 
     public PanelDanhMucSanPham () throws NamingException, RemoteException, URISyntaxException {
         setLayout(new BorderLayout());
-
+       List<DanhMucSanPham> danhMucSanPhams = danhMucSanPhamService.getList();
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         // Tạo tiêu đề căn giữa
