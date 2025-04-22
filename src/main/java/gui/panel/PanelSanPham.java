@@ -89,7 +89,7 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
                 dataModel.addRow ( new Object[]{
                         sanPham.getMaSanPham(),
                         sanPham.getTenSanPham(),
-                        sanPham.getDanhMucSanPham().getTenDanhMucSanPham(),
+                        (sanPham.getDanhMucSanPham() == null ? "" : sanPham.getDanhMucSanPham().getTenDanhMucSanPham()),
                         sanPham.getGiaBan(),
                         sanPham.getSoLuongTon(),
                         String.format("%.2f", sanPham.getThueVAT()),
