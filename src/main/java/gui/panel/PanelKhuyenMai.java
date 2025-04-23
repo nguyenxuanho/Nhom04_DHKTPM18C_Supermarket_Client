@@ -402,6 +402,8 @@ public class PanelKhuyenMai extends JPanel {
                             JOptionPane.ERROR_MESSAGE
                     );
                 }
+            }else{
+                JOptionPane.showMessageDialog(this, "Vui lòng chọn khuyến mãi để xóa.");
             }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Lỗi khi xoá khuyến mãi: " + e.getMessage());
