@@ -246,8 +246,8 @@ public class PanelKhuyenMai extends JPanel {
 
         try {
             Double value = Double.parseDouble(txtTienGiam.getText());
-            if (value < 0) {
-                JOptionPane.showMessageDialog(this, "Tiền giảm phải lớn hơn hoặc bằng 0.");
+            if (value < 0 || value > 1) {
+                JOptionPane.showMessageDialog(this, "Tiền giảm phải lớn hơn 0 và bé hơn 1");
                 return false;
             }
         } catch (NumberFormatException e) {
@@ -402,6 +402,8 @@ public class PanelKhuyenMai extends JPanel {
                             JOptionPane.ERROR_MESSAGE
                     );
                 }
+            }else{
+                JOptionPane.showMessageDialog(this, "Vui lòng chọn khuyến mãi để xóa.");
             }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Lỗi khi xoá khuyến mãi: " + e.getMessage());

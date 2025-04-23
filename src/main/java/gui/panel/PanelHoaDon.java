@@ -476,6 +476,10 @@ public class PanelHoaDon extends JPanel {
         }
     }
     private KhachHang findBySDT(){
+        if(txtTimSDT.getText().trim().equals("")){
+            JOptionPane.showMessageDialog(null, "Vui lòng nhập số điện thoại", "Thông báo", JOptionPane.WARNING_MESSAGE);
+            return null;
+        }
         try {
             System.out.println("SDT: " + txtTimSDT.getText());
             return khachHangService.findBySoDienThoai(txtTimSDT.getText());
@@ -538,7 +542,7 @@ public class PanelHoaDon extends JPanel {
             return false;
         } else if (!txtDiemTichLuyDung.getText().trim().matches(
                 "^[0-9][0-9]*$")) {
-            JOptionPane.showMessageDialog(null, "Điểm tích lũy phải là số nguyên dương", "Thông báo", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Điểm tích lũy phải là số nguyên không âm", "Thông báo", JOptionPane.WARNING_MESSAGE);
             return false;
         }
         if(Integer.parseInt(txtDiemTichLuyDung.getText()) > Double.parseDouble(txtDiemTichLuy.getText())){
@@ -658,6 +662,13 @@ public class PanelHoaDon extends JPanel {
 
 
         txtDonGia.setText(String.valueOf(sp.getGiaBan()));
+        if(!txtSoLuong.getText().isEmpty()){
+            SanPham sanPham = sanPhamService.findOne(maSP);
+            double donGia = Double.parseDouble(txtDonGia.getText());
+            int soLuong = Integer.parseInt(txtSoLuong.getText());
+            double tienGiam = sanPham.getKhuyenMai() == null || sanPham.getKhuyenMai().getNgayKetThuc().isBefore(LocalDate.now()) ? 0.0 : sanPham.getKhuyenMai().getTienGiam();
+            txtThanhTien.setText(String.valueOf(donGia * soLuong * (1 - tienGiam) * (1 + sanPham.getThueVAT())));
+        }
 
 
 
@@ -872,7 +883,7 @@ public class PanelHoaDon extends JPanel {
             calculateTongTien();
             return true;
         } else {
-            JOptionPane.showMessageDialog(null, "Vui lòng chọn sản phẩm để sửa", "Thông báo", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Vui lòng chọn chi tiết để sửa", "Thông báo", JOptionPane.WARNING_MESSAGE);
             return false;
         }
 
@@ -886,7 +897,7 @@ public class PanelHoaDon extends JPanel {
                 calculateTongTien();
             return true;
         } else {
-            JOptionPane.showMessageDialog(null, "Vui lòng chọn sản phẩm để xóa", "Thông báo", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Vui lòng chọn chi tiết để xóa", "Thông báo", JOptionPane.WARNING_MESSAGE);
             return false;
         }
     }
