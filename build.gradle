@@ -73,6 +73,31 @@ dependencies {
     implementation 'com.itextpdf:itextpdf:5.5.13.3'
 
 
+//    // https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml
+//    implementation 'org.apache.poi:poi-ooxml:5.4.1'
+//
+//    // https://mvnrepository.com/artifact/org.apache.poi/poi
+//    implementation 'org.apache.poi:poi:5.4.1'
+//
+//    // https://mvnrepository.com/artifact/org.apache.xmlbeans/xmlbeans
+//    implementation 'org.apache.xmlbeans:xmlbeans:5.3.0'
+//
+//    // https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml
+//    implementation 'org.apache.poi:poi-ooxml:5.4.1'
+//
+//    // https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml-schemas
+//    implementation 'org.apache.poi:poi-ooxml-schemas:4.1.2'
+
+    implementation 'org.apache.poi:poi:5.4.1'
+    implementation 'org.apache.poi:poi-ooxml:5.4.1'
+    implementation 'org.apache.xmlbeans:xmlbeans:5.3.0'
+// XÓA cái này đi vì đã nằm trong poi-ooxml rồi:
+// implementation 'org.apache.poi:poi-ooxml-schemas:4.1.2'
+
+
+
+
+
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")

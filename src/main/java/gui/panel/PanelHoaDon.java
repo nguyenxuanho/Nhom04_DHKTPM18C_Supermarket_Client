@@ -731,7 +731,6 @@ public class PanelHoaDon extends JPanel {
 
         if(hoaDonService.lapHoaDon(hoaDon)){
             sanPhamService.capNhatSoLuongSanPham(chiTietHoaDonList);
-
             JOptionPane.showMessageDialog(null, "Thêm hóa đơn thành công", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
             resetTable();
             resetForm();

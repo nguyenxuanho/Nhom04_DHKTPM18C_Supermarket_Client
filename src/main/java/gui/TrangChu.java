@@ -53,7 +53,7 @@ public class TrangChu extends JFrame {
 
 
     public TrangChu() throws NamingException, RemoteException, URISyntaxException {
-        NhanVien nhanVien = nhanVienService.getNhanVienById(TaiKhoanDTO.getTaiKhoan().getNhanVien().getMaNhanVien());
+//        NhanVien nhanVien = nhanVienService.getNhanVienById(TaiKhoanDTO.getTaiKhoan().getNhanVien().getMaNhanVien());
 
         try {
             // Set FlatLaf Light theme
@@ -155,10 +155,10 @@ public class TrangChu extends JFrame {
 
 
 // Label chào mừng
-        JLabel welcomeLabel = new JLabel(
+/*        JLabel welcomeLabel = new JLabel(
                 nhanVien.getChucVuNhanVien().toString()
-                        + ": Xin chào, " + nhanVien.getTenNhanVien());
-//        JLabel welcomeLabel = new JLabel(": Xin chào, " );
+                        + ": Xin chào, " + nhanVien.getTenNhanVien());*/
+        JLabel welcomeLabel = new JLabel(": Xin chào, " );
         welcomeLabel.setFont(new Font("Segoe UI", Font.PLAIN, 16));
         welcomeLabel.setForeground(Color.WHITE);
         welcomeLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 15));
@@ -221,7 +221,7 @@ public class TrangChu extends JFrame {
 
 
 
-        if(nhanVien.getChucVuNhanVien().toString().equalsIgnoreCase("Nhân viên")){
+//        if(nhanVien.getChucVuNhanVien().toString().equalsIgnoreCase("Nhân viên")){
             menuPanel.add(btnSanPham);
             menuPanel.add(Box.createVerticalStrut(10));
             menuPanel.add(btnDanhMucSanPham);
@@ -230,9 +230,9 @@ public class TrangChu extends JFrame {
             menuPanel.add(Box.createVerticalStrut(10));
             menuPanel.add(btnHoaDon);
             menuPanel.add(Box.createVerticalStrut(10));
-        }
+//        }
 
-        if(nhanVien.getChucVuNhanVien().toString().equalsIgnoreCase("Người quản lý")){
+//        if(nhanVien.getChucVuNhanVien().toString().equalsIgnoreCase("Người quản lý")){
             menuPanel.add(btnThongKe);
             menuPanel.add(Box.createVerticalStrut(10));
             menuPanel.add(btnNhanVien);
@@ -240,7 +240,7 @@ public class TrangChu extends JFrame {
             menuPanel.add(btnTaiKhoan);
             menuPanel.add(Box.createVerticalStrut(10));
             menuPanel.add(btnKhuyenMai);
-        }
+//        }
 
 
         menuPanel.add(Box.createVerticalGlue());
