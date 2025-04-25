@@ -1,13 +1,12 @@
 package gui.panel;
 
-import javax.naming.NamingException;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
 import com.formdev.flatlaf.FlatIntelliJLaf;
 import gui.LoginForm;
-import gui.TrangChu;
+import service.*;
 
 
 import java.awt.Color;
@@ -15,8 +14,6 @@ import javax.swing.JLabel;
 import javax.swing.ImageIcon;
 import javax.swing.SwingConstants;
 import java.awt.Font;
-import java.net.URISyntaxException;
-import java.rmi.RemoteException;
 import javax.swing.JProgressBar;
 
 public class Loading extends JFrame {
@@ -72,6 +69,31 @@ public class Loading extends JFrame {
         value.setFont(new Font("Arial", Font.PLAIN, 15));
         value.setBounds(712, 442, 86, 30);
         panel.add(value);
+
+
+        System.out.println("Đang kết nối đến RMI Server...");
+
+
+
+        ChiTietHoaDonService chiTietHoaDonService = RmiServiceLocator.getChiTietHoaDonService();
+        DanhMucSanPhamService danhMucSanPhamService = RmiServiceLocator.getDanhMucSanPhamService();
+        HoaDonService hoaDonService = RmiServiceLocator.getHoaDonService();
+        KhachHangService khachHangService = RmiServiceLocator.getKhachHangService();
+        NhanVienService nhanVienService = RmiServiceLocator.getNhanVienService();
+        SanPhamService sanPhamService = RmiServiceLocator.getSanPhamService();
+        TaiKhoanService taiKhoanService = RmiServiceLocator.getTaiKhoanService();
+        KhuyenMaiService khuyenMaiService = RmiServiceLocator.getKhuyenMaiService();
+        ThuocTinhSanPhamService thuocTinhSanPhamService = RmiServiceLocator.getThuocTinhSanPhamService();
+
+        if (chiTietHoaDonService != null && khachHangService != null) {
+            System.out.println("Client đã kết nối thành công đến RMI Server!");
+
+        } else {
+            System.err.println("Không thể kết nối đến một số service!");
+        }
+
+
+
     }
 
     public void updateProgress(int value) throws Exception {

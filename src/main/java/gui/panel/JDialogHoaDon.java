@@ -29,7 +29,7 @@ public class JDialogHoaDon extends JDialog implements ActionListener{
     private DecimalFormat df = new DecimalFormat("#,##0.00");
     private JTable table;
     private DefaultTableModel tableModel;
-    public JDialogHoaDon(Frame parent) throws NamingException, RemoteException {
+    public JDialogHoaDon(Frame parent){
         super(parent, "Phiếu Hóa Đơn", true);
         setSize(700, 600);
         setLocationRelativeTo(parent);

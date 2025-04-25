@@ -3,13 +3,7 @@ package gui;
 import com.formdev.flatlaf.*;
 import dto.TaiKhoanDTO;
 import gui.panel.*;
-import io.github.cdimascio.dotenv.Dotenv;
 import model.NhanVien;
-import service.DanhMucSanPhamService;
-import service.NhanVienService;
-
-import javax.naming.Context;
-import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.swing.*;
 import javax.swing.event.AncestorEvent;
@@ -21,19 +15,12 @@ import java.awt.event.MouseEvent;
 import java.net.URISyntaxException;
 import java.rmi.RemoteException;
 
+import static gui.panel.RmiServiceLocator.nhanVienService;
+
 public class TrangChu extends JFrame {
     private CardLayout cardLayout;
     private JPanel contentPanel;
     private JButton activeButton;
-
-
-    Dotenv dotenv = Dotenv.load();
-
-    String drivername = dotenv.get("DRIVER_NAME");
-
-    private final Context context = new InitialContext();
-
-    private final NhanVienService nhanVienService = (NhanVienService) context.lookup("rmi://" + drivername + ":9090/nhanVienService");
 
     private void setActiveButton(JButton button) {
         if (activeButton != null) {
@@ -53,7 +40,7 @@ public class TrangChu extends JFrame {
 
 
     public TrangChu() throws NamingException, RemoteException, URISyntaxException {
-//        NhanVien nhanVien = nhanVienService.getNhanVienById(TaiKhoanDTO.getTaiKhoan().getNhanVien().getMaNhanVien());
+        NhanVien nhanVien = nhanVienService.getNhanVienById(TaiKhoanDTO.getTaiKhoan().getNhanVien().getMaNhanVien());
 
         try {
             // Set FlatLaf Light theme
@@ -155,10 +142,10 @@ public class TrangChu extends JFrame {
 
 
 // Label chào mừng
-/*        JLabel welcomeLabel = new JLabel(
+       JLabel welcomeLabel = new JLabel(
                 nhanVien.getChucVuNhanVien().toString()
-                        + ": Xin chào, " + nhanVien.getTenNhanVien());*/
-        JLabel welcomeLabel = new JLabel(": Xin chào, " );
+                        + ": Xin chào, " + nhanVien.getTenNhanVien());
+//        JLabel welcomeLabel = new JLabel(": Xin chào, " );
         welcomeLabel.setFont(new Font("Segoe UI", Font.PLAIN, 16));
         welcomeLabel.setForeground(Color.WHITE);
         welcomeLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 15));

@@ -6,12 +6,8 @@ import io.github.cdimascio.dotenv.Dotenv;
 import model.SanPham;
 import model.ThuocTinhSanPham;
 import net.datafaker.Faker;
-import service.DanhMucSanPhamService;
-import service.SanPhamService;
 import service.ThuocTinhSanPhamService;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -24,9 +20,12 @@ import java.rmi.RemoteException;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static gui.panel.RmiServiceLocator.*;
 
 public class PanelSanPham extends JPanel implements MouseListener, ActionListener {
     private final JLabel jLabelMaSP, jLabelTenSP, jLabelLoaiSP, jLabelGiaSP,
@@ -34,11 +33,6 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
             jLabelMoTa, jLabelThuocTinh, labelFind, labelStatus, labelDanhMuc, labelNgayNhap;
     private final JComboBox<String> JcomboboxLoaiSP, JcomboboxTrangThai, jComboBoxStatus, jComboBoxDanhMuc, jComboBoxMonth, jComboBoxYear;
     private final JTextField txtMaSP, txtTenSP, txtGiaSP, txtThueVAT, txtSoLuong, txtThuocTinh, txtMoTa, txtFind;
-
-    Dotenv dotenv = Dotenv.load();
-
-    String drivername = dotenv.get("DRIVER_NAME");
-
     private final JTable jTableContent;
 
     private final Faker faker = new Faker();
@@ -49,12 +43,7 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
 
     private final JButton btnThem, btnXoa, btnSua, btnReset, btnResetTable, btnFind;
 
-    private final Context context = new InitialContext();
-    private final SanPhamService sanPhamService = (SanPhamService)context.lookup("rmi://" + drivername + ":9090/sanPhamService");
-    private final ThuocTinhSanPhamService thuocTinhSanPhamService = (ThuocTinhSanPhamService)context.lookup("rmi://" + drivername + ":9090/thuocTinhSanPhamService");
-    private final DanhMucSanPhamService danhMucSanPhamService = (DanhMucSanPhamService) context.lookup("rmi://" + drivername + ":9090/danhMucSanPhamService");
-
-    public PanelSanPham () throws NamingException, RemoteException {
+    public PanelSanPham () throws RemoteException {
         setLayout(new BorderLayout());
 
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -78,31 +67,7 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
 
         ComponentUtils.setTable(jTableContent);
 
-        sanPhamService.getList().forEach(sanPham -> {
-            try {
-                List<ThuocTinhSanPham> thuocTinhSanPhamList =  thuocTinhSanPhamService.getListByProductId(sanPham.getMaSanPham());
-               String thuocTinh =  thuocTinhSanPhamList.stream().map(thuocTinhSanPham ->
-                       thuocTinhSanPham.getTenThuocTinh() + ":" + thuocTinhSanPham.getGiaTriThuocTinh()
-               ).collect(Collectors.joining(","));
-
-
-                dataModel.addRow ( new Object[]{
-                        sanPham.getMaSanPham(),
-                        sanPham.getTenSanPham(),
-                        (sanPham.getDanhMucSanPham() == null ? "" : sanPham.getDanhMucSanPham().getTenDanhMucSanPham()),
-                        sanPham.getGiaBan(),
-                        sanPham.getSoLuongTon(),
-                        String.format("%.2f", sanPham.getThueVAT()),
-                        sanPham.getNgayNhap().toString(),
-                        thuocTinh,
-                        sanPham.getMoTa(),
-                        sanPham.getHanSuDung().toString(),
-                        sanPham.getTrangThai()
-                });
-            } catch (RemoteException e) {
-                throw new RuntimeException(e);
-            }
-        });
+        loadDataTable();
 
         // Tùy chỉnh độ cao hàng và font chữ nếu cần
         jTableContent.setRowHeight(30);
@@ -443,14 +408,21 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
                     int xoa = JOptionPane.showConfirmDialog(null, "Bạn có chắc muốn xóa dòng này ?");
                     if(xoa == 0) {
                         try {
-                            sanPhamService.delete(maSP);
-                            dataModel.removeRow(jTableContent.getSelectedRow());
-                            JOptionPane.showMessageDialog(
-                                    this,
-                                    "Đã xóa thành công sản phẩm này!!",
-                                    "Thành công",
-                                    JOptionPane.INFORMATION_MESSAGE
-                            );
+                            if(sanPhamService.delete(maSP)){
+                                loadDataTable();
+                                JOptionPane.showMessageDialog(
+                                        this,
+                                        "Đã xóa thành công sản phẩm này!!",
+                                        "Thành công",
+                                        JOptionPane.INFORMATION_MESSAGE
+                                );
+                            } else
+                                JOptionPane.showMessageDialog(
+                                        this,
+                                        "Xóa thất bại sản phẩm này!!",
+                                        "Lỗi",
+                                        JOptionPane.ERROR_MESSAGE
+                                );
                         } catch (RemoteException ex) {
                             throw new RuntimeException(ex);
                         }
@@ -466,7 +438,7 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
             }
             else if (source.equals(btnThem)) {
                 if(validateInput()){
-                    String maSP = "SP" + faker.number().digits(5);
+                    String maSP = "SP";
                     String tenSP = txtTenSP.getText();
                     double giaSP = Double.parseDouble(txtGiaSP.getText());
                     double thueVAT = Double.parseDouble(txtThueVAT.getText());
@@ -496,42 +468,42 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
 
                     try {
                         sanPham.setDanhMucSanPham(danhMucSanPhamService.findOne(maDanhMuc));
+                        List<ThuocTinhSanPham> thuocTinhSanPhamList = new ArrayList<>();
+                        int indexTT = Integer.parseInt(thuocTinhSanPhamService.findMaxID().substring(2));
+                        for(String item : listThuocTinh){
+                            String key = item.split(":")[0];
+                            String value = item.split(":")[1];
 
-                        Arrays.stream(listThuocTinh).forEach(item -> {
-                            String itemKey = item.split(":")[0];
-                            String itemValue = item.split(":")[1];
-                            String thuocTinhID = "TT" + faker.number().digits(5);
-                            ThuocTinhSanPham thuocTinhSanPham = new ThuocTinhSanPham(thuocTinhID, itemKey, itemValue);
-                            thuocTinhSanPham.setSanPham(sanPham);
+                            ThuocTinhSanPham tts = new ThuocTinhSanPham();
+                            tts.setTenThuocTinh(key);
+                            tts.setGiaTriThuocTinh(value);
+                            tts.setSanPham(sanPham);
+                            tts.setMaThuocTinhSanPham(String.format("TT%05d", indexTT + 1));
+                            indexTT++;
 
-                            try {
-                                thuocTinhSanPhamService.save(thuocTinhSanPham);
-                            } catch (RemoteException ex) {
-                                throw new RuntimeException(ex);
-                            }
-                        });
+                            thuocTinhSanPhamList.add(tts);
+                        }
 
-                        sanPhamService.save(sanPham);
+                        sanPham.setThuocTinhSanPhams(thuocTinhSanPhamList);
 
-                        dataModel.addRow(new Object[] {
-                                sanPham.getMaSanPham(),
-                                sanPham.getTenSanPham(),
-                                sanPham.getDanhMucSanPham().getTenDanhMucSanPham(),
-                                sanPham.getGiaBan(),
-                                sanPham.getSoLuongTon(),
-                                String.format("%.2f", sanPham.getThueVAT()),
-                                sanPham.getNgayNhap().toString(),
-                                txtThuocTinh.getText(),
-                                sanPham.getMoTa(),
-                                sanPham.getHanSuDung().toString(),
-                                sanPham.getTrangThai()
-                        });
-                        JOptionPane.showMessageDialog(
+                        if(sanPhamService.saveSanPhamVaThuocTinh(sanPham)){
+                            JOptionPane.showMessageDialog(
+                                    this,
+                                    "Thêm sản phẩm thành công",
+                                    "Thành công",
+                                    JOptionPane.INFORMATION_MESSAGE
+                            );
+
+                            loadDataTable();
+                        } else {
+                            JOptionPane.showMessageDialog(
                                 this,
-                                "Thêm sản phẩm thành công",
-                                "Thành công",
-                                JOptionPane.INFORMATION_MESSAGE
-                        );
+                                "Thêm sản phẩm thất bại",
+                                "Thất bại",
+                                JOptionPane.ERROR_MESSAGE
+                            );
+                        }
+
                     } catch (RemoteException ex) {
                         throw new RuntimeException(ex);
                     }
@@ -578,58 +550,47 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
                                sanPham.setNgayNhap(localDateNgayNhap);
                                sanPham.setHanSuDung(localDateHanSuDung);
 
-                               sanPhamService.update(sanPham);
+                               if(sanPhamService.update(sanPham)){
+                                   List<ThuocTinhSanPham> thuocTinhSanPhamList = thuocTinhSanPhamService.getListByProductId(maSP);
 
-                               List<ThuocTinhSanPham> thuocTinhSanPhamList = thuocTinhSanPhamService.getListByProductId(maSP);
+                                   thuocTinhSanPhamList.forEach(ttSP -> {
+                                       try {
+                                           thuocTinhSanPhamService.delete(ttSP.getMaThuocTinhSanPham());
+                                       } catch (RemoteException ex) {
+                                           throw new RuntimeException(ex);
+                                       }
+                                   });
 
-                               thuocTinhSanPhamList.forEach(ttSP -> {
-                                   try {
-                                       thuocTinhSanPhamService.delete(ttSP.getMaThuocTinhSanPham());
-                                   } catch (RemoteException ex) {
-                                       throw new RuntimeException(ex);
-                                   }
-                               });
+                                   Arrays.stream(listThuocTinh).forEach(item -> {
+                                       String itemKey = item.split(":")[0];
+                                       String itemValue = item.split(":")[1];
+                                       String thuocTinhID = "TT";
 
+                                       ThuocTinhSanPham thuocTinhSanPham = new ThuocTinhSanPham(thuocTinhID, itemKey, itemValue);
+                                       thuocTinhSanPham.setSanPham(sanPham);
 
-                               Arrays.stream(listThuocTinh).forEach(item -> {
-                                   String itemKey = item.split(":")[0];
-                                   String itemValue = item.split(":")[1];
-                                   String thuocTinhID = "TT" + faker.number().digits(5);
+                                       try {
+                                           thuocTinhSanPhamService.save(thuocTinhSanPham);
+                                       } catch (RemoteException ex) {
+                                           throw new RuntimeException(ex);
+                                       }
+                                   });
 
-                                   ThuocTinhSanPham thuocTinhSanPham = new ThuocTinhSanPham(thuocTinhID, itemKey, itemValue);
-                                   thuocTinhSanPham.setSanPham(sanPham);
-
-                                   try {
-                                       thuocTinhSanPhamService.save(thuocTinhSanPham);
-                                   } catch (RemoteException ex) {
-                                       throw new RuntimeException(ex);
-                                   }
-                               });
-
-                               for(int i = 0; i < jTableContent.getRowCount(); i++) {
-                                   if(jTableContent.getValueAt(i, 0).toString().equals(maSP)) {
-                                       jTableContent.setValueAt(tenSP, i, 1);
-                                       jTableContent.setValueAt(JcomboboxLoaiSP.getSelectedItem()
-                                               .toString().split("_")[1], i, 2);
-                                       jTableContent.setValueAt(giaSP, i, 3);
-                                       jTableContent.setValueAt(soLuong, i, 4);
-                                       jTableContent.setValueAt(String.format("%.2f", thueVAT), i, 5);
-                                       jTableContent.setValueAt(localDateNgayNhap.toString(), i, 6);
-                                       jTableContent.setValueAt(txtThuocTinh.getText(), i, 7);
-                                       jTableContent.setValueAt(moTa, i, 8);
-                                       jTableContent.setValueAt(localDateHanSuDung.toString(), i, 9);
-                                       jTableContent.setValueAt(trangThai, i, 10);
-                                   }
+                                   loadDataTable();
+                                   JOptionPane.showMessageDialog(
+                                           this,
+                                           "Sửa sản phẩm thành công",
+                                           "Thành công",
+                                           JOptionPane.INFORMATION_MESSAGE
+                                   );
+                               } else {
+                                   JOptionPane.showMessageDialog(
+                                           this,
+                                           "Sửa sản phẩm thất bại",
+                                           "Lỗi",
+                                           JOptionPane.ERROR_MESSAGE
+                                   );
                                }
-
-                               JOptionPane.showMessageDialog(
-                                       this,
-                                       "Sửa sản phẩm thành công",
-                                       "Thành công",
-                                       JOptionPane.INFORMATION_MESSAGE
-                               );
-
-
                            }
                            else
                                JOptionPane.showMessageDialog(
@@ -691,37 +652,7 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
 
             }
             else if (source.equals(btnResetTable)){
-                try {
-                    dataModel.setRowCount(0);
-                    sanPhamService.getList().forEach(sanPham -> {
-                        List<ThuocTinhSanPham> thuocTinhSanPhamList = null;
-                        try {
-                            thuocTinhSanPhamList = thuocTinhSanPhamService.getListByProductId(sanPham.getMaSanPham());
-                            String thuocTinh =  thuocTinhSanPhamList.stream().map(thuocTinhSanPham ->
-                                    thuocTinhSanPham.getTenThuocTinh() + ":" + thuocTinhSanPham.getGiaTriThuocTinh()
-                            ).collect(Collectors.joining(","));
-
-
-                            dataModel.addRow ( new Object[]{
-                                    sanPham.getMaSanPham(),
-                                    sanPham.getTenSanPham(),
-                                    sanPham.getDanhMucSanPham().getTenDanhMucSanPham(),
-                                    sanPham.getGiaBan(),
-                                    sanPham.getSoLuongTon(),
-                                    String.format("%.2f", sanPham.getThueVAT()),
-                                    sanPham.getNgayNhap().toString(),
-                                    thuocTinh,
-                                    sanPham.getMoTa(),
-                                    sanPham.getHanSuDung().toString(),
-                                    sanPham.getTrangThai()
-                            });
-                        } catch (RemoteException ex) {
-                            throw new RuntimeException(ex);
-                        }
-                    });
-                } catch (RemoteException ex) {
-                    throw new RuntimeException(ex);
-                }
+                loadDataTable();
             }
             else if (source.equals(jComboBoxDanhMuc) || source.equals(jComboBoxMonth) || source.equals(jComboBoxStatus) || source.equals(jComboBoxYear)){
                 String danhMuc = jComboBoxDanhMuc.getSelectedItem().toString();
@@ -846,6 +777,41 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
 
 
         return true;
+    }
+
+
+    private void loadDataTable(){
+        try {
+            dataModel.setRowCount(0);
+            sanPhamService.getList().forEach(sanPham -> {
+                List<ThuocTinhSanPham> thuocTinhSanPhamList = null;
+                try {
+                    thuocTinhSanPhamList = thuocTinhSanPhamService.getListByProductId(sanPham.getMaSanPham());
+                    String thuocTinh =  thuocTinhSanPhamList.stream().map(thuocTinhSanPham ->
+                            thuocTinhSanPham.getTenThuocTinh() + ":" + thuocTinhSanPham.getGiaTriThuocTinh()
+                    ).collect(Collectors.joining(","));
+
+
+                    dataModel.addRow ( new Object[]{
+                            sanPham.getMaSanPham(),
+                            sanPham.getTenSanPham(),
+                            sanPham.getDanhMucSanPham().getTenDanhMucSanPham(),
+                            sanPham.getGiaBan(),
+                            sanPham.getSoLuongTon(),
+                            String.format("%.2f", sanPham.getThueVAT()),
+                            sanPham.getNgayNhap().toString(),
+                            thuocTinh,
+                            sanPham.getMoTa(),
+                            sanPham.getHanSuDung().toString(),
+                            sanPham.getTrangThai()
+                    });
+                } catch (RemoteException ex) {
+                    throw new RuntimeException(ex);
+                }
+            });
+        } catch (RemoteException ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
     @Override

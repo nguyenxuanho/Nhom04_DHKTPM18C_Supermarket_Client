@@ -1,7 +1,6 @@
 package gui.panel;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
+
 import javax.naming.NamingException;
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -12,14 +11,11 @@ import javax.swing.table.DefaultTableModel;
 
 import com.formdev.flatlaf.FlatLightLaf;
 import com.toedter.calendar.JDateChooser;
-import io.github.cdimascio.dotenv.Dotenv;
 import lombok.extern.slf4j.Slf4j;
 import model.*;
-import net.datafaker.Faker;
+
 import gui.components.ComponentUtils;
-import service.NhanVienService;
-import service.TaiKhoanService;
-import utils.PasswordUtil;
+
 
 import java.awt.*;
 
@@ -30,6 +26,9 @@ import java.awt.event.MouseEvent;
 import java.rmi.RemoteException;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static gui.panel.RmiServiceLocator.nhanVienService;
+import static gui.panel.RmiServiceLocator.taiKhoanService;
 
 @Slf4j
 public class PanelTaiKhoan extends JPanel {
@@ -51,15 +50,6 @@ public class PanelTaiKhoan extends JPanel {
 	private JPasswordField txtPassword;
 	private JTextField txtTimMaTK;
 	private JTextField txtTimTenDangNhap;
-
-
-	private final Faker faker = new Faker();
-	Dotenv dotenv = Dotenv.load();
-	String drivername = dotenv.get("DRIVER_NAME");
-
-	private final Context context = new InitialContext();
-	private final TaiKhoanService taiKhoanService = (TaiKhoanService) context.lookup("rmi://" + drivername + ":9090/taiKhoanService");
-	private final NhanVienService nhanVienService = (NhanVienService) context.lookup("rmi://" + drivername + ":9090/nhanVienService");
 	private JComboBox<String> cbbMaNV;
 
 	public PanelTaiKhoan() throws NamingException, RemoteException {
@@ -380,7 +370,8 @@ public class PanelTaiKhoan extends JPanel {
 	private void addTaiKhoan() {
 		try {
 			if(validateInput()) {
-				String maTK = "TK" + faker.number().digits(5);
+//				String maTK = "TK" + faker.number().digits(5);
+				String maTK = "";
 				String tenDangNhap = txtTenDangNhap.getText();
 				String password = txtPassword.getText();
 //				String hashPassword = PasswordUtil.hashPassword(password);
@@ -393,13 +384,7 @@ public class PanelTaiKhoan extends JPanel {
 				taiKhoan.setNhanVien(nhanVien);
 
 				if(taiKhoanService.insertTaiKhoan(taiKhoan)) {
-					tableModel.addRow(new Object[]{
-							taiKhoan.getMaTaiKhoan(),
-							taiKhoan.getTenDangNhap(),
-							"...",
-							nhanVien.getMaNhanVien(),
-							taiKhoan.getTrangThai()
-					});
+					resetTable();
 					resetForm();
 					JOptionPane.showMessageDialog(this, "Đã thêm tài khoản thành công");
 				} else {
@@ -430,7 +415,7 @@ public class PanelTaiKhoan extends JPanel {
 
 				if (confirm == JOptionPane.YES_OPTION) {
 					if (taiKhoanService.deleteTaiKhoan(maTK)) {
-						tableModel.removeRow(selectedRow);
+						resetTable();
 						resetForm();
 						JOptionPane.showMessageDialog(
 								this,
@@ -497,11 +482,7 @@ public class PanelTaiKhoan extends JPanel {
 
 					if(confirm == JOptionPane.YES_OPTION) {
 						if(taiKhoanService.updateTaiKhoan(taiKhoan)) {
-							tableModel.setValueAt(maTK, row, 0);
-							tableModel.setValueAt(tenDangNhap, row, 1);
-							tableModel.setValueAt("...", row, 2);
-							tableModel.setValueAt(nhanVien.getMaNhanVien(), row, 3);
-							tableModel.setValueAt(trangthai, row, 3);
+							resetTable();
 							resetForm();
 							JOptionPane.showMessageDialog(
 									this,

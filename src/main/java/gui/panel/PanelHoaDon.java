@@ -22,6 +22,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import static gui.panel.RmiServiceLocator.*;
+
 public class PanelHoaDon extends JPanel {
     // Các trường cho phần chi tiết sản phẩm
     private JTextField txtMaSP, txtDonGia, txtSoLuong, txtThanhTien, txtTimMaHoaDon, txtTimTenKH;
@@ -37,13 +39,6 @@ public class PanelHoaDon extends JPanel {
 
     private JTable table;
     private DefaultTableModel tableModel;
-    private final HoaDonService hoaDonService;
-    private  final ChiTietHoaDonService chiTietHoaDonService;
-    private  final KhachHangService khachHangService;
-    private  final TaiKhoanService taiKhoanService;
-    private  final NhanVienService nhanVienService;
-    private  final SanPhamService sanPhamService;
-    private  final KhuyenMaiService khuyenMaiService;
 
     private final Dotenv dotenv = Dotenv.load();
     private final String drivername = dotenv.get("DRIVER_NAME");
@@ -60,19 +55,7 @@ public class PanelHoaDon extends JPanel {
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         JPanel infoPanel = createInfoPanel();
-        Context context = new InitialContext();
-        this.hoaDonService = (HoaDonService) context.lookup("rmi://" + drivername + ":9090/hoaDonService");
-        this.khachHangService = (KhachHangService) context.lookup("rmi://" + drivername + ":9090/khachHangService");
-        this.taiKhoanService = (TaiKhoanService) context.lookup("rmi://" + drivername + ":9090/taiKhoanService");
-        this.nhanVienService = (NhanVienService) context.lookup("rmi://" + drivername + ":9090/nhanVienService");
-        this.sanPhamService = (SanPhamService) context.lookup("rmi://" + drivername + ":9090/sanPhamService");
-        this.khuyenMaiService = (KhuyenMaiService) context.lookup("rmi://" + drivername + ":9090/khuyenMaiService");
-        this.chiTietHoaDonService = (ChiTietHoaDonService) context.lookup("rmi://" + drivername + ":9090/chiTietHoaDonService");
-
-
         // Phần nhập thông tin sản phẩm
-
-
         add(infoPanel, BorderLayout.NORTH);
 
 
@@ -739,7 +722,6 @@ public class PanelHoaDon extends JPanel {
         if(khachHangService.capNhatDiemTichLuy(hoaDon.getKhachHang().getMaKhachHang(), diemTichLuyCong - hoaDon.getDiemTichLuySuDung())){
             hoaDon.setKhachHang(khachHangService.findById(txtMaKH.getText()));
         }
-
         if(hoaDonService.lapHoaDon(hoaDon)){
             sanPhamService.capNhatSoLuongSanPham(chiTietHoaDonList);
             JOptionPane.showMessageDialog(null, "Thêm hóa đơn thành công", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
@@ -752,11 +734,15 @@ public class PanelHoaDon extends JPanel {
             txtDiemTichLuyDung.setText("");
             txtTongTien.setText("");
 
+
             HoaDonDTO.setHoaDon(hoaDon);
             JFrame frame = new JFrame();
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             JDialogHoaDon dialog = new JDialogHoaDon(frame);
             dialog.setVisible(true);
+        } else {
+            JOptionPane.showMessageDialog(null, "Thêm hóa đơn thất bại", "Lỗi", JOptionPane.ERROR_MESSAGE);
+
         }
     }
     private void resetTable(){

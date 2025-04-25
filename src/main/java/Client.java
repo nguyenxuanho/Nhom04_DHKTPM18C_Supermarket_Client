@@ -1,7 +1,5 @@
 
 
-import gui.LoginForm;
-import gui.TrangChu;
 import gui.panel.Loading;
 
 import javax.naming.NamingException;
@@ -15,12 +13,11 @@ public class Client {
                 Loading loading = new Loading();
                 loading.setVisible(true); // 👈 Mở form đăng nhập trước
                 loading.setLocationRelativeTo(null);
-
                 // Tạo một thread để xử lý tiến trình tải
                 new Thread(() -> {
                     try {
                         for (int i = 0; i <= 100; i++) {
-                            Thread.sleep(1);
+                            Thread.sleep(5);
                             loading.updateProgress(i);
                         }
                     } catch (Exception e1) {

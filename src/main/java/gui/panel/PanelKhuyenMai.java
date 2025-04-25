@@ -20,6 +20,9 @@ import java.rmi.RemoteException;
 import java.time.LocalDate;
 import java.util.List;
 
+import static gui.panel.RmiServiceLocator.khuyenMaiService;
+import static gui.panel.RmiServiceLocator.sanPhamService;
+
 public class PanelKhuyenMai extends JPanel {
     private JTextField txtMaSP, txtTenKM, txtTienGiam, txtNgayBatDau, txtNgayKetThuc, txtTimMaKM;
     private JButton btnThem, btnXoa, btnSua, btnReset, btnTim, btnTimSP;
@@ -27,12 +30,6 @@ public class PanelKhuyenMai extends JPanel {
     private DefaultTableModel tableModel;
     private final Faker faker = new Faker();
 
-    Dotenv dotenv = Dotenv.load();
-    String drivername = dotenv.get("DRIVER_NAME");
-
-    private final Context context = new InitialContext();
-    private final SanPhamService sanPhamService = (SanPhamService) context.lookup("rmi://" + drivername + ":9090/sanPhamService");
-    private final KhuyenMaiService khuyenMaiService = (KhuyenMaiService) context.lookup("rmi://" + drivername + ":9090/khuyenMaiService");
 
     public PanelKhuyenMai() throws NamingException, RemoteException {
         if(khuyenMaiService.getDanhSachKhuyenMaiHetHan() != null){

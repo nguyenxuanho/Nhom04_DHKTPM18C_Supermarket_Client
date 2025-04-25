@@ -643,7 +643,15 @@ public class PanelThongKe extends JPanel implements MouseListener, ActionListene
         // Xuất file
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Chọn vị trí lưu file Excel");
+
         fileChooser.setFileFilter(new FileNameExtensionFilter("Excel Files", "xls", "xlsx"));
+
+        // Đặt thư mục mặc định
+        File defaultDirectory = new File("C:/Users/Arisu/Downloads");
+        if (defaultDirectory.exists()) {
+            fileChooser.setCurrentDirectory(defaultDirectory);
+        }
+
         fileChooser.setSelectedFile(new File(filename + ".xlsx"));
 
         if (fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
@@ -799,6 +807,13 @@ public class PanelThongKe extends JPanel implements MouseListener, ActionListene
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Chọn vị trí lưu file Excel");
         fileChooser.setFileFilter(new FileNameExtensionFilter("Excel Files", "xls", "xlsx"));
+
+        // Đặt thư mục mặc định
+        File defaultDirectory = new File("C:/Users/Arisu/Downloads");
+        if (defaultDirectory.exists()) {
+            fileChooser.setCurrentDirectory(defaultDirectory);
+        }
+
         fileChooser.setSelectedFile(new File(suggestedFileName));
 
         if (fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {

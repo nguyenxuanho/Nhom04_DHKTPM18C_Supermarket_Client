@@ -34,8 +34,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static gui.panel.RmiServiceLocator.nhanVienService;
+
 public class PanelNhanVien extends JPanel {
-    private JTextField txtMaNV, txtTenNV, txtNgaySinh, txtSDT, txtDiaChi, txtSoDinhDanh, txtTimMaNV, txtTimTenNV;
+    private JTextField txtMaNV, txtTenNV, txtSDT, txtDiaChi, txtSoDinhDanh, txtTimMaNV, txtTimTenNV;
     private JComboBox<String> cboGioiTinh, cboChucVu;
     private JButton btnThem, btnXoa, btnSua, btnReset, btnTim;
     private JTable table;
@@ -47,11 +49,8 @@ public class PanelNhanVien extends JPanel {
     private JComboBox<String> cboChucVuLoc;
 
     private final Faker faker = new Faker();
-    Dotenv dotenv = Dotenv.load();
-    String drivername = dotenv.get("DRIVER_NAME");
 
-    private final Context context = new InitialContext();
-    private final NhanVienService nhanVienService = (NhanVienService) context.lookup("rmi://" + drivername + ":9090/nhanVienService");
+
 
     public PanelNhanVien() throws NamingException, RemoteException{
         setLayout(new BorderLayout(10, 10));
@@ -447,16 +446,7 @@ public class PanelNhanVien extends JPanel {
                 NhanVien nhanVien = new NhanVien(maNV, tenNV, localDateNgaySinh, sdt, diaChi, soDinhDanh, enumGT, chucVuNhanVien);
 
                 if(nhanVienService.insertNhanVien(nhanVien)) {
-                    tableModel.addRow(new Object[]{
-                            nhanVien.getMaNhanVien(),
-                            nhanVien.getTenNhanVien(),
-                            nhanVien.getNgaySinh(),
-                            nhanVien.getSoDienThoai(),
-                            nhanVien.getDiaChi(),
-                            nhanVien.getSoDinhDanh(),
-                            nhanVien.getGioiTinh(),
-                            nhanVien.getChucVuNhanVien()
-                    });
+                    resetTable();
                     resetForm();
                     JOptionPane.showMessageDialog(this, "Đã thêm nhân viên thành công");
                 } else {
@@ -488,7 +478,7 @@ public class PanelNhanVien extends JPanel {
 
                 if (confirm == JOptionPane.YES_OPTION) {
                     if (nhanVienService.deleteNhanVien(maNV)) {
-                        tableModel.removeRow(selectedRow);
+                        resetTable();
                         resetForm();
                         JOptionPane.showMessageDialog(
                                 this,
@@ -552,13 +542,7 @@ public class PanelNhanVien extends JPanel {
 
                     if(confirm == JOptionPane.YES_OPTION) {
                         if(nhanVienService.updateNhanVien(nhanVien)) {
-                            tableModel.setValueAt(nhanVien.getTenNhanVien(), row, 1);
-                            tableModel.setValueAt(nhanVien.getNgaySinh(), row, 2);
-                            tableModel.setValueAt(nhanVien.getSoDienThoai(), row, 3);
-                            tableModel.setValueAt(nhanVien.getDiaChi(), row, 4);
-                            tableModel.setValueAt(nhanVien.getSoDinhDanh(), row, 5);
-                            tableModel.setValueAt(nhanVien.getGioiTinh(), row, 6);
-                            tableModel.setValueAt(nhanVien.getChucVuNhanVien(), row, 7);
+                            resetTable();
                             resetForm();
                             JOptionPane.showMessageDialog(
                                     this,

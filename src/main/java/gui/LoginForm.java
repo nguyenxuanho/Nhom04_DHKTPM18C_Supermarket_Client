@@ -1,12 +1,8 @@
 package gui;
 
 import dto.TaiKhoanDTO;
-import io.github.cdimascio.dotenv.Dotenv;
+import gui.panel.RmiServiceLocator;
 import model.TaiKhoan;
-import service.TaiKhoanService;
-
-import javax.naming.Context;
-import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.swing.*;
 import java.awt.*;
@@ -17,12 +13,6 @@ public class LoginForm extends JFrame {
     private JTextField txtUsername;
     private JPasswordField txtPassword;
     private JLabel lblError;
-    Dotenv dotenv = Dotenv.load();
-
-    String drivername = dotenv.get("DRIVER_NAME");
-    private final Context context = new InitialContext();
-    private final TaiKhoanService taiKhoanService = (TaiKhoanService) context.lookup("rmi://" + drivername + ":9090/taiKhoanService");
-
 
     public LoginForm() throws NamingException {
         setTitle("Đăng nhập");
@@ -109,7 +99,7 @@ public class LoginForm extends JFrame {
                 String password = new String(txtPassword.getPassword()).trim();
 
                 try {
-                    TaiKhoan taiKhoan = taiKhoanService.verifyTaiKhoan(username, password);
+                    TaiKhoan taiKhoan = RmiServiceLocator.getTaiKhoanService().verifyTaiKhoan(username, password);
                     if(taiKhoan != null){
                         JOptionPane.showMessageDialog(LoginForm.this, "Đăng nhập thành công!");
                         dispose();

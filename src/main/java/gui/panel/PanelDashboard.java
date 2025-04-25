@@ -23,26 +23,15 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import static gui.panel.RmiServiceLocator.chiTietHoaDonService;
+import static gui.panel.RmiServiceLocator.sanPhamService;
 
 public class PanelDashboard extends JPanel implements MouseListener, ActionListener {
     private chart.Chart chart;
     private chart.PieChart pieChart;
-
-    Dotenv dotenv = Dotenv.load();
-
-    String drivername = dotenv.get("DRIVER_NAME");
-
     private final JTable jTableContent;
-
-    private final Faker faker = new Faker();
-
     private final DefaultTableModel dataModel;
 
-
-    private final Context context = new InitialContext();
-
-    private final SanPhamService sanPhamService = (SanPhamService) context.lookup("rmi://" + drivername + ":9090/sanPhamService");
-    private final ChiTietHoaDonService chiTietHoaDonService = (ChiTietHoaDonService) context.lookup("rmi://" + drivername + ":9090/chiTietHoaDonService");
     public PanelDashboard () throws NamingException, RemoteException {
         setLayout(new BorderLayout());
 

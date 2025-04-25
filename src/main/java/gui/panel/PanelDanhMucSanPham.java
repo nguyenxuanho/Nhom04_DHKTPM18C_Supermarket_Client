@@ -26,10 +26,6 @@ public class PanelDanhMucSanPham extends JPanel implements MouseListener, Action
     private final JLabel jLabelMaDanhMucSP, jLabelTenDanhMucSP, labelFind;
     private final JTextField txtMaDanhMucSP, txtTenDanhMucSP, txtFind;
 
-    Dotenv dotenv = Dotenv.load();
-
-    String drivername = dotenv.get("DRIVER_NAME");
-
     private final JTable jTableContent;
 
     private final Faker faker = new Faker();
@@ -39,13 +35,10 @@ public class PanelDanhMucSanPham extends JPanel implements MouseListener, Action
 
     private final JButton btnThem, btnXoa, btnSua, btnReset, btnResetTable, btnFind;
 
-    private final Context context = new InitialContext();
-
-    private final DanhMucSanPhamService danhMucSanPhamService = (DanhMucSanPhamService) context.lookup("rmi://" + drivername + ":9090/danhMucSanPhamService");
 
     public PanelDanhMucSanPham () throws NamingException, RemoteException, URISyntaxException {
         setLayout(new BorderLayout());
-       List<DanhMucSanPham> danhMucSanPhams = danhMucSanPhamService.getList();
+       List<DanhMucSanPham> danhMucSanPhams = RmiServiceLocator.getDanhMucSanPhamService().getList();
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         // Tạo tiêu đề căn giữa
@@ -66,7 +59,7 @@ public class PanelDanhMucSanPham extends JPanel implements MouseListener, Action
         jTableContent = new JTable(dataModel);
         ComponentUtils.setTable(jTableContent);
 
-        danhMucSanPhamService.getList().forEach(danhMucSanPham -> {
+        RmiServiceLocator.getDanhMucSanPhamService().getList().forEach(danhMucSanPham -> {
                 dataModel.addRow ( new Object[]{
                         danhMucSanPham.getMaDanhMucSanPham(),
                         danhMucSanPham.getTenDanhMucSanPham(),
@@ -260,6 +253,20 @@ public class PanelDanhMucSanPham extends JPanel implements MouseListener, Action
         return true;
     }
 
+    public void loadTable(){
+        try {
+            dataModel.setRowCount(0);
+            RmiServiceLocator.getDanhMucSanPhamService().getList().forEach(danhMucSanPham -> {
+                dataModel.addRow ( new Object[]{
+                        danhMucSanPham.getMaDanhMucSanPham(),
+                        danhMucSanPham.getTenDanhMucSanPham(),
+                });
+
+            });
+        } catch (RemoteException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
 
 
     @Override
@@ -276,7 +283,7 @@ public class PanelDanhMucSanPham extends JPanel implements MouseListener, Action
                     int xoa = JOptionPane.showConfirmDialog(null, "Bạn có chắc muốn xóa dòng này ?");
                     if(xoa == 0) {
                         try {
-                            danhMucSanPhamService.delete(maDanhMucSP);
+                            RmiServiceLocator.getDanhMucSanPhamService().delete(maDanhMucSP);
                             dataModel.removeRow(jTableContent.getSelectedRow());
                             JOptionPane.showMessageDialog(
                                     this,
@@ -306,17 +313,22 @@ public class PanelDanhMucSanPham extends JPanel implements MouseListener, Action
                     DanhMucSanPham danhMucSanPham = new DanhMucSanPham(maDanhMucSP, tenDanhMucSP);
 
                     try {
-                        danhMucSanPhamService.save(danhMucSanPham);
-                        dataModel.addRow(new Object[] {
-                                danhMucSanPham.getMaDanhMucSanPham(),
-                                danhMucSanPham.getTenDanhMucSanPham(),
-                        });
-                        JOptionPane.showMessageDialog(
-                                this,
-                                "Thêm danh mục thành công",
-                                "Thành công",
-                                JOptionPane.INFORMATION_MESSAGE
-                        );
+                        if(RmiServiceLocator.getDanhMucSanPhamService().save(danhMucSanPham)){
+                            loadTable();
+                            JOptionPane.showMessageDialog(
+                                    this,
+                                    "Thêm danh mục thành công",
+                                    "Thành công",
+                                    JOptionPane.INFORMATION_MESSAGE
+                            );
+                        } else {
+                            JOptionPane.showMessageDialog(
+                                    this,
+                                    "Thêm danh mục thất bại",
+                                    "Lỗi",
+                                    JOptionPane.ERROR_MESSAGE
+                            );
+                        }
                     } catch (RemoteException ex) {
                         throw new RuntimeException(ex);
 
@@ -329,28 +341,27 @@ public class PanelDanhMucSanPham extends JPanel implements MouseListener, Action
                         String maDanhMucSP = jTableContent.getValueAt(jTableContent.getSelectedRow(), 0).toString();
 
                         try {
-                            DanhMucSanPham danhMucSanPham = danhMucSanPhamService.findOne(maDanhMucSP);
+                            DanhMucSanPham danhMucSanPham = RmiServiceLocator.getDanhMucSanPhamService().findOne(maDanhMucSP);
                             if(danhMucSanPham != null){
                                 String tenDanhMucSP = txtTenDanhMucSP.getText();
 
                                 danhMucSanPham.setTenDanhMucSanPham(tenDanhMucSP);
 
-                                danhMucSanPhamService.update(danhMucSanPham);
-
-                                for(int i = 0; i < jTableContent.getRowCount(); i++) {
-                                    if(jTableContent.getValueAt(i, 0).toString().equals(maDanhMucSP)) {
-                                        jTableContent.setValueAt(tenDanhMucSP, i, 1);
-                                    }
-                                }
-
-                                JOptionPane.showMessageDialog(
-                                        this,
-                                        "Cập nhật danh mục thành công",
-                                        "Thành công",
-                                        JOptionPane.INFORMATION_MESSAGE
-                                );
-                                JOptionPane.showMessageDialog(null, "Sửa danh mục sản phẩm thành công");
-
+                                if(RmiServiceLocator.getDanhMucSanPhamService().update(danhMucSanPham)){
+                                    JOptionPane.showMessageDialog(
+                                            this,
+                                            "Cập nhật danh mục thành công",
+                                            "Thành công",
+                                            JOptionPane.INFORMATION_MESSAGE
+                                    );
+                                    loadTable();
+                                } else
+                                    JOptionPane.showMessageDialog(
+                                            this,
+                                            "Cập nhật danh mục thất bại",
+                                            "Lỗi",
+                                            JOptionPane.ERROR_MESSAGE
+                                    );
                             } else JOptionPane.showMessageDialog(null, "Không tìm thấy mã danh mục sản phẩm để sửa");
 
                         } catch (RemoteException ex) {
@@ -368,7 +379,7 @@ public class PanelDanhMucSanPham extends JPanel implements MouseListener, Action
             else if (source.equals(btnFind)) {
                 String maDanhMucSP = txtFind.getText();
                 try {
-                    DanhMucSanPham danhMucSanPham = danhMucSanPhamService.findOne(maDanhMucSP);
+                    DanhMucSanPham danhMucSanPham = RmiServiceLocator.getDanhMucSanPhamService().findOne(maDanhMucSP);
                     if(danhMucSanPham != null) {
                         dataModel.setRowCount(0);
                         dataModel.addRow(new Object[] {
@@ -388,18 +399,7 @@ public class PanelDanhMucSanPham extends JPanel implements MouseListener, Action
 
             }
             else if (source.equals(btnResetTable)){
-                try {
-                    dataModel.setRowCount(0);
-                    danhMucSanPhamService.getList().forEach(danhMucSanPham -> {
-                        dataModel.addRow ( new Object[]{
-                                danhMucSanPham.getMaDanhMucSanPham(),
-                                danhMucSanPham.getTenDanhMucSanPham(),
-                        });
-
-                    });
-                } catch (RemoteException ex) {
-                    throw new RuntimeException(ex);
-                }
+                loadTable();
             }
 
         }
@@ -412,7 +412,7 @@ public class PanelDanhMucSanPham extends JPanel implements MouseListener, Action
             if(source.equals(jTableContent)) {
                 String maDanhMucSP = jTableContent.getValueAt(jTableContent.getSelectedRow(), 0).toString();
                 try {
-                    DanhMucSanPham danhMucSanPham = danhMucSanPhamService.findOne(maDanhMucSP);
+                    DanhMucSanPham danhMucSanPham = RmiServiceLocator.getDanhMucSanPhamService().findOne(maDanhMucSP);
                     txtMaDanhMucSP.setText(danhMucSanPham.getMaDanhMucSanPham());
                     txtTenDanhMucSP.setText(danhMucSanPham.getTenDanhMucSanPham());
                 } catch (RemoteException ex) {

@@ -1,14 +1,10 @@
 package gui.panel;
 
 import gui.components.ComponentUtils;
-import io.github.cdimascio.dotenv.Dotenv;
 import model.GioiTinh;
 import model.KhachHang;
 import net.datafaker.Faker;
-import service.KhachHangService;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -22,8 +18,10 @@ import java.rmi.RemoteException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static gui.panel.RmiServiceLocator.khachHangService;
+
 public class PanelKhachHang extends JPanel {
-    private JTextField txtMaNV, txtTenNV, txtSDT, txtDiaChi, txtTimMaNV, txtTimTenNV;
+    private JTextField txtSDT;
     private JComboBox<String> cboGioiTinh;
     private JButton btnThem, btnXoa, btnSua, btnReset, btnTim;
     private JTable table;
@@ -41,11 +39,6 @@ public class PanelKhachHang extends JPanel {
 
     private final Faker faker = new Faker();
 
-    Dotenv dotenv = Dotenv.load();
-    String drivername = dotenv.get("DRIVER_NAME");
-
-    private final Context context = new InitialContext();
-    private final KhachHangService khachHangService = (KhachHangService) context.lookup("rmi://" + drivername + ":9090/khachHangService");
 
     public PanelKhachHang() throws NamingException, RemoteException {
 
@@ -225,19 +218,27 @@ public class PanelKhachHang extends JPanel {
         txtTimTenKH.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
-                timKiemTheoTen();
+                try {
+                    timKiemTheoTen();
+                } catch (RemoteException ex) {
+                    throw new RuntimeException(ex);
+                }
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
-                timKiemTheoTen();
+                try {
+                    timKiemTheoTen();
+                } catch (RemoteException ex) {
+                    throw new RuntimeException(ex);
+                }
             }
 
             @Override
             public void changedUpdate(DocumentEvent e) {
             }
 
-            private void timKiemTheoTen() {
+            private void timKiemTheoTen() throws RemoteException {
                 String tenKH = txtTimTenKH.getText().trim();
                 if (!tenKH.isEmpty()) {
                     try {
@@ -261,19 +262,27 @@ public class PanelKhachHang extends JPanel {
         txtTimSDT.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
-                timKiemTheoSDT();
+                try {
+                    timKiemTheoSDT();
+                } catch (RemoteException ex) {
+                    throw new RuntimeException(ex);
+                }
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
-                timKiemTheoSDT();
+                try {
+                    timKiemTheoSDT();
+                } catch (RemoteException ex) {
+                    throw new RuntimeException(ex);
+                }
             }
 
             @Override
             public void changedUpdate(DocumentEvent e) {
             }
 
-            private void timKiemTheoSDT() {
+            private void timKiemTheoSDT() throws RemoteException {
                 String sdt = txtTimSDT.getText().trim();
                 if (!sdt.isEmpty()) {
                     try {
@@ -313,7 +322,13 @@ public class PanelKhachHang extends JPanel {
         lammoi.setIcon(new ImageIcon(getClass().getResource("/image/refresh.png")));
 
 
-        lammoi.addActionListener(e -> resetTable());
+        lammoi.addActionListener(e -> {
+            try {
+                resetTable();
+            } catch (RemoteException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
 
         String[] columns = {"Mã khách hàng", "Tên khách hàng", "Số điện thoại", "Giới tính", "Điểm tích lũy"};
         tableModel = new DefaultTableModel(columns, 0) {
@@ -365,13 +380,7 @@ public class PanelKhachHang extends JPanel {
                 KhachHang khachHang = new KhachHang(maKH, tenKH, sdt, enumGT, diem);
 
                 if(khachHangService.themKhachHang(khachHang)) {
-                    tableModel.addRow(new Object[]{
-                            maKH,
-                            tenKH,
-                            sdt,
-                            gioiTinh,
-                            diemTichLuy
-                    });
+                    addSampleData();
                     resetForm();
                     JOptionPane.showMessageDialog(this, "Đã thêm khách hàng thành công");
                 } else {
@@ -401,7 +410,7 @@ public class PanelKhachHang extends JPanel {
 
                 if (confirm == JOptionPane.YES_OPTION) {
                     if (khachHangService.delete(maKH)) {
-                        tableModel.removeRow(selectedRow);
+                        addSampleData();
                         resetForm();
                         JOptionPane.showMessageDialog(
                                 this,
@@ -459,11 +468,7 @@ public class PanelKhachHang extends JPanel {
 
                     if(confirm == JOptionPane.YES_OPTION) {
                         if(khachHangService.suaKhachHang(maKH, khachHang)) {
-                            tableModel.setValueAt(maKH, row, 0);
-                            tableModel.setValueAt(tenKH, row, 1);
-                            tableModel.setValueAt(sdt, row, 2);
-                            tableModel.setValueAt(gioiTinh, row, 3);
-                            tableModel.setValueAt(diemTichLuy, row, 4);
+                            addSampleData();
                             resetForm();
                             JOptionPane.showMessageDialog(
                                     this,
@@ -595,16 +600,12 @@ public class PanelKhachHang extends JPanel {
         return true;
     }
 
-    private void resetTable() {
-        try{
-            tableModel.setRowCount(0);
-            addSampleData();
-        } catch (RemoteException e) {
-            throw new RuntimeException(e);
-        }
+    private void resetTable() throws RemoteException {
+       addSampleData();
     }
 
     private void addSampleData() throws RemoteException{
+        tableModel.setRowCount(0);
 
         List<KhachHang> khachHangs = khachHangService.findAll();
 

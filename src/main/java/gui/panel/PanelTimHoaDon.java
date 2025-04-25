@@ -1,16 +1,8 @@
 package gui.panel;
 
-import dto.TaiKhoanDTO;
 import gui.components.ComponentUtils;
-import io.github.cdimascio.dotenv.Dotenv;
 import model.ChiTietHoaDon;
 import model.HoaDon;
-import model.KhachHang;
-import model.SanPham;
-import service.*;
-
-import javax.naming.Context;
-import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -19,9 +11,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.rmi.RemoteException;
 import java.text.DecimalFormat;
-import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.List;
+
+import static gui.panel.RmiServiceLocator.chiTietHoaDonService;
+import static gui.panel.RmiServiceLocator.hoaDonService;
 
 public class PanelTimHoaDon extends JPanel {
     // Các trường cho phần chi tiết sản phẩm
@@ -36,11 +29,6 @@ public class PanelTimHoaDon extends JPanel {
     private JTextArea txtGhiChu;
     private JTable table;
     private DefaultTableModel tableModel;
-    private final HoaDonService hoaDonService;
-    private  final ChiTietHoaDonService chiTietHoaDonService;
-    private  final TaiKhoanService taiKhoanService;
-    private final Dotenv dotenv = Dotenv.load();
-    private final String drivername = dotenv.get("DRIVER_NAME");
     private JLabel lblMaHoaDon, lbltongTien, lblDiem;
     private JTextField txtMaKH,txtMaSP, txtDonGia, txtSoLuong, txtThanhTien;
     private JTextField txtTimSDT;
@@ -49,13 +37,6 @@ public class PanelTimHoaDon extends JPanel {
     public PanelTimHoaDon() throws NamingException, RemoteException {
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
-        Context context = new InitialContext();
-        this.hoaDonService = (HoaDonService) context.lookup("rmi://" + drivername + ":9090/hoaDonService");
-        this.taiKhoanService = (TaiKhoanService) context.lookup("rmi://" + drivername + ":9090/taiKhoanService");
-        this.chiTietHoaDonService = (ChiTietHoaDonService) context.lookup("rmi://" + drivername + ":9090/chiTietHoaDonService");
-
-
 
 
         // Container chính chứa bảng và panel phải
