@@ -33,14 +33,8 @@ public class TrangChu extends JFrame {
     }
 
 
-
-    private int x;
-    private int y;
-
-
-
     public TrangChu() throws NamingException, RemoteException, URISyntaxException {
-//        NhanVien nhanVien = nhanVienService.getNhanVienById(TaiKhoanDTO.getTaiKhoan().getNhanVien().getMaNhanVien());
+        NhanVien nhanVien = nhanVienService.getNhanVienById(TaiKhoanDTO.getTaiKhoan().getNhanVien().getMaNhanVien());
 
         try {
             // Set FlatLaf Light theme
@@ -142,10 +136,10 @@ public class TrangChu extends JFrame {
 
 
 // Label chào mừng
-//       JLabel welcomeLabel = new JLabel(
-//                nhanVien.getChucVuNhanVien().toString()
-//                        + ": Xin chào, " + nhanVien.getTenNhanVien());
-        JLabel welcomeLabel = new JLabel(": Xin chào, " );
+       JLabel welcomeLabel = new JLabel(
+                nhanVien.getChucVuNhanVien().toString()
+                        + ": Xin chào, " + nhanVien.getTenNhanVien());
+//        JLabel welcomeLabel = new JLabel(": Xin chào, " );
         welcomeLabel.setFont(new Font("Segoe UI", Font.PLAIN, 16));
         welcomeLabel.setForeground(Color.WHITE);
         welcomeLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 15));
