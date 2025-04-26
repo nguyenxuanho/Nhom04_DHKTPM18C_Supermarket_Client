@@ -40,13 +40,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
 
-public class PanelThongKe extends JPanel implements MouseListener, ActionListener {
+import static gui.panel.RmiServiceLocator.chiTietHoaDonService;
+import static gui.panel.RmiServiceLocator.sanPhamService;
 
-    Dotenv dotenv = Dotenv.load();
+public class PanelThongKe extends JPanel implements MouseListener, ActionListener {
 
     private DecimalFormat df = new DecimalFormat("#,##0.00");
     private static Chart chart;
-    String drivername = dotenv.get("DRIVER_NAME");
     private static Box chartBox;
     private final JTextField txtNam;
     private final JDateChooser dateNgayBatDau, dateNgayKetThuc;
@@ -57,10 +57,6 @@ public class PanelThongKe extends JPanel implements MouseListener, ActionListene
 
     private final JButton btnThongKe, btnThongKeNam, btnXuatThongKeNgay, btnXuatThongKeNam;
     private PieChart pieChart;
-    private final Context context = new InitialContext();
-    private final ChiTietHoaDonService chiTietHoaDonService = (ChiTietHoaDonService) context.lookup("rmi://" + drivername + ":9090/chiTietHoaDonService");
-    private final SanPhamService sanPhamService = (SanPhamService) context.lookup("rmi://" + drivername + ":9090/sanPhamService");
-
     public PanelThongKe () throws NamingException, RemoteException {
         setLayout(new BorderLayout());
 
