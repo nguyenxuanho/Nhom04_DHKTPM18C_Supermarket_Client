@@ -1,8 +1,11 @@
 package gui;
 
 import dto.TaiKhoanDTO;
+import gui.panel.PanelDashboard;
 import gui.panel.RmiServiceLocator;
 import model.TaiKhoan;
+import utils.PasswordResetPanel;
+
 import javax.naming.NamingException;
 import javax.swing.*;
 import java.awt.*;
@@ -26,6 +29,10 @@ public class LoginForm extends JFrame {
         lblImage.setIcon(new ImageIcon(new ImageIcon(getClass().getResource("/image/sieuthi.jpg"))
                 .getImage().getScaledInstance(300, 400, Image.SCALE_SMOOTH)));
         add(lblImage, BorderLayout.WEST);
+
+        JPanel panelContainer = new JPanel();
+        add(panelContainer, BorderLayout.CENTER);
+        panelContainer.setLayout(new CardLayout());
 
         // ==== PANEL PHẢI: FORM LOGIN ====
         JPanel panelMain = new JPanel();
@@ -86,10 +93,31 @@ public class LoginForm extends JFrame {
         gbc.gridy = 4;
         panelMain.add(btnLogin, gbc);
 
-        add(panelMain, BorderLayout.CENTER);
+        JButton btnForgotPassword = new JButton("Quên mật khẩu?");
+        btnForgotPassword.setBorderPainted(false);
+        btnForgotPassword.setContentAreaFilled(false);
+        btnForgotPassword.setForeground(Color.BLUE);
+        btnForgotPassword.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        gbc.gridy = 5;
+        panelMain.add(btnForgotPassword, gbc);
+
+
+
+        panelContainer.add(panelMain, "login");
+        panelContainer.add(new PasswordResetPanel(), "resetPassword");
+
+        CardLayout cl = (CardLayout) panelContainer.getLayout();
+        cl.show(panelContainer, "login");
 
         txtUsername.setText("machxuan");
         txtPassword.setText("123456789");
+
+        btnForgotPassword.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cl.show(panelContainer, "resetPassword");
+            }
+        });
 
         // ===== XỬ LÝ ĐĂNG NHẬP =====
         btnLogin.addActionListener(new ActionListener() {

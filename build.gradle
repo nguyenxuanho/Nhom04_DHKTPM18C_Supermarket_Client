@@ -79,6 +79,9 @@ dependencies {
 // XÓA cái này đi vì đã nằm trong poi-ooxml rồi:
 // implementation 'org.apache.poi:poi-ooxml-schemas:4.1.2'
 
+    // https://mvnrepository.com/artifact/javax.mail/mail
+    implementation("javax.mail:mail:1.5.0-b01")
+
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
