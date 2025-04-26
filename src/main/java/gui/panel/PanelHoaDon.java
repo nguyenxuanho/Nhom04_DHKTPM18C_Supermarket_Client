@@ -697,7 +697,7 @@ public class PanelHoaDon extends JPanel {
             return;
         }
 
-        String maHoaDon = "HD" + (String.format("%05d",Integer.parseInt(hoaDonService.findAll().get(hoaDonService.findAll().size()-1).getMaHoaDon().replace("HD",""))+1)) ;
+        String maHoaDon = "HD";
         HoaDon hoaDon = new HoaDon(LocalDate.now(),
                 maHoaDon, Integer.parseInt(txtDiemTichLuyDung.getText()),
                 txtGhiChu.getText().trim().toString(), khachHangService.findById(txtMaKH.getText()),
