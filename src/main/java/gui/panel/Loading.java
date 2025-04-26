@@ -6,6 +6,7 @@ import javax.swing.border.EmptyBorder;
 
 import com.formdev.flatlaf.FlatIntelliJLaf;
 import gui.LoginForm;
+import gui.TrangChu;
 import service.*;
 
 
@@ -120,7 +121,7 @@ public class Loading extends JFrame {
             case 100:
                 this.dispose(); // Đóng cửa sổ tải
 
-                new LoginForm().setVisible(true);
+                new TrangChu().setVisible(true);
                 break;
         }
     }
