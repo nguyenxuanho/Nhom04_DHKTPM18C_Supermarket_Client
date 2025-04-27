@@ -606,7 +606,6 @@ public class PanelHoaDon extends JPanel {
 
 
     }
-
     private void handleSoLuongChange() throws RemoteException {
         if (!validateCTHD()) return;
 
@@ -623,7 +622,6 @@ public class PanelHoaDon extends JPanel {
             txtThanhTien.setText("");
         }
     }
-
     private  void handleClickRowTable() throws ParseException {
         int selectedRow = table.getSelectedRow();
         if (selectedRow != -1) {
@@ -800,6 +798,15 @@ public class PanelHoaDon extends JPanel {
             String thanhTien = txtThanhTien.getText().trim();
             SanPham sanPham = sanPhamService.findOne(maSP);
             if(sanPham != null){
+                if(Integer.parseInt(soLuong) > sanPham.getSoLuongTon()){
+                    JOptionPane.showMessageDialog(
+                            null,
+                            "Số lượng tồn không đáp ứng đủ",
+                            "Lỗi",
+                            JOptionPane.ERROR_MESSAGE
+                    );
+                    return false;
+                }
                 tableModel.setValueAt(maSP + "_" + sanPham.getTenSanPham(), selectedRow, 0);
                 tableModel.setValueAt(String.format("%.2f", sanPham.getThueVAT() * 100) + "%", selectedRow, 2);
                 tableModel.setValueAt(df.format(Double.parseDouble(donGia)) + " VND", selectedRow, 3);

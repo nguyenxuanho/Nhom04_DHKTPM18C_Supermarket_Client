@@ -98,7 +98,7 @@ public class PanelKhachHang extends JPanel {
         Box box2 = Box.createHorizontalBox();
         JLabel jLabelGioiTinh = new JLabel("Giới tính:");
         jLabelGioiTinh.setPreferredSize(new Dimension(90, 25));
-        cboGioiTinh = new JComboBox<>(new String[]{"Nam", "Nử", "Khác"});
+        cboGioiTinh = new JComboBox<>(new String[]{"Nam", "Nữ", "Khác"});
         cboGioiTinh.setPreferredSize(new Dimension(257, 25));
         JLabel jLabelChucvu = new JLabel("Điểm tích lũy:");
         jLabelChucvu.setPreferredSize(new Dimension(90, 25));

@@ -5,7 +5,7 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 
 public class RmiServiceLocator {
-    private static String hostname = "LAPTOP-MB2815MQ"; // Hoặc hostname cụ thể
+    private static String hostname = "XuanHo"; // Hoặc hostname cụ thể
     private static final String RMI_URL = "rmi://" + hostname + ":9090/";
     private static Context context;
 
