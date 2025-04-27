@@ -448,9 +448,9 @@ public class PanelNhanVien extends JPanel {
                 if(nhanVienService.insertNhanVien(nhanVien)) {
                     resetTable();
                     resetForm();
-                    JOptionPane.showMessageDialog(this, "Đã thêm nhân viên thành công");
+                    JOptionPane.showMessageDialog(this, "Đã thêm nhân viên thành công", "Thành công", JOptionPane.INFORMATION_MESSAGE);
                 } else {
-                    JOptionPane.showMessageDialog(this, "Không thể thêm nhân viên mới");
+                    JOptionPane.showMessageDialog(this, "Không thể thêm nhân viên mới", "Lỗi", JOptionPane.ERROR_MESSAGE);
                 }
             }
         } catch (RemoteException e) {

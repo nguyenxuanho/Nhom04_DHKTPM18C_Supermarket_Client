@@ -124,7 +124,7 @@ public class PanelTaiKhoan extends JPanel {
 		cbbMaNV.setPreferredSize(new Dimension(168, 25));
 		JLabel jLabelTrangThai = new JLabel("Trạng thái:");
 		jLabelTrangThai.setPreferredSize(new Dimension(90, 25));
-		cboTrangThai = new JComboBox<>(new String[]{"Đang hoạt động", "Không còn hoạt đông"});
+		cboTrangThai = new JComboBox<>(new String[]{"hoạt động", "dừng hoạt động"});
 		cboTrangThai.setPreferredSize(new Dimension(445, 25));
 
 		box2.add(Box.createHorizontalStrut(50));
@@ -225,7 +225,7 @@ public class PanelTaiKhoan extends JPanel {
 		txtTimTenDangNhap.setFont(new Font("Arial", Font.PLAIN, 15));
 		jLableMaNV = new JLabel("Trạng thái: ");
 		jLableMaNV.setFont(new Font("Arial", Font.PLAIN, 15));
-		cboChucVuLoc = new JComboBox<>(new String[]{"Tất cả", "Đang hoạt động", "Không còn hoạt động"});
+		cboChucVuLoc = new JComboBox<>(new String[]{"Tất cả", "hoạt động", "dừng hoạt động"});
 		cboChucVuLoc.setFont(new Font("Arial", Font.PLAIN, 15));
 		cboChucVuLoc.setPreferredSize(new Dimension(205, 30));
 
@@ -456,7 +456,7 @@ public class PanelTaiKhoan extends JPanel {
 					String tenDangNhap = txtTenDangNhap.getText().toString();
 					NhanVien nhanVien = taiKhoanService.getNhanVienByTaiKhoan(maTK);
 					String password = txtPassword.getText().toString();
-//					String trangthai = cboTrangThai.getSelectedItem().toString();
+					String trangthai = cboTrangThai.getSelectedItem().toString();
 
 					TaiKhoan taiKhoanHienTai = taiKhoanService.getTaiKhoanById(maTK);
 					TaiKhoan taiKhoan = new TaiKhoan();
@@ -468,7 +468,7 @@ public class PanelTaiKhoan extends JPanel {
 //						taiKhoan.setMatKhau(taiKhoanHienTai.getMatKhau());
 //					}
 
-					String trangthai = taiKhoanHienTai.getTrangThai();
+//					String trangthai = taiKhoanHienTai.getTrangThai();
 					taiKhoan.setMatKhau(password);
 					taiKhoan.setTrangThai(trangthai);
 					taiKhoan.setNhanVien(nhanVien);
@@ -486,14 +486,14 @@ public class PanelTaiKhoan extends JPanel {
 							resetForm();
 							JOptionPane.showMessageDialog(
 									this,
-									"Cập nhật khách hàng thành công",
+									"Cập nhật tài khoản thành công",
 									"Thành công",
 									JOptionPane.INFORMATION_MESSAGE
 							);
 						} else {
 							JOptionPane.showMessageDialog(
 									this,
-									"Không thể cập nhật khách hàng" ,
+									"Không thể cập nhật tài khoản" ,
 									"Lỗi",
 									JOptionPane.ERROR_MESSAGE
 							);
@@ -503,7 +503,7 @@ public class PanelTaiKhoan extends JPanel {
 			} else {
 				JOptionPane.showMessageDialog(
 						this,
-						"Vui lòng chọn khách cần cập nhật",
+						"Vui lòng chọn nhân viên cần cập nhật",
 						"Thông báo",
 						JOptionPane.ERROR_MESSAGE
 				);

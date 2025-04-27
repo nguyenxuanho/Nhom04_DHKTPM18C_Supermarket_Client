@@ -129,6 +129,11 @@ public class LoginForm extends JFrame {
                 try {
                     TaiKhoan taiKhoan = RmiServiceLocator.getTaiKhoanService().verifyTaiKhoan(username, password);
                     if(taiKhoan != null){
+                        if(taiKhoan.getTrangThai().equalsIgnoreCase("dừng hoạt động")){
+                            JOptionPane.showMessageDialog(null, "Tài khoản hiện đang bị khóa!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                            return;
+                        }
+
                         JOptionPane.showMessageDialog(LoginForm.this, "Đăng nhập thành công!");
                         dispose();
 
