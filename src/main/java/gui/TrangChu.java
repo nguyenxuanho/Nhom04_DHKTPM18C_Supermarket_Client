@@ -22,6 +22,11 @@ public class TrangChu extends JFrame {
     private JPanel contentPanel;
     private JButton activeButton;
 
+    private static PanelTaiKhoan panelTaiKhoan;
+    private static PanelDashboard panelDashboard;
+    private static PanelNhanVien panelNhanVien;
+    private static PanelThongKe panelThongKe;
+
     private void setActiveButton(JButton button) {
         if (activeButton != null) {
             activeButton.setBackground(Color.WHITE); // Không active thì trắng
@@ -304,14 +309,19 @@ public class TrangChu extends JFrame {
         cardLayout = new CardLayout();
         contentPanel = new JPanel(cardLayout);
 
-        contentPanel.add(new PanelDashboard(), "dashboard");
+        panelTaiKhoan = new PanelTaiKhoan();
+        panelDashboard = new PanelDashboard();
+        panelNhanVien = new PanelNhanVien();
+        panelThongKe = new PanelThongKe();
+
+        contentPanel.add(panelDashboard, "dashboard");
         contentPanel.add(new PanelSanPham(), "sanpham");
         contentPanel.add(new PanelKhachHang(), "khachhang");
         contentPanel.add(new PanelHoaDon(), "hoadon");
-        contentPanel.add(new PanelThongKe(), "thongke");
+        contentPanel.add(panelThongKe, "thongke");
         contentPanel.add(new PanelDanhMucSanPham(), "danhmucsanpham");
-        contentPanel.add(new PanelNhanVien(), "nhanvien");
-        contentPanel.add(new PanelTaiKhoan(), "taikhoan");
+        contentPanel.add(panelNhanVien, "nhanvien");
+        contentPanel.add(panelTaiKhoan, "taikhoan");
         contentPanel.add(new PanelTimHoaDon(), "timhoadon");
         contentPanel.add(new PanelKhuyenMai(), "khuyenmai");
 
@@ -319,8 +329,15 @@ public class TrangChu extends JFrame {
 
         setActiveButton(btnDashboard);
         btnDashboard.addActionListener((ActionEvent e) -> {
-            cardLayout.show(contentPanel, "dashboard");
-            setActiveButton(btnDashboard);
+            try {
+                contentPanel.remove(panelDashboard); // XÓA panel cũ
+                panelDashboard = new PanelDashboard(); // TẠO panel mới
+                contentPanel.add(panelDashboard, "dashboard"); // ADD panel mới
+                cardLayout.show(contentPanel, "dashboard"); // SHOW ra
+                setActiveButton(btnDashboard);
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
         });
         btnSanPham.addActionListener((ActionEvent e) -> {
             cardLayout.show(contentPanel, "sanpham");
@@ -335,20 +352,41 @@ public class TrangChu extends JFrame {
             setActiveButton(btnHoaDon);
         });
         btnThongKe.addActionListener((ActionEvent e) -> {
-            cardLayout.show(contentPanel, "thongke");
-            setActiveButton(btnThongKe);
+            try {
+                contentPanel.remove(panelThongKe); // XÓA panel cũ
+                panelThongKe = new PanelThongKe(); // TẠO panel mới
+                contentPanel.add(panelThongKe, "thongke"); // ADD panel mới
+                cardLayout.show(contentPanel, "thongke"); // SHOW ra
+                setActiveButton(btnThongKe);
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
         });
         btnDanhMucSanPham.addActionListener((ActionEvent e) -> {
             cardLayout.show(contentPanel, "danhmucsanpham");
             setActiveButton(btnDanhMucSanPham);
         });
         btnNhanVien.addActionListener((ActionEvent e) -> {
-            cardLayout.show(contentPanel, "nhanvien");
-            setActiveButton(btnNhanVien);
+            try {
+                contentPanel.remove(panelNhanVien); // XÓA panel cũ
+                panelNhanVien = new PanelNhanVien(); // TẠO panel mới
+                contentPanel.add(panelNhanVien, "nhanvien"); // ADD panel mới
+                cardLayout.show(contentPanel, "nhanvien"); // SHOW ra
+                setActiveButton(btnNhanVien);
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
         });
         btnTaiKhoan.addActionListener((ActionEvent e) -> {
-            cardLayout.show(contentPanel, "taikhoan");
-            setActiveButton(btnTaiKhoan);
+            try {
+                contentPanel.remove(panelTaiKhoan); // XÓA panel cũ
+                panelTaiKhoan = new PanelTaiKhoan(); // TẠO panel mới
+                contentPanel.add(panelTaiKhoan, "taikhoan"); // ADD panel mới
+                cardLayout.show(contentPanel, "taikhoan"); // SHOW ra
+                setActiveButton(btnTaiKhoan);
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
         });
         btnTimHoaDon.addActionListener((ActionEvent e) -> {
             cardLayout.show(contentPanel, "timhoadon");
@@ -404,6 +442,11 @@ public class TrangChu extends JFrame {
         return button;
     }
 
+    private void refreshPanel(JPanel oldPanel, JPanel newPanel, String name) {
+        contentPanel.remove(oldPanel);
+        contentPanel.add(newPanel, name);
+        cardLayout.show(contentPanel, name);
+    }
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {

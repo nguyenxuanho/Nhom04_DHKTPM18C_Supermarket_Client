@@ -93,6 +93,8 @@ public class PanelDashboard extends JPanel implements MouseListener, ActionListe
         chiTietHoaDonService.doanhThuTheoNgayGanNhat(23).entrySet()
                 .stream().sorted(Map.Entry.<LocalDate, Double>comparingByKey())
                 .forEach(entry -> {
+                    System.out.println(entry.getKey());
+                    System.out.println(entry.getValue());
             chart.addData(new ModelChart(entry.getKey().toString(), new double[]{entry.getValue()}));
         });
 
