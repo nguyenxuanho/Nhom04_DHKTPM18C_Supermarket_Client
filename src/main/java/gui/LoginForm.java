@@ -19,7 +19,7 @@ public class LoginForm extends JFrame {
 
     public LoginForm() throws NamingException {
         setTitle("Đăng nhập");
-        setSize(700, 400); // Giao diện lớn hơn để chứa ảnh
+        setSize(700, 600); // Giao diện lớn hơn để chứa ảnh
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
@@ -27,7 +27,7 @@ public class LoginForm extends JFrame {
         // ==== PANEL TRÁI: ẢNH ====
         JLabel lblImage = new JLabel();
         lblImage.setIcon(new ImageIcon(new ImageIcon(getClass().getResource("/image/sieuthi.jpg"))
-                .getImage().getScaledInstance(300, 400, Image.SCALE_SMOOTH)));
+                .getImage().getScaledInstance(350, 600, Image.SCALE_SMOOTH)));
         add(lblImage, BorderLayout.WEST);
 
         JPanel panelContainer = new JPanel();
