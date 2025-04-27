@@ -581,7 +581,7 @@ public class PanelNhanVien extends JPanel {
     private void resetForm() {
         txtMaNV.setText("");
         txtTenNV.setText("");
-        dateNgaySinh.setDateFormatString("");
+        dateNgaySinh.setDate(null);
         txtSDT.setText("");
         txtDiaChi.setText("");
         txtSoDinhDanh.setText("");
@@ -674,7 +674,7 @@ public class PanelNhanVien extends JPanel {
         return age >= 18;
     }
 
-    private boolean validateInput() {
+    private boolean validateInput() throws RemoteException{
         if (txtTenNV.getText().trim().isEmpty()) {
             JOptionPane.showMessageDialog(this, "Vui lòng nhập tên nhân viên!", "Lỗi", JOptionPane.ERROR_MESSAGE);
             txtTenNV.requestFocus();
@@ -701,20 +701,44 @@ public class PanelNhanVien extends JPanel {
             return false;
         }
 
-        if (!txtSDT.getText().matches("^(03|05|07|08|09)\\d{8}$")) {
+        if (!txtSDT.getText().matches("^(03|04|05|07|08|09)\\d{8}$")) {
             JOptionPane.showMessageDialog(this,
-                    "Số điện thoại phải có 10 chữ số và bắt đầu bằng 03, 05, 07, 08 hoặc 09",
+                    "Số điện thoại phải có 10 chữ số và bắt đầu bằng 03, 04, 05, 07, 08 hoặc 09",
                     "Lỗi", JOptionPane.ERROR_MESSAGE);
             txtSDT.requestFocus();
             txtSDT.selectAll();
             return false;
         }
 
+        List<NhanVien> dsNhanViens = RmiServiceLocator.getNhanVienService().getAllNhanVien();
+        for (NhanVien nhanVien : dsNhanViens) {
+            if(nhanVien.getSoDienThoai().equalsIgnoreCase(txtSDT.getText().trim())) {
+                JOptionPane.showMessageDialog(this,
+                        "Số điện thoại đã tồn tại.",
+                        "Lỗi", JOptionPane.ERROR_MESSAGE);
+                txtSDT.requestFocus();
+                txtSDT.selectAll();
+                return false;
+            }
+        }
+
         String soDinhDanh = txtSoDinhDanh.getText().trim();
         if (soDinhDanh.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Vui lòng nhập số định danh!", "Lỗi", JOptionPane.ERROR_MESSAGE);
             txtSoDinhDanh.requestFocus();
+            txtSoDinhDanh.selectAll();
             return false;
+        }
+
+        for (NhanVien nhanVien : dsNhanViens) {
+            if(nhanVien.getSoDinhDanh().equalsIgnoreCase(soDinhDanh)) {
+                JOptionPane.showMessageDialog(this,
+                        "Số định danh đã tồn tại. Vui lòng thử lại.",
+                        "Lỗi", JOptionPane.ERROR_MESSAGE);
+                txtSoDinhDanh.requestFocus();
+                txtSoDinhDanh.selectAll();
+                return false;
+            }
         }
 
         // Kiểm tra số định danh phải là 12 chữ số
