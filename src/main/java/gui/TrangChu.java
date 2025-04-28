@@ -207,7 +207,7 @@ public class TrangChu extends JFrame {
 
 
 
-//        if(nhanVien.getChucVuNhanVien().toString().equalsIgnoreCase("Nhân viên")){
+        if(nhanVien.getChucVuNhanVien().toString().equalsIgnoreCase("Nhân viên")){
             menuPanel.add(btnSanPham);
             menuPanel.add(Box.createVerticalStrut(10));
             menuPanel.add(btnDanhMucSanPham);
@@ -216,9 +216,9 @@ public class TrangChu extends JFrame {
             menuPanel.add(Box.createVerticalStrut(10));
             menuPanel.add(btnHoaDon);
             menuPanel.add(Box.createVerticalStrut(10));
-//        }
+        }
 
-//        if(nhanVien.getChucVuNhanVien().toString().equalsIgnoreCase("Người quản lý")){
+        if(nhanVien.getChucVuNhanVien().toString().equalsIgnoreCase("Người quản lý")){
             menuPanel.add(btnThongKe);
             menuPanel.add(Box.createVerticalStrut(10));
             menuPanel.add(btnNhanVien);
@@ -226,7 +226,7 @@ public class TrangChu extends JFrame {
             menuPanel.add(btnTaiKhoan);
             menuPanel.add(Box.createVerticalStrut(10));
             menuPanel.add(btnKhuyenMai);
-//        }
+        }
 
 
         menuPanel.add(Box.createVerticalGlue());

@@ -93,8 +93,6 @@ public class PanelDashboard extends JPanel implements MouseListener, ActionListe
         chiTietHoaDonService.doanhThuTheoNgayGanNhat(23).entrySet()
                 .stream().sorted(Map.Entry.<LocalDate, Double>comparingByKey())
                 .forEach(entry -> {
-                    System.out.println(entry.getKey());
-                    System.out.println(entry.getValue());
             chart.addData(new ModelChart(entry.getKey().toString(), new double[]{entry.getValue()}));
         });
 
@@ -111,15 +109,28 @@ public class PanelDashboard extends JPanel implements MouseListener, ActionListe
         List<Map.Entry<String, Integer>> dataList = new ArrayList<>(sanPhamService.thongKeSoLuongTheoTrangThai().entrySet());
 
         List<Color> colorList = List.of(
-                new Color(117, 229, 56),
-                new Color(99, 194, 255),
-                new Color(255, 193, 7),
-                new Color(40, 167, 69),
-                new Color(250, 34, 188),
-                new Color(255, 193, 7),
-                new Color(184, 174, 48),
-                new Color(143, 23, 64)
+                new Color(117, 229, 56),   // xanh lá sáng
+                new Color(99, 194, 255),   // xanh dương nhạt
+                new Color(255, 193, 7),    // vàng tươi
+                new Color(40, 167, 69),    // xanh lá đậm
+                new Color(250, 34, 188),   // hồng đậm
+                new Color(255, 87, 34),    // cam đỏ
+                new Color(255, 152, 0),    // cam vàng
+                new Color(156, 39, 176),   // tím
+                new Color(33, 150, 243),   // xanh da trời
+                new Color(0, 188, 212),    // xanh ngọc
+                new Color(76, 175, 80),    // xanh lá cây
+                new Color(205, 220, 57),   // vàng chanh
+                new Color(255, 138, 101),  // cam nhạt
+                new Color(103, 58, 183),   // tím đậm
+                new Color(121, 85, 72),    // nâu
+                new Color(96, 125, 139),   // xanh xám
+                new Color(255, 235, 59),   // vàng chói
+                new Color(244, 67, 54),    // đỏ tươi
+                new Color(0, 150, 136),    // xanh teal
+                new Color(3, 169, 244)     // xanh nước biển
         );
+
 
 
 

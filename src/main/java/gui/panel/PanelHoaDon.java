@@ -398,7 +398,6 @@ public class PanelHoaDon extends JPanel {
     }
     private void handleTimKHTheoSDT(){
         KhachHang kh = findBySDT();
-        System.out.println("Khach hang: " + kh);
         if(kh!=null){
             txtMaKH.setText(kh.getMaKhachHang());
             txtTimTenKH.setText(kh.getTenKhachHang());
@@ -413,7 +412,6 @@ public class PanelHoaDon extends JPanel {
             return null;
         }
         try {
-            System.out.println("SDT: " + txtTimSDT.getText());
             return khachHangService.findBySoDienThoai(txtTimSDT.getText());
         } catch (Exception e) {
             return null;

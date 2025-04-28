@@ -143,7 +143,7 @@ public class PanelSanPham extends JPanel implements MouseListener, ActionListene
         boxSearch.add(txtFind);
         boxSearch.add(Box.createHorizontalStrut(10));
         boxSearch.add(btnFind);
-        boxSearch.add(Box.createHorizontalStrut(200));
+        boxSearch.add(Box.createHorizontalStrut(10));
         boxSearch.add(labelDanhMuc);
         boxSearch.add(Box.createHorizontalStrut(10));
         boxSearch.add(jComboBoxDanhMuc);

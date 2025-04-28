@@ -25,7 +25,6 @@ public class RmiServiceLocator {
             // Khởi tạo context
             context = new InitialContext();
             // Khởi tạo tất cả các dịch vụ một lần
-            chiTietHoaDonService = lookupService("chiTietHoaDonService", ChiTietHoaDonService.class);
             danhMucSanPhamService = lookupService("danhMucSanPhamService", DanhMucSanPhamService.class);
             hoaDonService = lookupService("hoaDonService", HoaDonService.class);
             khachHangService = lookupService("khachHangService", KhachHangService.class);
@@ -34,6 +33,7 @@ public class RmiServiceLocator {
             taiKhoanService = lookupService("taiKhoanService", TaiKhoanService.class);
             khuyenMaiService = lookupService("khuyenMaiService", KhuyenMaiService.class);
             thuocTinhSanPhamService = lookupService("thuocTinhSanPhamService", ThuocTinhSanPhamService.class);
+            chiTietHoaDonService = lookupService("chiTietHoaDonService", ChiTietHoaDonService.class);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -79,6 +79,7 @@ public class RmiServiceLocator {
     @SuppressWarnings("unchecked")
     private static <T> T lookupService(String serviceName, Class<T> clazz) {
         try {
+            System.out.println("Connect to Class" + serviceName);
             return (T) context.lookup(RMI_URL + serviceName);
         } catch (Exception e) {
             e.printStackTrace();

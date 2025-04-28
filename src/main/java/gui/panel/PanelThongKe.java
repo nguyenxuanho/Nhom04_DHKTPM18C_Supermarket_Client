@@ -5,18 +5,11 @@ import chart.ModelChart;
 import chart.ModelPieChart;
 import chart.PieChart;
 import com.toedter.calendar.JDateChooser;
-import dto.HoaDonDTO;
 import gui.components.ComponentUtils;
-import io.github.cdimascio.dotenv.Dotenv;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import raven.toast.Notifications;
-import service.ChiTietHoaDonService;
-import service.SanPhamService;
-
-import javax.naming.Context;
-import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -33,8 +26,6 @@ import java.rmi.RemoteException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -279,15 +270,28 @@ public class PanelThongKe extends JPanel implements MouseListener, ActionListene
                         java.util.List<Map.Entry<LocalDate, Double>> dataList = new ArrayList<>(chiTietHoaDonService.thongKeDoanhThuTheoNgay(localDateBatDau, localDateKetThuc).entrySet());
 
                         List<Color> colorList = List.of(
-                                new Color(117, 229, 56),
-                                new Color(99, 194, 255),
-                                new Color(255, 193, 7),
-                                new Color(40, 167, 69),
-                                new Color(250, 34, 188),
-                                new Color(255, 193, 7),
-                                new Color(184, 174, 48),
-                                new Color(143, 23, 64)
+                                new Color(117, 229, 56),   // xanh lá sáng
+                                new Color(99, 194, 255),   // xanh dương nhạt
+                                new Color(255, 193, 7),    // vàng tươi
+                                new Color(40, 167, 69),    // xanh lá đậm
+                                new Color(250, 34, 188),   // hồng đậm
+                                new Color(255, 87, 34),    // cam đỏ
+                                new Color(255, 152, 0),    // cam vàng
+                                new Color(156, 39, 176),   // tím
+                                new Color(33, 150, 243),   // xanh da trời
+                                new Color(0, 188, 212),    // xanh ngọc
+                                new Color(76, 175, 80),    // xanh lá cây
+                                new Color(205, 220, 57),   // vàng chanh
+                                new Color(255, 138, 101),  // cam nhạt
+                                new Color(103, 58, 183),   // tím đậm
+                                new Color(121, 85, 72),    // nâu
+                                new Color(96, 125, 139),   // xanh xám
+                                new Color(255, 235, 59),   // vàng chói
+                                new Color(244, 67, 54),    // đỏ tươi
+                                new Color(0, 150, 136),    // xanh teal
+                                new Color(3, 169, 244)     // xanh nước biển
                         );
+
 
                         for (int i = 0; i < dataList.size(); i++) {
                             LocalDate label = dataList.get(i).getKey();
@@ -370,12 +374,28 @@ public class PanelThongKe extends JPanel implements MouseListener, ActionListene
                         java.util.List<Map.Entry<Integer, Double>> dataList = new ArrayList<>(chiTietHoaDonService.thongKeDoanhThuTheoNam(nam).entrySet());
 
                         java.util.List<Color> colorList = List.of(
-                                new Color(23, 126, 238),  // Màu xanh dương
-                                new Color(221, 65, 65),   // Màu đỏ
-                                new Color(255, 193, 7),   // Màu vàng
-                                new Color(40, 167, 69),   // Màu xanh lá
-                                new Color(108, 117, 125)  // Màu xám
+                                new Color(117, 229, 56),   // xanh lá sáng
+                                new Color(99, 194, 255),   // xanh dương nhạt
+                                new Color(255, 193, 7),    // vàng tươi
+                                new Color(40, 167, 69),    // xanh lá đậm
+                                new Color(250, 34, 188),   // hồng đậm
+                                new Color(255, 87, 34),    // cam đỏ
+                                new Color(255, 152, 0),    // cam vàng
+                                new Color(156, 39, 176),   // tím
+                                new Color(33, 150, 243),   // xanh da trời
+                                new Color(0, 188, 212),    // xanh ngọc
+                                new Color(76, 175, 80),    // xanh lá cây
+                                new Color(205, 220, 57),   // vàng chanh
+                                new Color(255, 138, 101),  // cam nhạt
+                                new Color(103, 58, 183),   // tím đậm
+                                new Color(121, 85, 72),    // nâu
+                                new Color(96, 125, 139),   // xanh xám
+                                new Color(255, 235, 59),   // vàng chói
+                                new Color(244, 67, 54),    // đỏ tươi
+                                new Color(0, 150, 136),    // xanh teal
+                                new Color(3, 169, 244)     // xanh nước biển
                         );
+
 
                         for (int i = 0; i < dataList.size(); i++) {
                             int label = dataList.get(i).getKey();
