@@ -571,11 +571,21 @@ public class PanelTaiKhoan extends JPanel {
 		}
 	}
 
-	private boolean validateInput() {
+	private boolean validateInput() throws RemoteException {
 		if (txtTenDangNhap.getText().trim().isEmpty()) {
-			JOptionPane.showMessageDialog(this, "Vui lòng nhập tên nhân viên!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-			txtTenNV.requestFocus();
+			JOptionPane.showMessageDialog(this, "Vui lòng nhập tên đăng nhập!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+			txtTenDangNhap.requestFocus();
 			return false;
+		}
+
+		List<TaiKhoan> taiKhoans = RmiServiceLocator.getTaiKhoanService().getAllTaiKhoan();
+		for (TaiKhoan taiKhoan : taiKhoans) {
+			if(taiKhoan.getTenDangNhap().equals(txtTenDangNhap.getText().trim())) {
+				JOptionPane.showMessageDialog(this, "Tên đăng nhập đã tồn tại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+				txtTenDangNhap.requestFocus();
+				txtTenDangNhap.selectAll();
+				return false;
+			}
 		}
 
 		if (txtPassword.getPassword().equals("")) {
